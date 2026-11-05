@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Akun Baru — Eventict')
+@section('title', 'Daftar Akun Peserta — Eventict')
 
 @section('content')
 <div class="w-full min-h-screen bg-slate-50 flex flex-col justify-between items-center py-8 px-4 sm:px-6 lg:px-8">
@@ -27,12 +27,12 @@
     <div class="w-full md:w-5/12 bg-blue-950 text-white p-8 lg:p-10 flex flex-col justify-between">
       <div class="flex flex-col gap-6">
         <div class="flex flex-col gap-2">
-          <h2 class="text-2xl font-bold font-['Poppins'] leading-snug">Mulai Bersama Jaringan Eventict</h2>
-          <p class="text-slate-300 text-xs font-normal font-['Poppins'] leading-relaxed">Pendaftaran cepat untuk kemudahan akses seminar ilmiah, absensi digital, dan portofolio SKP.</p>
+          <h2 class="text-2xl font-bold font-['Poppins'] leading-snug">Portal Peserta Eventict</h2>
+          <p class="text-slate-300 text-xs font-normal font-['Poppins'] leading-relaxed">Pendaftaran peserta untuk kemudahan akses seminar ilmiah, absensi digital presisi, dan portofolio SKP terpadu.</p>
         </div>
 
         <div class="p-4 bg-white/5 border border-white/10 rounded-xl flex flex-col gap-3">
-          <span class="text-xs font-semibold text-slate-200 font-['Poppins']">Keuntungan Akun Terverifikasi:</span>
+          <span class="text-xs font-semibold text-slate-200 font-['Poppins']">Keuntungan Akun Peserta:</span>
           <div class="flex items-start gap-2 text-xs text-slate-300 font-['Poppins']">
             <svg class="size-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="20 6 9 17 4 12"/>
@@ -49,8 +49,26 @@
             <svg class="size-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            <span>Bagi panitia: kemudahan publikasi dan kelola operasional</span>
+            <span>Check-in presensi instan menggunakan QR Pass unik</span>
           </div>
+        </div>
+
+        <div class="p-3.5 bg-blue-900/60 border border-blue-800 rounded-xl flex flex-col gap-1.5 text-xs">
+          <div class="flex items-center gap-2 text-blue-200 font-semibold">
+            <svg class="size-4 text-blue-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            <span>Akses Penyelenggara Internal</span>
+          </div>
+          <p class="text-blue-100 text-[11px] leading-relaxed">
+            Akun panitia dan penyelenggara dikelola secara internal oleh instansi. Jika Anda panitia kegiatan, silakan gunakan kredensial yang telah diterbitkan.
+          </p>
+          <a href="{{ route('login') }}" class="text-white text-[11px] font-semibold hover:underline inline-flex items-center gap-1 mt-0.5">
+            <span>Masuk sebagai Panitia</span>
+            <span>&rarr;</span>
+          </a>
         </div>
       </div>
 
@@ -62,8 +80,8 @@
 
     <div class="w-full md:w-7/12 p-8 lg:p-12 flex flex-col justify-center">
       <div class="flex flex-col gap-2 mb-6">
-        <h1 class="text-2xl font-bold font-['Poppins'] text-slate-900">Buat Akun Eventict</h1>
-        <p class="text-xs text-slate-500 font-normal font-['Poppins']">Pilih peran akun yang sesuai dengan kebutuhan Anda.</p>
+        <h1 class="text-2xl font-bold font-['Poppins'] text-slate-900">Daftar Akun Peserta</h1>
+        <p class="text-xs text-slate-500 font-normal font-['Poppins']">Lengkapi data diri Anda untuk mengikuti seminar dan workshop.</p>
       </div>
 
       @if ($errors->any())
@@ -85,39 +103,7 @@
         @csrf
 
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-slate-700 font-['Poppins']">Tipe Akun</label>
-          <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl border border-slate-200">
-            <button
-              type="button"
-              id="role-btn-peserta"
-              onclick="setRole('peserta')"
-              class="py-2 px-3 rounded-lg text-xs font-semibold font-['Poppins'] transition cursor-pointer flex items-center justify-center gap-1.5 bg-white text-blue-950 shadow-2xs"
-            >
-              <svg class="size-3.5 text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-              </svg>
-              <span>Peserta Kegiatan</span>
-            </button>
-            <button
-              type="button"
-              id="role-btn-penyelenggara"
-              onclick="setRole('penyelenggara')"
-              class="py-2 px-3 rounded-lg text-xs font-medium font-['Poppins'] transition cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900"
-            >
-              <svg class="size-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect width="18" height="18" x="3" y="3" rx="2"/>
-                <path d="M3 9h18"/>
-                <path d="M9 21V9"/>
-              </svg>
-              <span>Penyelenggara / Panitia</span>
-            </button>
-          </div>
-          <input type="hidden" name="role" id="role-input" value="{{ old('role', $defaultRole ?? 'peserta') }}">
-        </div>
-
-        <div class="flex flex-col gap-1.5">
-          <label for="name" id="label-name" class="text-xs font-semibold text-slate-700 font-['Poppins']">Nama Lengkap</label>
+          <label for="name" class="text-xs font-semibold text-slate-700 font-['Poppins']">Nama Lengkap</label>
           <input
             type="text"
             id="name"
@@ -131,7 +117,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
-            <label for="institution" id="label-institution" class="text-xs font-semibold text-slate-700 font-['Poppins']">Asal Instansi / Perusahaan / Kampus</label>
+            <label for="institution" class="text-xs font-semibold text-slate-700 font-['Poppins']">Asal Instansi / Perusahaan / Kampus</label>
             <input
               type="text"
               id="institution"
@@ -196,7 +182,7 @@
           type="submit"
           class="w-full py-2.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold font-['Poppins'] transition shadow-xs cursor-pointer mt-2"
         >
-          Daftar Sekarang
+          Daftar Sebagai Peserta
         </button>
       </form>
 
@@ -211,39 +197,4 @@
     &copy; {{ date('Y') }} Eventict. Sistem Informasi Seminar & Workshop Berstandar Nasional.
   </div>
 </div>
-
-<script>
-function setRole(role) {
-  document.getElementById('role-input').value = role;
-  const btnPeserta = document.getElementById('role-btn-peserta');
-  const btnPenyelenggara = document.getElementById('role-btn-penyelenggara');
-  const labelName = document.getElementById('label-name');
-  const inputName = document.getElementById('name');
-  const labelInst = document.getElementById('label-institution');
-  const inputInst = document.getElementById('institution');
-
-  if (role === 'peserta') {
-    btnPeserta.className = "py-2 px-3 rounded-lg text-xs font-semibold font-['Poppins'] transition cursor-pointer flex items-center justify-center gap-1.5 bg-white text-blue-950 shadow-2xs";
-    btnPenyelenggara.className = "py-2 px-3 rounded-lg text-xs font-medium font-['Poppins'] transition cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900";
-    labelName.innerText = "Nama Lengkap";
-    inputName.placeholder = "Budi Santoso, M.Kom";
-    labelInst.innerText = "Asal Instansi / Perusahaan / Kampus";
-    inputInst.placeholder = "Universitas Indonesia / PT Teknologi Maju";
-  } else {
-    btnPenyelenggara.className = "py-2 px-3 rounded-lg text-xs font-semibold font-['Poppins'] transition cursor-pointer flex items-center justify-center gap-1.5 bg-white text-blue-950 shadow-2xs";
-    btnPeserta.className = "py-2 px-3 rounded-lg text-xs font-medium font-['Poppins'] transition cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900";
-    labelName.innerText = "Nama Organisasi / Komunitas Penyelenggara";
-    inputName.placeholder = "Komunitas Developer Indonesia / Himpunan Mahasiswa";
-    labelInst.innerText = "Institusi Induk / Afiliasi";
-    inputInst.placeholder = "Fakultas Ilmu Komputer / Asosiasi Profesi";
-  }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  const initialRole = document.getElementById('role-input').value;
-  if (initialRole) {
-    setRole(initialRole);
-  }
-});
-</script>
 @endsection

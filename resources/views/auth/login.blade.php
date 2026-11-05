@@ -62,7 +62,7 @@
           </button>
           <button type="button" onclick="fillDemo('panitia@eventict.id', 'password123')" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-left text-xs transition cursor-pointer">
             <div class="font-semibold text-white">Sekretariat Panitia</div>
-            <div class="text-[10px] text-slate-300">Peran: Penyelenggara</div>
+            <div class="text-[10px] text-slate-300">Peran: Panitia Internal</div>
           </button>
         </div>
       </div>

@@ -21,7 +21,7 @@
       <nav class="hidden md:flex justify-start items-center gap-8">
         <a href="#kegiatan" class="text-white/90 text-sm font-medium font-['Poppins'] hover:text-white transition">Jelajahi Kegiatan</a>
         <a href="#alur" class="text-white/90 text-sm font-medium font-['Poppins'] hover:text-white transition">Akreditasi & SKP</a>
-        <a href="{{ route('register', ['role' => 'penyelenggara']) }}" class="text-white/90 text-sm font-medium font-['Poppins'] hover:text-white transition">Panduan Penyelenggara</a>
+        <a href="#alur" class="text-white/90 text-sm font-medium font-['Poppins'] hover:text-white transition">Alur & SKP</a>
       </nav>
       <div class="flex justify-start items-center gap-3">
         @auth
@@ -422,7 +422,7 @@
         <div class="flex flex-col gap-3">
           <span class="text-white text-sm font-semibold font-['Poppins']">Saluran Bantuan / Kontak</span>
           <a href="{{ route('peserta.dashboard') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Pusat Bantuan Peserta</a>
-          <a href="{{ route('organizer.dashboard') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Panduan Penyelenggara</a>
+          <a href="{{ route('login') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Akses Panitia (Internal)</a>
           <span class="text-slate-300 text-xs font-normal font-['Poppins']">help@eventict.id</span>
           <span class="text-slate-400 text-xs font-normal font-['Poppins']">Senin–Jumat, 08:00–17:00 WIB</span>
         </div>

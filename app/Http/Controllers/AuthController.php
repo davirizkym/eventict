@@ -39,15 +39,13 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    public function showRegister(Request $request)
+    public function showRegister()
     {
         if (Auth::check()) {
             return $this->redirectBasedOnRole(Auth::user());
         }
 
-        $defaultRole = in_array($request->query('role'), ['peserta', 'penyelenggara']) ? $request->query('role') : 'peserta';
-
-        return view('auth.register', compact('defaultRole'));
+        return view('auth.register');
     }
 
     public function register(Request $request)
@@ -56,7 +54,6 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'confirmed', Password::min(8)],
-            'role' => ['required', 'string', 'in:peserta,penyelenggara'],
             'institution' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:25'],
         ]);
@@ -65,7 +62,7 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
+            'role' => 'peserta',
             'institution' => $validated['institution'] ?? null,
             'phone' => $validated['phone'] ?? null,
         ]);
