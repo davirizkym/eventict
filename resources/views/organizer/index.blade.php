@@ -513,8 +513,8 @@
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-slate-700 font-['Poppins']">Nomor Sertifikat / SKP Resmi (Opsional)</label>
-        <input type="text" id="single-modal-cert-number" name="certificate_number" placeholder="Contoh: 044/PB-IDI/SKP/XI/2026 (Kosongkan untuk otomatis)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg outline-none focus:border-blue-950">
+        <label class="text-xs font-semibold text-slate-700 font-['Poppins']">Nomor Sertifikat Resmi (Opsional)</label>
+        <input type="text" id="single-modal-cert-number" name="certificate_number" placeholder="Contoh: CERT/LAB-ICT/2026/001 (Kosongkan untuk otomatis)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg outline-none focus:border-blue-950">
       </div>
 
       <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
