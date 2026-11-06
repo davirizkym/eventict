@@ -40,7 +40,7 @@
           <span class="text-xs leading-5">Dashboard & Jadwal</span>
         </a>
 
-        <a href="#" class="w-full p-3 rounded-lg inline-flex items-center justify-between transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
+        <a href="#tiket" class="w-full p-3 rounded-lg inline-flex items-center justify-between transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
           <div class="inline-flex items-center gap-3">
             <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
@@ -50,20 +50,12 @@
             </svg>
             <span class="text-xs leading-5">Tiket Saya</span>
           </div>
-          <span class="px-2 py-0.5 bg-blue-900 text-blue-200 text-[10px] font-semibold rounded-md">2</span>
+          <span class="px-2 py-0.5 bg-blue-900 text-blue-200 text-[10px] font-semibold rounded-md">
+            {{ $registrations->count() }}
+          </span>
         </a>
 
-        <a href="#" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
-          <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect width="5" height="5" x="3" y="3" rx="1"/>
-            <rect width="5" height="5" x="16" y="3" rx="1"/>
-            <rect width="5" height="5" x="3" y="16" rx="1"/>
-            <path d="M21 16h-3a2 2 0 0 0-2 2v3"/>
-          </svg>
-          <span class="text-xs leading-5">Presensi Hari-H</span>
-        </a>
-
-        <a href="#" class="w-full p-3 rounded-lg inline-flex items-center justify-between transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
+        <a href="#sertifikat" class="w-full p-3 rounded-lg inline-flex items-center justify-between transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
           <div class="inline-flex items-center gap-3">
             <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="8" r="6"/>
@@ -71,23 +63,17 @@
             </svg>
             <span class="text-xs leading-5">Lemari E-Sertifikat</span>
           </div>
-          <span class="px-2 py-0.5 bg-blue-900 text-blue-200 text-[10px] font-semibold rounded-md">5</span>
+          <span class="px-2 py-0.5 bg-blue-900 text-blue-200 text-[10px] font-semibold rounded-md">
+            {{ $certificates->count() }}
+          </span>
         </a>
 
-        <a href="#" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
+        <a href="{{ route('home') }}#kegiatan" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
           <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-            <polyline points="14 2 14 8 20 8"/>
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
           </svg>
-          <span class="text-xs leading-5">Materi & Unduhan</span>
-        </a>
-
-        <a href="#" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
-          <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
-          <span class="text-xs leading-5">Pengaturan Akun</span>
+          <span class="text-xs leading-5">Jelajahi Kegiatan Baru</span>
         </a>
       </div>
     </div>
@@ -101,7 +87,7 @@
           <span class="text-white text-xs font-semibold">Butuh panduan?</span>
         </div>
         <div class="text-slate-300 text-xs font-normal leading-4">Kenali alur registrasi, presensi, hingga klaim sertifikat ber-SKP.</div>
-        <a href="{{ route('home') }}" class="text-white text-xs font-semibold hover:underline inline-flex items-center gap-1">
+        <a href="{{ route('home') }}#alur" class="text-white text-xs font-semibold hover:underline inline-flex items-center gap-1">
           <span>Buka panduan</span>
           <span class="text-[10px]">↗</span>
         </a>
@@ -110,11 +96,11 @@
       <div class="w-full p-2.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between gap-2">
         <div class="flex items-center gap-2.5 min-w-0">
           <div class="size-8 rounded-lg bg-blue-900 text-white font-semibold text-xs flex items-center justify-center shrink-0">
-            {{ strtoupper(substr(Auth::user()->name ?? 'P', 0, 2)) }}
+            {{ strtoupper(substr($user->name ?? 'P', 0, 2)) }}
           </div>
           <div class="flex flex-col min-w-0">
-            <span class="text-white text-xs font-semibold truncate">{{ Auth::user()->name ?? 'Peserta' }}</span>
-            <span class="text-slate-400 text-[11px] truncate">{{ Auth::user()->institution ?? 'Peserta Eventict' }}</span>
+            <span class="text-white text-xs font-semibold truncate">{{ $user->name ?? 'Peserta' }}</span>
+            <span class="text-slate-400 text-[11px] truncate">{{ $user->institution ?? 'Peserta Eventict' }}</span>
           </div>
         </div>
         <form method="POST" action="{{ route('logout') }}" class="shrink-0">
@@ -155,7 +141,7 @@
             <circle cx="12" cy="12" r="10"/>
             <polyline points="12 6 12 12 16 14"/>
           </svg>
-          <span>18 Nov 2026 &bull; 08:25 WIB</span>
+          <span>{{ now()->format('d M Y') }}</span>
         </div>
         <a href="{{ route('home') }}" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
           Lihat Beranda
@@ -164,10 +150,31 @@
     </header>
 
     <main class="flex-1 p-6 lg:p-10 flex flex-col gap-8 overflow-y-auto">
+      @if(session('success'))
+        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-medium flex items-center gap-2">
+          <svg class="size-4 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <span>{{ session('success') }}</span>
+        </div>
+      @endif
+
+      @if(session('info'))
+        <div class="p-4 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs font-medium flex items-center gap-2">
+          <svg class="size-4 shrink-0 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <span>{{ session('info') }}</span>
+        </div>
+      @endif
+
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div class="text-slate-500 text-xs font-normal font-['Poppins']">Peserta / Dashboard</div>
-          <h2 class="text-slate-900 text-2xl lg:text-3xl font-semibold font-['Poppins'] leading-tight">Selamat datang, {{ Auth::user()->name ?? 'dr. Amanda Putri, Sp.PD' }}.</h2>
+          <h2 class="text-slate-900 text-2xl lg:text-3xl font-semibold font-['Poppins'] leading-tight">Selamat datang, {{ $user->name }}.</h2>
           <p class="text-slate-600 text-sm font-normal font-['Poppins']">Jadwal, akses sesi, dan dokumen profesi Anda dalam satu tempat.</p>
         </div>
         <div class="text-xs text-slate-500 font-['Poppins'] self-start sm:self-auto flex items-center gap-1.5">
@@ -175,190 +182,181 @@
             <circle cx="12" cy="12" r="10"/>
             <polyline points="12 6 12 12 16 14"/>
           </svg>
-          <span>18 Nov 2026 &bull; 08:25 WIB</span>
+          <span>Sesi Aktif Terhubung</span>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 lg:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 shadow-xs">
-        <div class="flex-1 flex flex-col gap-4">
-          <div class="text-xs font-semibold text-blue-950 font-['Poppins'] tracking-wider uppercase">
-            Agenda Hari Ini &bull; Mulai 09:00 WIB
-          </div>
-          <h2 class="text-slate-900 text-xl lg:text-2xl font-bold font-['Poppins'] leading-tight">Simposium Nasional Telemedicine & Regulasi Medis</h2>
-          <div class="flex items-center gap-2 text-slate-600 text-xs font-normal font-['Poppins']">
-            <svg class="size-4 text-slate-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-            <span>Ruang Rinjani 2, Hotel Borobudur Jakarta / Akses Zoom Terhubung</span>
-          </div>
-          <div class="flex flex-wrap items-center gap-3 pt-2">
-            <a href="#" class="px-4 py-2 bg-blue-950 text-white rounded-lg text-xs font-medium font-['Poppins'] hover:bg-blue-900 transition flex items-center gap-2 cursor-pointer">
-              <svg class="size-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <polygon points="10 8 16 12 10 16 10 8"/>
+      @if($todayRegistration && $todayRegistration->event)
+        <div class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 lg:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 shadow-xs">
+          <div class="flex-1 flex flex-col gap-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-blue-950 font-['Poppins'] tracking-wider uppercase">
+                Agenda Kegiatan Utama &bull; {{ substr($todayRegistration->event->start_time, 0, 5) }} WIB
+              </span>
+              @if($todayRegistration->attendance_status === 'attended')
+                <span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-semibold rounded-md">
+                  Sudah Presensi ({{ $todayRegistration->checked_in_at ? $todayRegistration->checked_in_at->format('H:i') : '' }} WIB)
+                </span>
+              @endif
+            </div>
+
+            <h2 class="text-slate-900 text-xl lg:text-2xl font-bold font-['Poppins'] leading-tight">
+              {{ $todayRegistration->event->title }}
+            </h2>
+
+            <div class="flex items-center gap-2 text-slate-600 text-xs font-normal font-['Poppins']">
+              <svg class="size-4 text-slate-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                <circle cx="12" cy="10" r="3"/>
               </svg>
-              <span>Masuk Ruang Virtual</span>
-            </a>
-            <a href="#" class="px-4 py-2 bg-white border border-slate-300 text-slate-800 rounded-lg text-xs font-medium font-['Poppins'] hover:bg-slate-50 transition flex items-center gap-2 cursor-pointer">
-              <svg class="size-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                <polyline points="14 2 14 8 20 8"/>
+              <span>{{ $todayRegistration->event->location ?? 'Online via Eventict Platform' }}</span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 pt-2">
+              @if($todayRegistration->event->virtual_meeting_url)
+                <a href="{{ $todayRegistration->event->virtual_meeting_url }}" target="_blank" class="px-4 py-2 bg-blue-950 text-white rounded-lg text-xs font-medium font-['Poppins'] hover:bg-blue-900 transition flex items-center gap-2 cursor-pointer">
+                  <svg class="size-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polygon points="10 8 16 12 10 16 10 8"/>
+                  </svg>
+                  <span>Masuk Ruang Virtual</span>
+                </a>
+              @endif
+              <a href="{{ route('events.show', $todayRegistration->event->slug) }}" class="px-4 py-2 bg-white border border-slate-300 text-slate-800 rounded-lg text-xs font-medium font-['Poppins'] hover:bg-slate-50 transition flex items-center gap-2 cursor-pointer">
+                <span>Lihat Detail Sesi</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center gap-2.5 text-center shrink-0">
+            <div class="size-28 bg-white p-2 rounded-lg border border-slate-300 flex items-center justify-center shadow-2xs">
+              <svg class="size-full text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect width="6" height="6" x="2" y="2" rx="1"/>
+                <rect width="6" height="6" x="16" y="2" rx="1"/>
+                <rect width="6" height="6" x="2" y="16" rx="1"/>
+                <path d="M10 2h4"/>
+                <path d="M2 10v4"/>
+                <path d="M10 6h4"/>
+                <path d="M14 10h4"/>
+                <path d="M10 14h4"/>
+                <path d="M16 14v4"/>
+                <path d="M16 20h4"/>
+                <path d="M20 16v4"/>
               </svg>
-              <span>Buka Materi Sesi (PDF)</span>
-            </a>
+            </div>
+            <div class="text-[11px] text-slate-500 font-medium font-['Poppins']">Tunjukkan saat Masuk Aula</div>
+            <div class="text-blue-950 font-bold text-xs tracking-wider font-mono">#{{ $todayRegistration->qr_pass }}</div>
           </div>
         </div>
-
-        <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center gap-2.5 text-center shrink-0">
-          <div class="size-28 bg-white p-2 rounded-lg border border-slate-300 flex items-center justify-center shadow-2xs">
-            <svg class="size-full text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect width="6" height="6" x="2" y="2" rx="1"/>
-              <rect width="6" height="6" x="16" y="2" rx="1"/>
-              <rect width="6" height="6" x="2" y="16" rx="1"/>
-              <path d="M10 2h4"/>
-              <path d="M2 10v4"/>
-              <path d="M10 6h4"/>
-              <path d="M14 10h4"/>
-              <path d="M10 14h4"/>
-              <path d="M16 14v4"/>
-              <path d="M16 20h4"/>
-              <path d="M20 16v4"/>
+      @else
+        <div class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-8 text-center flex flex-col items-center gap-3 shadow-xs">
+          <div class="size-12 rounded-full bg-blue-50 text-blue-950 flex items-center justify-center">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+              <line x1="16" x2="16" y1="2" y2="6"/>
+              <line x1="8" x2="8" y1="2" y2="6"/>
+              <line x1="3" x2="21" y1="10" y2="10"/>
             </svg>
           </div>
-          <div class="text-[11px] text-slate-500 font-medium font-['Poppins']">Tunjukkan saat Masuk Aula</div>
-          <div class="text-blue-950 font-bold text-xs tracking-wider font-mono">#PASS-9982-AMANDA</div>
+          <h3 class="text-slate-900 font-semibold text-lg font-['Poppins']">Belum Ada Agenda Hari Ini</h3>
+          <p class="text-slate-500 text-xs font-normal font-['Poppins'] max-w-md">Jelajahi berbagai seminar dan workshop terakreditasi untuk meningkatkan kompetensi keahlian Anda.</p>
+          <a href="{{ route('home') }}#kegiatan" class="mt-2 px-5 py-2.5 bg-blue-950 text-white rounded-lg text-xs font-semibold font-['Poppins'] hover:bg-blue-900 transition">
+            Jelajahi Kegiatan
+          </a>
         </div>
-      </div>
+      @endif
 
-      <div class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 lg:p-8 flex flex-col gap-5 shadow-xs">
-        <h3 class="text-slate-900 text-lg font-semibold font-['Poppins']">Jadwal Acara yang Anda Ikuti Hari Ini</h3>
-        <div class="flex flex-col gap-3">
-          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex items-center gap-4">
-              <div class="size-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
-                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              </div>
-              <div>
-                <div class="text-slate-500 text-xs font-normal font-['Poppins']">08:30 – 09:00 WIB</div>
-                <div class="text-slate-900 text-sm font-semibold font-['Poppins']">Registrasi Ulang & Presensi Pagi</div>
-              </div>
-            </div>
-            <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full self-start sm:self-auto">Sudah Check-In (08:24 WIB)</span>
-          </div>
-
-          <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex items-center gap-4">
-              <div class="size-8 rounded-full bg-blue-100 text-blue-900 flex items-center justify-center shrink-0">
-                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-              </div>
-              <div>
-                <div class="text-slate-500 text-xs font-normal font-['Poppins']">09:00 – 10:30 WIB</div>
-                <div class="text-slate-900 text-sm font-semibold font-['Poppins']">Plenary Session: Standar Etik Telehealth Global</div>
-                <div class="text-slate-600 text-xs font-normal font-['Poppins']">Prof. Faisal</div>
-              </div>
-            </div>
-            <span class="px-2.5 py-1 bg-blue-100 text-blue-900 text-xs font-medium rounded-full self-start sm:self-auto">Sedang Berlangsung</span>
-          </div>
-
-          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex items-center gap-4">
-              <div class="size-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
-                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                </svg>
-              </div>
-              <div>
-                <div class="text-slate-500 text-xs font-normal font-['Poppins']">10:45 – 12:15 WIB</div>
-                <div class="text-slate-900 text-sm font-semibold font-['Poppins']">Workshop Bedah Kasus: Keamanan Data Pasien</div>
-              </div>
-            </div>
-            <span class="px-2.5 py-1 bg-slate-200 text-slate-700 text-xs font-medium rounded-full self-start sm:self-auto">Belum Dimulai</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 lg:p-8 flex flex-col gap-6 shadow-xs">
+      <div id="tiket" class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 lg:p-8 flex flex-col gap-5 shadow-xs">
         <div class="flex justify-between items-center">
-          <h3 class="text-slate-900 text-lg font-semibold font-['Poppins']">E-Sertifikat Resmi Siap Unduh (5 Sertifikat)</h3>
-          <a href="#" class="text-blue-950 text-xs font-medium font-['Poppins'] hover:underline">Lihat semua →</a>
+          <h3 class="text-slate-900 text-lg font-semibold font-['Poppins']">Tiket & Pendaftaran Saya ({{ $registrations->count() }})</h3>
+          <a href="{{ route('home') }}#kegiatan" class="text-blue-950 text-xs font-medium font-['Poppins'] hover:underline">+ Daftar Kegiatan Lain</a>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          @forelse($registrations as $reg)
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-4">
+                <div class="size-10 rounded-xl bg-blue-100 text-blue-950 flex items-center justify-center shrink-0 font-mono font-bold text-xs">
+                  PASS
+                </div>
+                <div>
+                  <div class="text-slate-500 text-xs font-normal font-['Poppins']">
+                    {{ $reg->event->start_date ? $reg->event->start_date->format('d M Y') : '' }} &bull; {{ substr($reg->event->start_time ?? '', 0, 5) }} WIB
+                  </div>
+                  <a href="{{ route('events.show', $reg->event->slug) }}" class="text-slate-900 text-sm font-semibold font-['Poppins'] hover:text-blue-950 transition">
+                    {{ $reg->event->title }}
+                  </a>
+                  <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+                    No. Tiket: {{ $reg->registration_code }} &bull; Pass: #{{ $reg->qr_pass }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 self-start sm:self-auto">
+                @if($reg->attendance_status === 'attended')
+                  <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
+                    Hadir ({{ $reg->checked_in_at ? $reg->checked_in_at->format('H:i') : '' }} WIB)
+                  </span>
+                @else
+                  <span class="px-2.5 py-1 bg-slate-200 text-slate-700 text-xs font-medium rounded-full">
+                    Belum Check-In
+                  </span>
+                @endif
+                <a href="{{ route('events.show', $reg->event->slug) }}" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 transition">
+                  Detail Sesi
+                </a>
+              </div>
+            </div>
+          @empty
+            <div class="p-6 bg-slate-50 rounded-xl text-center text-xs text-slate-500 font-['Poppins']">
+              Anda belum mendaftar kegiatan apapun.
+            </div>
+          @endforelse
+        </div>
+      </div>
+
+      <div id="sertifikat" class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 lg:p-8 flex flex-col gap-6 shadow-xs">
+        <div class="flex justify-between items-center">
+          <h3 class="text-slate-900 text-lg font-semibold font-['Poppins']">E-Sertifikat Resmi Siap Unduh ({{ $certificates->count() }} Sertifikat)</h3>
+          <span class="text-slate-400 text-xs font-['Poppins']">Terverifikasi Digital</span>
         </div>
 
         <div class="flex flex-col gap-4">
-          <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-              <div class="w-24 h-16 bg-white border border-slate-300 rounded flex flex-col items-center justify-center p-1 text-center shrink-0 shadow-2xs">
-                <div class="text-[8px] font-bold text-slate-700 uppercase tracking-widest">SERTIFIKAT</div>
-                <div class="text-[7px] text-slate-500">dr. Amanda Putri</div>
-                <div class="px-1 bg-blue-950 text-white text-[7px] font-bold rounded mt-1">IDI</div>
+          @forelse($certificates as $cert)
+            <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-4">
+                <div class="w-24 h-16 bg-white border border-slate-300 rounded flex flex-col items-center justify-center p-1 text-center shrink-0 shadow-2xs">
+                  <div class="text-[8px] font-bold text-slate-700 uppercase tracking-widest">SERTIFIKAT</div>
+                  <div class="text-[7px] text-slate-500 truncate max-w-[80px]">{{ $user->name }}</div>
+                  <div class="px-1 bg-blue-950 text-white text-[7px] font-bold rounded mt-1">VERIFIED</div>
+                </div>
+                <div>
+                  <div class="text-slate-900 text-sm font-semibold font-['Poppins']">{{ $cert->event->title ?? 'Kegiatan Ilmiah' }}</div>
+                  <div class="text-slate-500 text-xs font-normal font-['Poppins']">No. Sertifikat: {{ $cert->certificate_number }}</div>
+                  <div class="text-slate-400 text-[11px] font-mono mt-0.5">Hash Verifikasi: {{ $cert->verify_hash }}</div>
+                  @if($cert->event && $cert->event->skp_points > 0)
+                    <span class="inline-block px-2 py-0.5 bg-blue-100 text-blue-950 font-semibold text-[10px] rounded mt-1">
+                      {{ $cert->event->skp_points }} SKP Resmi
+                    </span>
+                  @endif
+                </div>
               </div>
-              <div>
-                <div class="text-slate-900 text-sm font-semibold font-['Poppins']">Simposium Nasional Telemedicine 2026</div>
-                <div class="text-slate-500 text-xs font-normal font-['Poppins']">No. SK: SKP-2026-X-091</div>
-                <span class="inline-block px-2 py-0.5 bg-blue-100 text-blue-950 font-semibold text-[10px] rounded mt-1">8 SKP</span>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 self-start sm:self-auto">
-              <button type="button" class="px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-medium font-['Poppins'] rounded-lg transition flex items-center gap-1.5 cursor-pointer">
-                <svg class="size-3.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" x2="12" y1="15" y2="3"/>
-                </svg>
-                <span>Unduh PDF Asli</span>
-              </button>
-              <button type="button" class="px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-medium font-['Poppins'] rounded-lg transition flex items-center gap-1.5 cursor-pointer">
-                <svg class="size-3.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="18" cy="5" r="3"/>
-                  <circle cx="6" cy="12" r="3"/>
-                  <circle cx="18" cy="19" r="3"/>
-                  <line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/>
-                  <line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>
-                </svg>
-                <span>Salin Tautan</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-              <div class="w-24 h-16 bg-white border border-slate-300 rounded flex flex-col items-center justify-center p-1 text-center shrink-0 shadow-2xs">
-                <div class="text-[8px] font-bold text-slate-700 uppercase tracking-widest">SERTIFIKAT</div>
-                <div class="text-[7px] text-slate-500">dr. Amanda Putri</div>
-                <div class="px-1 bg-emerald-800 text-white text-[7px] font-bold rounded mt-1">BNSP</div>
-              </div>
-              <div>
-                <div class="text-slate-900 text-sm font-semibold font-['Poppins']">Workshop Machine Learning Intermediate</div>
-                <div class="text-slate-500 text-xs font-normal font-['Poppins']">Sertifikat kompetensi • Dokumen digital asli</div>
-                <span class="inline-block px-2 py-0.5 bg-emerald-100 text-emerald-950 font-semibold text-[10px] rounded mt-1">32 Jam Pembelajaran</span>
+              <div class="flex items-center gap-2 self-start sm:self-auto">
+                <a href="{{ route('events.show', $cert->event->slug ?? '') }}" class="px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-medium font-['Poppins'] rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+                  <svg class="size-3.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" x2="12" y1="15" y2="3"/>
+                  </svg>
+                  <span>Unduh Dokumen</span>
+                </a>
               </div>
             </div>
-            <div class="flex items-center gap-2 self-start sm:self-auto">
-              <button type="button" class="px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-medium font-['Poppins'] rounded-lg transition flex items-center gap-1.5 cursor-pointer">
-                <svg class="size-3.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" x2="12" y1="15" y2="3"/>
-                </svg>
-                <span>Unduh PDF Asli</span>
-              </button>
-              <button type="button" class="px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-medium font-['Poppins'] rounded-lg transition flex items-center gap-1.5 cursor-pointer">
-                <svg class="size-3.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="18" cy="5" r="3"/>
-                  <circle cx="6" cy="12" r="3"/>
-                  <circle cx="18" cy="19" r="3"/>
-                  <line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/>
-                  <line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>
-                </svg>
-                <span>Salin Tautan</span>
-              </button>
+          @empty
+            <div class="p-6 bg-slate-50 rounded-xl text-center text-xs text-slate-500 font-['Poppins']">
+              Belum ada e-sertifikat yang terbit. Sertifikat akan terbit otomatis setelah Anda menghadiri kegiatan dan mengisi evaluasi.
             </div>
-          </div>
+          @endforelse
         </div>
       </div>
     </main>
