@@ -53,28 +53,6 @@
           </div>
         </div>
 
-        <div class="p-3.5 bg-blue-900/60 border border-blue-800 rounded-xl flex flex-col gap-1.5 text-xs">
-          <div class="flex items-center gap-2 text-blue-200 font-semibold">
-            <svg class="size-4 text-blue-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="16" x2="12" y2="12"/>
-              <line x1="12" y1="8" x2="12.01" y2="8"/>
-            </svg>
-            <span>Akses Penyelenggara Internal</span>
-          </div>
-          <p class="text-blue-100 text-[11px] leading-relaxed">
-            Akun panitia dan penyelenggara dikelola secara internal oleh instansi. Jika Anda panitia kegiatan, silakan gunakan kredensial yang telah diterbitkan.
-          </p>
-          <a href="{{ route('login') }}" class="text-white text-[11px] font-semibold hover:underline inline-flex items-center gap-1 mt-0.5">
-            <span>Masuk sebagai Panitia</span>
-            <span>&rarr;</span>
-          </a>
-        </div>
-      </div>
-
-      <div class="pt-6 border-t border-white/10 text-xs text-slate-400 font-['Poppins']">
-        Sudah memiliki akun terdaftar?
-        <a href="{{ route('login') }}" class="text-white font-semibold hover:underline block mt-1">Masuk ke Akun Anda</a>
       </div>
     </div>
 

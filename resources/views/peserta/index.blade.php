@@ -342,8 +342,8 @@
                 </div>
               </div>
               <div class="flex items-center gap-2 self-start sm:self-auto">
-                <a href="{{ route('events.show', $cert->event->slug ?? '') }}" class="px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-medium font-['Poppins'] rounded-lg transition flex items-center gap-1.5 cursor-pointer">
-                  <svg class="size-3.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <a href="{{ $cert->download_url ? asset($cert->download_url) : '#' }}" target="_blank" download class="px-3.5 py-2 bg-blue-950 hover:bg-blue-900 text-white text-xs font-medium font-['Poppins'] rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                  <svg class="size-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="7 10 12 15 17 10"/>
                     <line x1="12" x2="12" y1="15" y2="3"/>

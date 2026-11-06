@@ -31,7 +31,7 @@
 
       <div class="w-full p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-1">
         <div class="flex items-center justify-between">
-          <span class="text-white text-xs font-semibold leading-tight truncate">Simposium Telemedicine 2026</span>
+          <span class="text-white text-xs font-semibold leading-tight truncate">{{ $activeEvent->title ?? 'Simposium Telemedicine 2026' }}</span>
           <svg class="size-4 text-blue-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
@@ -49,7 +49,7 @@
           <span class="text-xs leading-5">Ringkasan & Operasional</span>
         </a>
 
-        <a href="#" class="w-full p-3 rounded-lg inline-flex items-center justify-between transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
+        <a href="#tabel-peserta" class="w-full p-3 rounded-lg inline-flex items-center justify-between transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
           <div class="inline-flex items-center gap-3">
             <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -57,22 +57,20 @@
               <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
-            <span class="text-xs leading-5">Peserta & Verifikasi Bayar</span>
+            <span class="text-xs leading-5">Peserta & Presensi</span>
           </div>
-          <span class="px-2 py-0.5 bg-blue-900 text-blue-200 text-[10px] font-semibold rounded-md">4</span>
+          <span class="px-2 py-0.5 bg-blue-900 text-blue-200 text-[10px] font-semibold rounded-md">{{ $totalRegistrations }}</span>
         </a>
 
-        <a href="#" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
+        <button type="button" onclick="openBatchUploadModal()" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal text-left cursor-pointer">
           <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect width="5" height="5" x="3" y="3" rx="1"/>
-            <rect width="5" height="5" x="16" y="3" rx="1"/>
-            <rect width="5" height="5" x="3" y="16" rx="1"/>
-            <path d="M21 16h-3a2 2 0 0 0-2 2v3"/>
+            <circle cx="12" cy="8" r="6"/>
+            <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
           </svg>
-          <span class="text-xs leading-5">Scanner Presensi Masuk</span>
-        </a>
+          <span class="text-xs leading-5">Upload Sertifikat Massal</span>
+        </button>
 
-        <a href="#" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
+        <a href="{{ route('home') }}" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
           <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="8" x2="21" y1="6" y2="6"/>
             <line x1="8" x2="21" y1="12" y2="12"/>
@@ -81,31 +79,7 @@
             <line x1="3" x2="3.01" y1="12" y2="12"/>
             <line x1="3" x2="3.01" y1="18" y2="18"/>
           </svg>
-          <span class="text-xs leading-5">Rundown & Narasumber</span>
-        </a>
-
-        <a href="#" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
-          <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="8" r="6"/>
-            <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
-          </svg>
-          <span class="text-xs leading-5">Template & Terbit Sertifikat</span>
-        </a>
-
-        <a href="#" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
-          <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" x2="12" y1="2" y2="22"/>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-          </svg>
-          <span class="text-xs leading-5">Rekapitulasi Keuangan</span>
-        </a>
-
-        <a href="#" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
-          <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
-          <span class="text-xs leading-5">Pengaturan Panitia</span>
+          <span class="text-xs leading-5">Lihat Katalog Publik</span>
         </a>
       </div>
     </div>
@@ -116,13 +90,9 @@
           <svg class="w-4 h-4 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          <span class="text-white text-xs font-semibold">Butuh panduan?</span>
+          <span class="text-white text-xs font-semibold">Format Unggah Sertifikat</span>
         </div>
-        <div class="text-slate-300 text-xs font-normal leading-4">Panduan scan presensi, verifikasi peserta, dan penerbitan sertifikat.</div>
-        <a href="{{ route('home') }}" class="text-white text-xs font-semibold hover:underline inline-flex items-center gap-1">
-          <span>Buka panduan</span>
-          <span class="text-[10px]">↗</span>
-        </a>
+        <div class="text-slate-300 text-xs font-normal leading-4">Nama file otomatis dipetakan lewat No. Registrasi (REG-xxxx), NIK, atau Email.</div>
       </div>
 
       <div class="w-full p-2.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between gap-2">
@@ -183,33 +153,58 @@
 
     <main class="flex-1 p-6 lg:p-10 flex flex-col gap-8 overflow-y-auto">
       <div>
-        <div class="text-slate-500 text-xs font-normal font-['Poppins']">Organizer / Simposium Telemedicine 2026</div>
+        <div class="text-slate-500 text-xs font-normal font-['Poppins']">Organizer / {{ $activeEvent->title ?? 'Simposium Telemedicine 2026' }}</div>
         <h2 class="text-slate-900 text-2xl lg:text-3xl font-semibold font-['Poppins'] leading-tight">Pusat Kendali Operasional Hari-H</h2>
       </div>
 
+      @if (session('success'))
+        <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3 text-xs text-emerald-800">
+          <svg class="size-4 text-emerald-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <div class="font-medium font-['Poppins']">{{ session('success') }}</div>
+        </div>
+      @endif
+
+      @if (session('warning'))
+        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-xs text-amber-800">
+          <svg class="size-4 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <div class="font-medium font-['Poppins']">{{ session('warning') }}</div>
+        </div>
+      @endif
+
+      @if (session('error'))
+        <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-xs text-rose-800">
+          <svg class="size-4 text-rose-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <div class="font-medium font-['Poppins']">{{ session('error') }}</div>
+        </div>
+      @endif
+
       <div class="flex flex-wrap items-center gap-3">
-        <button type="button" class="px-4 py-2 bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 rounded-lg text-xs font-medium font-['Poppins'] transition flex items-center gap-2 cursor-pointer shadow-2xs">
-          <svg class="size-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" x2="12" y1="15" y2="3"/>
-          </svg>
-          <span>Ekspor Data (Excel/CSV)</span>
-        </button>
-        <button type="button" class="px-4 py-2 bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 rounded-lg text-xs font-medium font-['Poppins'] transition flex items-center gap-2 cursor-pointer shadow-2xs">
-          <svg class="size-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-            <circle cx="12" cy="13" r="4"/>
-          </svg>
-          <span>Buka Kamera Scanner QR</span>
-        </button>
-        <button type="button" class="px-4 py-2 bg-blue-950 text-white hover:bg-blue-900 rounded-lg text-xs font-medium font-['Poppins'] transition flex items-center gap-2 cursor-pointer shadow-2xs">
+        <button type="button" onclick="openBatchUploadModal()" class="px-4 py-2 bg-emerald-700 text-white hover:bg-emerald-800 rounded-lg text-xs font-semibold font-['Poppins'] transition flex items-center gap-2 cursor-pointer shadow-xs">
           <svg class="size-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="8" r="6"/>
-            <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" x2="12" y1="3" y2="15"/>
           </svg>
-          <span>Proses Penerbitan Sertifikat</span>
+          <span>Unggah Sertifikat Massal</span>
         </button>
+        <a href="#tabel-peserta" class="px-4 py-2 bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 rounded-lg text-xs font-medium font-['Poppins'] transition flex items-center gap-2 cursor-pointer shadow-2xs">
+          <svg class="size-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>Panduan Format Nama File</span>
+        </a>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -221,11 +216,11 @@
               <circle cx="9" cy="7" r="4"/>
             </svg>
           </div>
-          <div class="text-slate-900 text-2xl font-bold font-['Poppins']">388 / 400 Kursi</div>
+          <div class="text-slate-900 text-2xl font-bold font-['Poppins']">{{ $totalRegistrations }} / {{ $activeEvent->quota ?? 400 }} Kursi</div>
           <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
-            <div class="bg-blue-950 h-1.5 rounded-full" style="width: 97%"></div>
+            <div class="bg-blue-950 h-1.5 rounded-full" style="width: {{ $activeEvent && $activeEvent->quota > 0 ? min(100, round(($totalRegistrations / $activeEvent->quota) * 100)) : 0 }}%"></div>
           </div>
-          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">97% kapasitas terisi</div>
+          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">{{ $activeEvent && $activeEvent->quota > 0 ? round(($totalRegistrations / $activeEvent->quota) * 100) : 0 }}% kapasitas terisi</div>
         </div>
 
         <div class="p-5 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col gap-2 shadow-xs">
@@ -237,26 +232,26 @@
               <rect width="5" height="5" x="3" y="16" rx="1"/>
             </svg>
           </div>
-          <div class="text-slate-900 text-2xl font-bold font-['Poppins']">312 Peserta Hadir</div>
+          <div class="text-slate-900 text-2xl font-bold font-['Poppins']">{{ $totalAttended }} Peserta Hadir</div>
           <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
-            <div class="bg-emerald-600 h-1.5 rounded-full" style="width: 80.4%"></div>
+            <div class="bg-emerald-600 h-1.5 rounded-full" style="width: {{ $totalRegistrations > 0 ? round(($totalAttended / $totalRegistrations) * 100) : 0 }}%"></div>
           </div>
-          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">80.4% tingkat kehadiran</div>
+          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">{{ $totalRegistrations > 0 ? round(($totalAttended / $totalRegistrations) * 100) : 0 }}% tingkat kehadiran</div>
         </div>
 
         <div class="p-5 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col gap-2 shadow-xs">
           <div class="flex justify-between items-center text-slate-500 text-xs font-medium font-['Poppins']">
-            <span>Kuesioner Evaluasi Terkumpul</span>
+            <span>Sertifikat Telah Diunggah</span>
             <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
+              <circle cx="12" cy="8" r="6"/>
+              <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
             </svg>
           </div>
-          <div class="text-slate-900 text-2xl font-bold font-['Poppins']">280 Responden</div>
+          <div class="text-slate-900 text-2xl font-bold font-['Poppins']">{{ $totalCertificates }} Sertifikat Terbit</div>
           <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
-            <div class="bg-blue-950 h-1.5 rounded-full" style="width: 89.7%"></div>
+            <div class="bg-blue-950 h-1.5 rounded-full" style="width: {{ $totalRegistrations > 0 ? round(($totalCertificates / $totalRegistrations) * 100) : 0 }}%"></div>
           </div>
-          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">89.7% dari yang hadir</div>
+          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">{{ $totalRegistrations > 0 ? round(($totalCertificates / $totalRegistrations) * 100) : 0 }}% peserta memiliki sertifikat</div>
         </div>
 
         <div class="p-5 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col gap-2 shadow-xs">
@@ -267,7 +262,7 @@
               <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
             </svg>
           </div>
-          <div class="text-slate-900 text-2xl font-bold font-['Poppins']">Rp 135.800.000</div>
+          <div class="text-slate-900 text-2xl font-bold font-['Poppins']">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</div>
           <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
             <div class="bg-blue-950 h-1.5 rounded-full" style="width: 100%"></div>
           </div>
@@ -275,241 +270,301 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 lg:p-8 flex flex-col gap-5 shadow-xs">
+      <div id="tabel-peserta" class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 lg:p-8 flex flex-col gap-5 shadow-xs">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 class="text-slate-900 text-lg font-semibold font-['Poppins']">Presensi & Kelayakan Sertifikat</h3>
-            <p class="text-slate-500 text-xs font-normal font-['Poppins']">Pantau hasil scan, pembayaran, dan pemenuhan syarat peserta.</p>
+            <h3 class="text-slate-900 text-lg font-semibold font-['Poppins']">Presensi & Pengelolaan Sertifikat Peserta</h3>
+            <p class="text-slate-500 text-xs font-normal font-['Poppins']">Upload sertifikat satuan di setiap baris peserta atau gunakan upload massal.</p>
           </div>
-          <div class="text-slate-400 text-xs font-normal font-['Poppins'] flex items-center gap-1.5 self-start sm:self-auto">
-            <svg class="size-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-            </svg>
-            <span>Sinkron 09:05 WIB</span>
-          </div>
+          <button type="button" onclick="openBatchUploadModal()" class="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-lg transition cursor-pointer self-start sm:self-auto flex items-center gap-1.5">
+            <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+            <span>Upload Massal (Multi-File)</span>
+          </button>
         </div>
 
-        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col md:flex-row items-center gap-3">
+        <form method="GET" action="{{ route('organizer.dashboard') }}" class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col md:flex-row items-center gap-3">
           <div class="flex-1 w-full flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-lg">
             <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.35-4.35"/>
             </svg>
-            <input type="text" placeholder="Cari nama / NIK / institusi..." class="w-full bg-transparent border-none outline-none text-xs text-slate-800 placeholder:text-slate-400">
+            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama / NIK / institusi / no. registrasi..." class="w-full bg-transparent border-none outline-none text-xs text-slate-800 placeholder:text-slate-400">
           </div>
-          <select class="w-full md:w-48 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 outline-none cursor-pointer">
+          <select name="attendance" onchange="this.form.submit()" class="w-full md:w-44 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 outline-none cursor-pointer">
             <option value="">Semua Presensi</option>
-            <option value="hadir">Hadir</option>
-            <option value="belum">Belum Hadir</option>
+            <option value="attended" {{ request('attendance') === 'attended' ? 'selected' : '' }}>Hadir</option>
+            <option value="unattended" {{ request('attendance') === 'unattended' ? 'selected' : '' }}>Belum Hadir</option>
           </select>
-          <select class="w-full md:w-44 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 outline-none cursor-pointer">
-            <option value="">Semua Tiket</option>
-            <option value="lunas">Lunas</option>
-            <option value="pending">Pending</option>
+          <select name="certificate" onchange="this.form.submit()" class="w-full md:w-48 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 outline-none cursor-pointer">
+            <option value="">Semua Sertifikat</option>
+            <option value="has_cert" {{ request('certificate') === 'has_cert' ? 'selected' : '' }}>Sudah Ada Sertifikat</option>
+            <option value="no_cert" {{ request('certificate') === 'no_cert' ? 'selected' : '' }}>Belum Ada Sertifikat</option>
           </select>
-          <select class="w-full md:w-52 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 outline-none cursor-pointer">
-            <option value="">Semua Kelayakan</option>
-            <option value="memenuhi">Memenuhi Syarat</option>
-            <option value="tidak">Tidak Memenuhi</option>
-          </select>
-        </div>
+          <button type="submit" class="px-4 py-2 bg-blue-950 text-white rounded-lg text-xs font-semibold hover:bg-blue-900 transition cursor-pointer">
+            Filter
+          </button>
+          @if(request()->hasAny(['q', 'attendance', 'certificate']))
+            <a href="{{ route('organizer.dashboard') }}" class="px-3 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-medium hover:bg-slate-300 transition">
+              Reset
+            </a>
+          @endif
+        </form>
 
         <div class="overflow-x-auto rounded-xl border border-slate-200">
-          <table class="w-full min-w-[860px] text-left border-collapse text-xs">
+          <table class="w-full min-w-[920px] text-left border-collapse text-xs">
             <thead>
               <tr class="bg-slate-50 text-slate-600 font-semibold font-['Poppins'] border-b border-slate-200">
                 <th class="p-3 w-10 text-center"><input type="checkbox" class="rounded border-slate-300"></th>
                 <th class="p-3 whitespace-nowrap">No. Registrasi</th>
-                <th class="p-3 whitespace-nowrap">Nama Peserta & Gelar Lengkap</th>
-                <th class="p-3 whitespace-nowrap">Asal Instansi / Organisasi</th>
-                <th class="p-3 whitespace-nowrap">Waktu Check-In Scan</th>
-                <th class="p-3 text-center whitespace-nowrap">Evaluasi</th>
+                <th class="p-3 whitespace-nowrap">Nama Peserta</th>
+                <th class="p-3 whitespace-nowrap">Asal Instansi</th>
+                <th class="p-3 whitespace-nowrap">Status Presensi</th>
                 <th class="p-3 whitespace-nowrap">Status Tiket</th>
-                <th class="p-3 whitespace-nowrap">Status Kelayakan</th>
-                <th class="p-3 text-center whitespace-nowrap">Aksi Cepat</th>
+                <th class="p-3 whitespace-nowrap">Status Sertifikat</th>
+                <th class="p-3 text-center whitespace-nowrap">Aksi Panitia</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-200 font-['Poppins']">
-              <tr class="hover:bg-slate-50 transition">
-                <td class="p-3 text-center"><input type="checkbox" class="rounded border-slate-300" checked></td>
-                <td class="p-3 font-mono font-medium text-slate-700">#REG-0104</td>
-                <td class="p-3 font-semibold text-slate-900">
-                  <div>dr. Amanda Putri, Sp.PD</div>
-                  <div class="text-[11px] text-slate-500 font-normal">Peserta profesional</div>
-                </td>
-                <td class="p-3 text-slate-700">RSUP Dr. Cipto Mangunkusumo</td>
-                <td class="p-3 text-slate-700">08:24:12 WIB • Pintu Aula Utama</td>
-                <td class="p-3 text-center text-emerald-600 font-bold">✓</td>
-                <td class="p-3 whitespace-nowrap"><span class="px-2 py-0.5 bg-blue-50 text-blue-950 border border-blue-200 font-semibold rounded text-[11px] whitespace-nowrap">LUNAS</span></td>
-                <td class="p-3 whitespace-nowrap"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold rounded-md text-[11px] whitespace-nowrap">MEMENUHI SYARAT</span></td>
-                <td class="p-3 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button type="button" title="Cetak Badge" class="p-1.5 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg></button>
-                    <button type="button" title="Lihat Sertifikat" class="p-1.5 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-50 transition">
-                <td class="p-3 text-center"><input type="checkbox" class="rounded border-slate-300" checked></td>
-                <td class="p-3 font-mono font-medium text-slate-700">#REG-0105</td>
-                <td class="p-3 font-semibold text-slate-900">
-                  <div>dr. Budi Santoso, Sp.JP</div>
-                  <div class="text-[11px] text-slate-500 font-normal">Peserta profesional</div>
-                </td>
-                <td class="p-3 text-slate-700">RS Jantung dan Pembuluh Darah Harapan Kita</td>
-                <td class="p-3 text-slate-700">08:26:40 WIB • Pintu Aula Utama</td>
-                <td class="p-3 text-center text-emerald-600 font-bold">✓</td>
-                <td class="p-3 whitespace-nowrap"><span class="px-2 py-0.5 bg-blue-50 text-blue-950 border border-blue-200 font-semibold rounded text-[11px] whitespace-nowrap">LUNAS</span></td>
-                <td class="p-3 whitespace-nowrap"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold rounded-md text-[11px] whitespace-nowrap">MEMENUHI SYARAT</span></td>
-                <td class="p-3 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button type="button" title="Cetak Badge" class="p-1.5 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg></button>
-                    <button type="button" title="Lihat Sertifikat" class="p-1.5 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-50 transition">
-                <td class="p-3 text-center"><input type="checkbox" class="rounded border-slate-300"></td>
-                <td class="p-3 font-mono font-medium text-slate-700">#REG-0106</td>
-                <td class="p-3 font-semibold text-slate-900">
-                  <div>dr. Nur Aisyah, M.Kes</div>
-                  <div class="text-[11px] text-slate-500 font-normal">Peserta profesional</div>
-                </td>
-                <td class="p-3 text-slate-700">Dinas Kesehatan Provinsi DKI Jakarta</td>
-                <td class="p-3 text-slate-700">08:28:05 WIB • Pintu Aula Timur</td>
-                <td class="p-3 text-center text-slate-300 whitespace-nowrap">-</td>
-                <td class="p-3 whitespace-nowrap"><span class="px-2 py-0.5 bg-blue-50 text-blue-950 border border-blue-200 font-semibold rounded text-[11px] whitespace-nowrap">LUNAS</span></td>
-                <td class="p-3 whitespace-nowrap"><span class="px-2.5 py-1 bg-slate-100 text-slate-600 border border-slate-200 font-semibold rounded-md text-[11px] whitespace-nowrap">TIDAK MEMENUHI</span></td>
-                <td class="p-3 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button type="button" title="Cetak Badge" class="p-1.5 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-50 transition">
-                <td class="p-3 text-center"><input type="checkbox" class="rounded border-slate-300" checked></td>
-                <td class="p-3 font-mono font-medium text-slate-700">#REG-0107</td>
-                <td class="p-3 font-semibold text-slate-900">
-                  <div>dr. Rizky Pratama, Sp.A</div>
-                  <div class="text-[11px] text-slate-500 font-normal">Peserta profesional</div>
-                </td>
-                <td class="p-3 text-slate-700">RSUP Fatmawati</td>
-                <td class="p-3 text-slate-700">08:30:18 WIB • Pintu Aula Utama</td>
-                <td class="p-3 text-center text-emerald-600 font-bold">✓</td>
-                <td class="p-3 whitespace-nowrap"><span class="px-2 py-0.5 bg-blue-50 text-blue-950 border border-blue-200 font-semibold rounded text-[11px] whitespace-nowrap">LUNAS</span></td>
-                <td class="p-3 whitespace-nowrap"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold rounded-md text-[11px] whitespace-nowrap">MEMENUHI SYARAT</span></td>
-                <td class="p-3 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button type="button" title="Cetak Badge" class="p-1.5 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg></button>
-                    <button type="button" title="Lihat Sertifikat" class="p-1.5 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-50 transition">
-                <td class="p-3 text-center"><input type="checkbox" class="rounded border-slate-300" checked></td>
-                <td class="p-3 font-mono font-medium text-slate-700">#REG-0108</td>
-                <td class="p-3 font-semibold text-slate-900">
-                  <div>dr. Dewi Lestari, Sp.KK</div>
-                  <div class="text-[11px] text-slate-500 font-normal">Peserta profesional</div>
-                </td>
-                <td class="p-3 text-slate-700">RSUD Pasar Minggu</td>
-                <td class="p-3 text-slate-700">08:32:44 WIB • Pintu Aula Timur</td>
-                <td class="p-3 text-center text-emerald-600 font-bold">✓</td>
-                <td class="p-3 whitespace-nowrap"><span class="px-2 py-0.5 bg-blue-50 text-blue-950 border border-blue-200 font-semibold rounded text-[11px] whitespace-nowrap">LUNAS</span></td>
-                <td class="p-3 whitespace-nowrap"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold rounded-md text-[11px] whitespace-nowrap">MEMENUHI SYARAT</span></td>
-                <td class="p-3 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button type="button" title="Cetak Badge" class="p-1.5 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg></button>
-                    <button type="button" title="Lihat Sertifikat" class="p-1.5 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-50 transition">
-                <td class="p-3 text-center"><input type="checkbox" class="rounded border-slate-300"></td>
-                <td class="p-3 font-mono font-medium text-slate-700">#REG-0109</td>
-                <td class="p-3 font-semibold text-slate-900">
-                  <div>dr. Ahmad Fauzi, M.Biomed</div>
-                  <div class="text-[11px] text-slate-500 font-normal">Peserta profesional</div>
-                </td>
-                <td class="p-3 text-slate-700">Fakultas Kedokteran Universitas Indonesia</td>
-                <td class="p-3 text-slate-700">08:35:09 WIB • Pintu Aula Utama</td>
-                <td class="p-3 text-center text-slate-300 whitespace-nowrap">-</td>
-                <td class="p-3 whitespace-nowrap"><span class="px-2 py-0.5 bg-blue-50 text-blue-950 border border-blue-200 font-semibold rounded text-[11px] whitespace-nowrap">LUNAS</span></td>
-                <td class="p-3 whitespace-nowrap"><span class="px-2.5 py-1 bg-slate-100 text-slate-600 border border-slate-200 font-semibold rounded-md text-[11px] whitespace-nowrap">TIDAK MEMENUHI</span></td>
-                <td class="p-3 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <button type="button" title="Cetak Badge" class="p-1.5 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg></button>
-                  </div>
-                </td>
-              </tr>
+              @forelse($registrations as $reg)
+                <tr class="hover:bg-slate-50 transition">
+                  <td class="p-3 text-center"><input type="checkbox" class="rounded border-slate-300"></td>
+                  <td class="p-3 font-mono font-medium text-slate-700">#{{ $reg->registration_code }}</td>
+                  <td class="p-3 font-semibold text-slate-900">
+                    <div>{{ $reg->user->name }}</div>
+                    <div class="text-[11px] text-slate-500 font-normal">
+                      NIK: {{ $reg->user->nik ?? '-' }} • {{ $reg->user->email }}
+                    </div>
+                  </td>
+                  <td class="p-3 text-slate-700">{{ $reg->user->institution ?? '-' }}</td>
+                  <td class="p-3 text-slate-700 whitespace-nowrap">
+                    @if($reg->attendance_status === 'attended')
+                      <span class="inline-flex items-center gap-1.5 text-emerald-800 font-medium">
+                        <span class="size-1.5 rounded-full bg-emerald-600"></span>
+                        <span>{{ $reg->checked_in_at ? $reg->checked_in_at->format('H:i') . ' WIB' : 'Hadir' }}</span>
+                      </span>
+                    @else
+                      <span class="text-slate-400">Belum Presensi</span>
+                    @endif
+                  </td>
+                  <td class="p-3 whitespace-nowrap">
+                    <span class="px-2 py-0.5 bg-blue-50 text-blue-950 border border-blue-200 font-semibold rounded text-[11px] uppercase">
+                      {{ $reg->payment_status === 'paid' ? 'LUNAS' : ($reg->payment_status === 'free' ? 'GRATIS' : 'PENDING') }}
+                    </span>
+                  </td>
+                  <td class="p-3 whitespace-nowrap">
+                    @if($reg->certificate)
+                      <span class="px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold rounded-md text-[11px] whitespace-nowrap inline-flex items-center gap-1">
+                        <svg class="size-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>TERBIT</span>
+                      </span>
+                    @else
+                      <span class="px-2.5 py-1 bg-slate-100 text-slate-600 border border-slate-200 font-medium rounded-md text-[11px] whitespace-nowrap">
+                        BELUM TERBIT
+                      </span>
+                    @endif
+                  </td>
+                  <td class="p-3 text-center">
+                    <div class="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onclick="openSingleUploadModal('{{ $reg->id }}', '{{ addslashes($reg->user->name) }}', '{{ $reg->registration_code }}', '{{ $reg->certificate ? asset($reg->certificate->download_url) : '' }}', '{{ $reg->certificate ? $reg->certificate->certificate_number : '' }}')"
+                        title="Upload Sertifikat Manual"
+                        class="px-2 py-1 bg-blue-950 hover:bg-blue-900 text-white rounded text-[11px] font-medium transition cursor-pointer flex items-center gap-1"
+                      >
+                        <svg class="size-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                          <polyline points="17 8 12 3 7 8"/>
+                          <line x1="12" x2="12" y1="3" y2="15"/>
+                        </svg>
+                        <span>{{ $reg->certificate ? 'Ganti' : 'Upload' }}</span>
+                      </button>
+
+                      @if($reg->certificate)
+                        <a
+                          href="{{ asset($reg->certificate->download_url) }}"
+                          target="_blank"
+                          title="Lihat Berkas Sertifikat"
+                          class="p-1.5 hover:bg-slate-100 rounded text-slate-700 cursor-pointer border border-slate-200"
+                        >
+                          <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="8" r="6"/>
+                            <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                          </svg>
+                        </a>
+                      @endif
+
+                      <form method="POST" action="{{ route('organizer.attendance.toggle', $reg->id) }}" class="inline">
+                        @csrf
+                        <button
+                          type="submit"
+                          title="{{ $reg->attendance_status === 'attended' ? 'Batal Hadir' : 'Tandai Hadir' }}"
+                          class="p-1.5 hover:bg-slate-100 rounded {{ $reg->attendance_status === 'attended' ? 'text-emerald-700 border border-emerald-200 bg-emerald-50' : 'text-slate-400 border border-slate-200' }} cursor-pointer"
+                        >
+                          <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="8" class="p-8 text-center text-slate-500 font-['Poppins']">
+                    Tidak ada data peserta yang sesuai dengan kriteria filter.
+                  </td>
+                </tr>
+              @endforelse
             </tbody>
           </table>
         </div>
 
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2 text-xs text-slate-500">
-          <div>Menampilkan 1–6 dari 388 peserta terkonfirmasi</div>
-          <div class="flex items-center gap-2">
-            <button type="button" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 rounded-md text-xs font-medium cursor-pointer">Sebelumnya</button>
-            <span class="px-2.5 py-1 text-slate-700 font-semibold">1 / 65</span>
-            <button type="button" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 rounded-md text-xs font-medium cursor-pointer">Berikutnya</button>
-          </div>
+          <div>Menampilkan {{ $registrations->count() }} peserta terdaftar</div>
         </div>
       </div>
 
       <div class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 lg:p-8 flex flex-col gap-6 shadow-xs">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 class="text-slate-900 text-lg font-semibold font-['Poppins']">Panel Konfigurasi Sertifikat Otomatis</h3>
-            <p class="text-slate-500 text-xs font-normal font-['Poppins']">Syarat kelayakan penerbitan dan pemetaan data sertifikat digital.</p>
+            <h3 class="text-slate-900 text-lg font-semibold font-['Poppins']">Panduan Penamaan File untuk Upload Massal</h3>
+            <p class="text-slate-500 text-xs font-normal font-['Poppins']">Sistem akan secara otomatis mencocokkan setiap file sertifikat ke profil peserta yang tepat.</p>
           </div>
-          <button type="button" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-lg transition cursor-pointer self-start sm:self-auto">Pratinjau konfigurasi</button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="flex flex-col gap-3">
-            <span class="text-xs font-semibold text-slate-700 uppercase tracking-wider font-['Poppins']">Syarat Penerbitan</span>
-            <label class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-slate-100 transition">
-              <input type="checkbox" checked class="rounded border-slate-300 size-4 text-blue-950">
-              <span class="text-xs text-slate-800 font-medium font-['Poppins']">Minimal kehadiran 80% dari total durasi acara.</span>
-            </label>
-            <label class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-slate-100 transition">
-              <input type="checkbox" checked class="rounded border-slate-300 size-4 text-blue-950">
-              <span class="text-xs text-slate-800 font-medium font-['Poppins']">Telah menyelesaikan formulir evaluasi pemateri.</span>
-            </label>
-            <span class="text-[11px] text-slate-500">Syarat diperiksa otomatis oleh sistem sebelum sertifikat ber-QR terbit.</span>
-          </div>
-
-          <div class="flex flex-col gap-3">
-            <span class="text-xs font-semibold text-slate-700 uppercase tracking-wider font-['Poppins']">Pemetaan Variabel PDF</span>
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between text-xs">
-              <span class="font-mono text-blue-950 font-semibold bg-blue-100 px-2 py-0.5 rounded">@{{nama_peserta}}</span>
-              <span class="text-slate-700 font-medium">dr. Amanda Putri, Sp.PD</span>
-            </div>
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between text-xs">
-              <span class="font-mono text-blue-950 font-semibold bg-blue-100 px-2 py-0.5 rounded">@{{nomor_skp}}</span>
-              <span class="text-slate-700 font-medium">044/PB-IDI/SKP/XI/2026</span>
-            </div>
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between text-xs">
-              <span class="font-mono text-blue-950 font-semibold bg-blue-100 px-2 py-0.5 rounded">@{{qr_verifikasi}}</span>
-              <span class="text-slate-700 font-medium font-mono text-[11px]">https://eventict.id/verify/EVT-4409</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="p-4 bg-amber-50/80 border border-amber-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <input type="checkbox" checked class="rounded border-amber-400 size-4 text-amber-600">
-            <div>
-              <div class="text-xs font-semibold text-amber-950 font-['Poppins']">Konfirmasi sebelum pengiriman massal</div>
-              <div class="text-[11px] text-amber-800 font-normal font-['Poppins']">312 peserta akan menerima e-sertifikat melalui email terdaftar dengan QR hash unik.</div>
-            </div>
-          </div>
-          <button type="button" class="px-5 py-2.5 bg-blue-950 hover:bg-blue-900 text-white text-xs font-semibold font-['Poppins'] rounded-lg transition shrink-0 cursor-pointer shadow-xs">
-            Kirim E-Sertifikat ke 312 Peserta yang Memenuhi Syarat
+          <button type="button" onclick="openBatchUploadModal()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-lg transition cursor-pointer self-start sm:self-auto flex items-center gap-1.5 shadow-2xs">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+            <span>Buka Form Upload Massal</span>
           </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-['Poppins']">
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-2">
+            <div class="font-semibold text-slate-900 flex items-center gap-2">
+              <span class="size-6 rounded-full bg-blue-950 text-white flex items-center justify-center text-[11px] font-bold">1</span>
+              <span>Berdasarkan No. Registrasi</span>
+            </div>
+            <p class="text-slate-600 text-[11px] leading-relaxed">
+              Beri nama file PDF sesuai nomor registrasi yang tertera di tiket peserta.
+            </p>
+            <div class="mt-auto pt-2 font-mono text-[11px] text-blue-950 bg-white p-2 rounded border border-slate-200">
+              REG-2026-0104.pdf
+            </div>
+          </div>
+
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-2">
+            <div class="font-semibold text-slate-900 flex items-center gap-2">
+              <span class="size-6 rounded-full bg-blue-950 text-white flex items-center justify-center text-[11px] font-bold">2</span>
+              <span>Berdasarkan NIK Peserta</span>
+            </div>
+            <p class="text-slate-600 text-[11px] leading-relaxed">
+              Gunakan 16 digit NIK peserta KTP/Kemenkes sebagai nama file dokumen sertifikat.
+            </p>
+            <div class="mt-auto pt-2 font-mono text-[11px] text-blue-950 bg-white p-2 rounded border border-slate-200">
+              3171012345670001.pdf
+            </div>
+          </div>
+
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-2">
+            <div class="font-semibold text-slate-900 flex items-center gap-2">
+              <span class="size-6 rounded-full bg-blue-950 text-white flex items-center justify-center text-[11px] font-bold">3</span>
+              <span>Berdasarkan Email Peserta</span>
+            </div>
+            <p class="text-slate-600 text-[11px] leading-relaxed">
+              Beri nama file dengan alamat email resmi peserta yang terdaftar di sistem.
+            </p>
+            <div class="mt-auto pt-2 font-mono text-[11px] text-blue-950 bg-white p-2 rounded border border-slate-200">
+              amanda@rsupcm.co.id.pdf
+            </div>
+          </div>
         </div>
       </div>
     </main>
+  </div>
+</div>
+
+<div id="single-upload-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl flex flex-col gap-5 border border-slate-200">
+    <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+      <div>
+        <h3 class="text-slate-900 font-bold text-base font-['Poppins']">Unggah Sertifikat Peserta</h3>
+        <p class="text-slate-500 text-xs">Unggah file PDF atau Gambar sertifikat buatan panitia.</p>
+      </div>
+      <button type="button" onclick="closeSingleUploadModal()" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form id="single-upload-form" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
+      @csrf
+      <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex flex-col gap-1">
+        <div class="text-slate-500">Penerima Sertifikat:</div>
+        <div id="single-modal-participant-name" class="font-bold text-slate-900 text-sm"></div>
+        <div id="single-modal-participant-code" class="font-mono text-blue-950 font-semibold"></div>
+      </div>
+
+      <div id="single-modal-existing-alert" class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 hidden items-center justify-between">
+        <span>Peserta sudah memiliki berkas sertifikat.</span>
+        <a id="single-modal-existing-link" href="#" target="_blank" class="font-semibold underline">Lihat File</a>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-slate-700 font-['Poppins']">Pilih Berkas Sertifikat (PDF / JPG / PNG)</label>
+        <input type="file" name="certificate_file" accept=".pdf,.jpg,.jpeg,.png" required class="w-full text-xs text-slate-700 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-950 file:text-white hover:file:bg-blue-900 file:cursor-pointer border border-slate-300 rounded-lg p-2 bg-white">
+        <span class="text-[11px] text-slate-500">Maksimum ukuran berkas: 10 MB.</span>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-slate-700 font-['Poppins']">Nomor Sertifikat / SKP Resmi (Opsional)</label>
+        <input type="text" id="single-modal-cert-number" name="certificate_number" placeholder="Contoh: 044/PB-IDI/SKP/XI/2026 (Kosongkan untuk otomatis)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg outline-none focus:border-blue-950">
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+        <button type="button" onclick="closeSingleUploadModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">Batal</button>
+        <button type="submit" class="px-4 py-2 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-xs">Simpan & Terbitkan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="batch-upload-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl flex flex-col gap-5 border border-slate-200">
+    <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+      <div>
+        <h3 class="text-slate-900 font-bold text-base font-['Poppins']">Unggah Sertifikat Massal (Multi-File)</h3>
+        <p class="text-slate-500 text-xs">Pilih puluhan hingga ratusan berkas sertifikat sekaligus untuk dipetakan otomatis.</p>
+      </div>
+      <button type="button" onclick="closeBatchUploadModal()" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-950 flex flex-col gap-1.5">
+      <div class="font-bold flex items-center gap-1.5">
+        <svg class="size-4 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Format Penamaan File Otomatis:</span>
+      </div>
+      <ul class="list-disc list-inside space-y-1 text-slate-700 pl-1 text-[11px]">
+        <li><strong>Nomor Registrasi:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">REG-2026-0104.pdf</code></li>
+        <li><strong>Nomor NIK Peserta:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">3171012345670001.pdf</code></li>
+        <li><strong>Email Peserta:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">amanda@rsupcm.co.id.pdf</code></li>
+      </ul>
+    </div>
+
+    <form action="{{ route('organizer.certificate.batch') }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
+      @csrf
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-slate-700 font-['Poppins']">Pilih File Sertifikat (Bisa blok banyak file sekaligus)</label>
+        <input type="file" id="batch-file-input" name="certificate_files[]" accept=".pdf,.jpg,.jpeg,.png" multiple required onchange="handleBatchFileSelect(this)" class="w-full text-xs text-slate-700 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-700 file:text-white hover:file:bg-emerald-800 file:cursor-pointer border border-slate-300 rounded-lg p-2 bg-white">
+        <div id="batch-file-count" class="text-[11px] text-slate-500 mt-1">Belum ada file yang dipilih.</div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+        <button type="button" onclick="closeBatchUploadModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">Batal</button>
+        <button type="submit" class="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-xs flex items-center gap-2">
+          <svg class="size-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+          <span>Mulai Sinkronisasi & Unggah</span>
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 @endsection
@@ -546,5 +601,65 @@ document.addEventListener('DOMContentLoaded', function() {
   if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
   if (backdrop) backdrop.addEventListener('click', closeSidebar);
 });
+
+function openSingleUploadModal(regId, name, code, existingUrl, certNumber) {
+  const modal = document.getElementById('single-upload-modal');
+  const form = document.getElementById('single-upload-form');
+  const nameEl = document.getElementById('single-modal-participant-name');
+  const codeEl = document.getElementById('single-modal-participant-code');
+  const certInput = document.getElementById('single-modal-cert-number');
+  const existingAlert = document.getElementById('single-modal-existing-alert');
+  const existingLink = document.getElementById('single-modal-existing-link');
+
+  if (!modal || !form) return;
+
+  form.action = '/penyelenggara/registrasi/' + regId + '/upload-sertifikat';
+  nameEl.textContent = name;
+  codeEl.textContent = '#' + code;
+  certInput.value = certNumber || '';
+
+  if (existingUrl) {
+    existingAlert.classList.remove('hidden');
+    existingAlert.classList.add('flex');
+    existingLink.href = existingUrl;
+  } else {
+    existingAlert.classList.add('hidden');
+    existingAlert.classList.remove('flex');
+  }
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeSingleUploadModal() {
+  const modal = document.getElementById('single-upload-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+function openBatchUploadModal() {
+  const modal = document.getElementById('batch-upload-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+}
+
+function closeBatchUploadModal() {
+  const modal = document.getElementById('batch-upload-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+function handleBatchFileSelect(input) {
+  const countEl = document.getElementById('batch-file-count');
+  if (!countEl) return;
+  const count = input.files ? input.files.length : 0;
+  countEl.textContent = count > 0 ? (count + ' berkas terpilih siap dipetakan.') : 'Belum ada file yang dipilih.';
+}
 </script>
 @endpush
