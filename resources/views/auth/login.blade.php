@@ -53,19 +53,7 @@
         </div>
       </div>
 
-      <div class="pt-8 border-t border-white/10 flex flex-col gap-2.5 mt-6">
-        <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold font-['Poppins']">Akun Uji Coba Cepat:</span>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button type="button" onclick="fillDemo('amanda@eventict.id', 'password123')" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-left text-xs transition cursor-pointer">
-            <div class="font-semibold text-white">dr. Amanda Putri</div>
-            <div class="text-[10px] text-slate-300">Peran: Peserta</div>
-          </button>
-          <button type="button" onclick="fillDemo('panitia@eventict.id', 'password123')" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-left text-xs transition cursor-pointer">
-            <div class="font-semibold text-white">Sekretariat Panitia</div>
-            <div class="text-[10px] text-slate-300">Peran: Panitia Internal</div>
-          </button>
-        </div>
-      </div>
+
     </div>
 
     <div class="w-full md:w-7/12 p-8 lg:p-12 flex flex-col justify-center">
@@ -157,15 +145,19 @@
 </div>
 
 <script>
-function fillDemo(email, pass) {
-  document.getElementById('email').value = email;
-  document.getElementById('password').value = pass;
-}
-
 function togglePasswordVisibility() {
   const input = document.getElementById('password');
-  const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-  input.setAttribute('type', type);
+  const eyeIcon = document.getElementById('eye-icon');
+  if (!input || !eyeIcon) return;
+
+  const isPassword = input.getAttribute('type') === 'password';
+  input.setAttribute('type', isPassword ? 'text' : 'password');
+
+  if (isPassword) {
+    eyeIcon.innerHTML = '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>';
+  } else {
+    eyeIcon.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+  }
 }
 </script>
 @endsection

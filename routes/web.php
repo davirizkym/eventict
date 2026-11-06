@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\PesertaController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,7 +24,9 @@ Route::middleware(['auth', 'role:peserta'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:penyelenggara'])->group(function () {
-    Route::get('/penyelenggara', function () {
-        return view('organizer.index');
-    })->name('organizer.dashboard');
+    Route::get('/penyelenggara', [OrganizerController::class, 'index'])->name('organizer.dashboard');
+    Route::post('/penyelenggara/registrasi/{registration}/upload-sertifikat', [OrganizerController::class, 'uploadSingle'])->name('organizer.certificate.single');
+    Route::post('/penyelenggara/upload-sertifikat-massal', [OrganizerController::class, 'uploadBatch'])->name('organizer.certificate.batch');
+    Route::post('/penyelenggara/registrasi/{registration}/presensi', [OrganizerController::class, 'toggleAttendance'])->name('organizer.attendance.toggle');
+    Route::delete('/penyelenggara/registrasi/{registration}/sertifikat', [OrganizerController::class, 'deleteCertificate'])->name('organizer.certificate.delete');
 });
