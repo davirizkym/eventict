@@ -39,6 +39,35 @@ class EventController extends Controller
         return view('landing', compact('events'));
     }
 
+    public function catalog(Request $request)
+    {
+        $query = Event::with('speakers')->where('status', '!=', 'draft');
+
+        if ($request->filled('q')) {
+            $keyword = $request->query('q');
+            $query->where(function ($q) use ($keyword) {
+                $q->where('title', 'like', "%{$keyword}%")
+                    ->orWhere('description', 'like', "%{$keyword}%")
+                    ->orWhereHas('speakers', function ($sq) use ($keyword) {
+                        $sq->where('name', 'like', "%{$keyword}%")
+                            ->orWhere('institution', 'like', "%{$keyword}%");
+                    });
+            });
+        }
+
+        if ($request->filled('format')) {
+            $query->where('format', $request->query('format'));
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->query('category'));
+        }
+
+        $events = $query->orderBy('start_date', 'asc')->get();
+
+        return view('events.catalog', compact('events'));
+    }
+
     public function show(string $slug)
     {
         $event = Event::with('speakers')->where('slug', $slug)->firstOrFail();
@@ -57,6 +86,11 @@ class EventController extends Controller
         $isFull = $registeredCount >= $event->quota;
 
         return view('events.show', compact('event', 'isRegistered', 'userRegistration', 'registeredCount', 'isFull'));
+    }
+
+    public function about()
+    {
+        return view('pages.about');
     }
 
     public function registerEvent(Request $request, string $slug)

@@ -81,7 +81,7 @@ class OrganizerController extends Controller
 
         $certNumber = $request->filled('certificate_number')
             ? $request->certificate_number
-            : ('SKP-' . date('Y') . '-' . strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $registration->event->slug ?? 'EVT'), 0, 3)) . '-' . str_pad($registration->id, 4, '0', STR_PAD_LEFT));
+            : ('ICT-' . date('Y') . '-' . strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $registration->event->slug ?? 'EVT'), 0, 3)) . '-' . str_pad($registration->id, 4, '0', STR_PAD_LEFT));
 
         $verifyHash = 'EVT-' . rand(1000, 9999) . '-' . strtoupper(substr(md5(uniqid()), 0, 4));
 
@@ -134,7 +134,7 @@ class OrganizerController extends Controller
                 $path = $file->storeAs('certificates', $storedName, 'public');
                 $downloadUrl = 'storage/' . $path;
 
-                $certNumber = 'SKP-' . date('Y') . '-' . strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $registration->event->slug ?? 'EVT'), 0, 3)) . '-' . str_pad($registration->id, 4, '0', STR_PAD_LEFT);
+                $certNumber = 'ICT-' . date('Y') . '-' . strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $registration->event->slug ?? 'EVT'), 0, 3)) . '-' . str_pad($registration->id, 4, '0', STR_PAD_LEFT);
                 $verifyHash = 'EVT-' . rand(1000, 9999) . '-' . strtoupper(substr(md5(uniqid()), 0, 4));
 
                 Certificate::updateOrCreate(

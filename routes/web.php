@@ -7,6 +7,9 @@ use App\Http\Controllers\PesertaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [EventController::class, 'index'])->name('home');
+Route::get('/kegiatan', [EventController::class, 'catalog'])->name('events.index_public');
+Route::redirect('/jadwal', '/kegiatan');
+Route::get('/tentang', [EventController::class, 'about'])->name('about');
 Route::get('/kegiatan/{slug}', [EventController::class, 'show'])->name('events.show');
 
 Route::middleware('guest')->group(function () {
