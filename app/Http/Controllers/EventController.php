@@ -59,6 +59,27 @@ class EventController extends Controller
         return view('events.show', compact('event', 'isRegistered', 'userRegistration', 'registeredCount', 'isFull'));
     }
 
+    public function showRegistrationForm(string $slug)
+    {
+        $event = Event::with('speakers')->where('slug', $slug)->where('status', '!=', 'draft')->firstOrFail();
+        $user = Auth::user();
+
+        $existing = Registration::where('user_id', $user->id)
+            ->where('event_id', $event->id)
+            ->first();
+
+        if ($existing) {
+            return redirect()->route('peserta.dashboard')->with('info', 'Anda sudah terdaftar pada kegiatan ini.');
+        }
+
+        $registeredCount = $event->registrations()->count();
+        if ($registeredCount >= $event->quota) {
+            return redirect()->route('events.show', $slug)->with('error', 'Mohon maaf, kuota peserta untuk kegiatan ini telah penuh.');
+        }
+
+        return view('events.register', compact('event', 'user', 'registeredCount'));
+    }
+
     public function registerEvent(Request $request, string $slug)
     {
         $event = Event::where('slug', $slug)->where('status', '!=', 'draft')->firstOrFail();
@@ -73,7 +94,34 @@ class EventController extends Controller
         }
 
         if ($event->registrations()->count() >= $event->quota) {
-            return back()->with('error', 'Mohon maaf, kuota peserta untuk kegiatan ini telah penuh.');
+            return redirect()->route('events.show', $slug)->with('error', 'Mohon maaf, kuota peserta untuk kegiatan ini telah penuh.');
+        }
+
+        $request->validate([
+            'nik' => ['nullable', 'string', 'digits:16'],
+            'phone' => ['nullable', 'string', 'max:25'],
+            'institution' => ['nullable', 'string', 'max:255'],
+            'attendance_mode' => ['nullable', 'string', 'in:offline,online,hybrid'],
+            'payment_method' => ['nullable', 'string', 'max:50'],
+            'agree_terms' => ['required', 'accepted'],
+        ], [
+            'agree_terms.accepted' => 'Anda wajib menyetujui syarat & ketentuan kehadiran kegiatan.',
+            'nik.digits' => 'Nomor Induk Kependudukan (NIK) harus berjumlah 16 digit angka.',
+        ]);
+
+        // Perbarui data profil peserta jika diisi dan data sebelumnya belum ada
+        $userUpdates = [];
+        if ($request->filled('nik') && empty($user->nik)) {
+            $userUpdates['nik'] = $request->nik;
+        }
+        if ($request->filled('phone') && empty($user->phone)) {
+            $userUpdates['phone'] = $request->phone;
+        }
+        if ($request->filled('institution') && empty($user->institution)) {
+            $userUpdates['institution'] = $request->institution;
+        }
+        if (!empty($userUpdates)) {
+            $user->update($userUpdates);
         }
 
         $nextNumber = Registration::where('event_id', $event->id)->count() + 1;
@@ -92,6 +140,6 @@ class EventController extends Controller
             'evaluation_status' => 'pending',
         ]);
 
-        return redirect()->route('peserta.dashboard')->with('success', 'Pendaftaran berhasil! E-Tiket Anda telah terbit.');
+        return redirect()->route('peserta.dashboard')->with('success', 'Pendaftaran berhasil! E-Tiket Anda (' . $regCode . ') telah terbit.');
     }
 }

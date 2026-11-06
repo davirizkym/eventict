@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Certificate;
+use App\Models\Event;
 use App\Models\Registration;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,14 @@ class PesertaController extends Controller
             ->latest('issued_at')
             ->get();
 
-        return view('peserta.index', compact('user', 'registrations', 'todayRegistration', 'certificates'));
+        $registeredEventIds = $registrations->pluck('event_id')->toArray();
+        $availableEvents = Event::with('speakers')
+            ->withCount('registrations')
+            ->where('status', '!=', 'draft')
+            ->whereNotIn('id', $registeredEventIds)
+            ->orderBy('start_date', 'asc')
+            ->get();
+
+        return view('peserta.index', compact('user', 'registrations', 'todayRegistration', 'certificates', 'availableEvents'));
     }
 }

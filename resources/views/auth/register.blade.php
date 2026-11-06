@@ -53,6 +53,10 @@
           </div>
         </div>
 
+        <div class="pt-6 border-t border-white/10 text-xs text-slate-300 font-['Poppins']">
+          Sudah memiliki akun terdaftar?
+          <a href="{{ route('login') }}" class="text-white font-semibold hover:underline block mt-1">Masuk ke Akun Anda &rarr;</a>
+        </div>
       </div>
     </div>
 
@@ -62,7 +66,7 @@
         <p class="text-xs text-slate-500 font-normal font-['Poppins']">Lengkapi data diri Anda untuk mengikuti seminar dan workshop.</p>
       </div>
 
-      @if ($errors->any())
+      @if (isset($errors) && $errors->any())
         <div class="p-3.5 mb-5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-800">
           <svg class="size-4 text-rose-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
@@ -80,17 +84,33 @@
       <form method="POST" action="{{ route('register') }}" class="flex flex-col gap-4">
         @csrf
 
-        <div class="flex flex-col gap-1.5">
-          <label for="name" class="text-xs font-semibold text-slate-700 font-['Poppins']">Nama Lengkap</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value="{{ old('name') }}"
-            required
-            placeholder="Budi Santoso, M.Kom"
-            class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950 font-['Poppins']"
-          >
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label for="name" class="text-xs font-semibold text-slate-700 font-['Poppins']">Nama Lengkap & Gelar</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value="{{ old('name') }}"
+              required
+              placeholder="Budi Santoso, M.Kom"
+              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950 font-['Poppins']"
+            >
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="nik" class="text-xs font-semibold text-slate-700 font-['Poppins']">
+              NIK (16 Digit KTP) <span class="text-slate-400 font-normal">(opsional untuk SKP)</span>
+            </label>
+            <input
+              type="text"
+              id="nik"
+              name="nik"
+              value="{{ old('nik') }}"
+              maxlength="16"
+              placeholder="3171012345670001"
+              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950 font-['Poppins'] font-mono"
+            >
+          </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">

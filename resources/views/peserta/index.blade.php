@@ -68,12 +68,19 @@
           </span>
         </a>
 
-        <a href="{{ route('home') }}#kegiatan" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
-          <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.35-4.35"/>
-          </svg>
-          <span class="text-xs leading-5">Jelajahi Kegiatan Baru</span>
+        <a href="#eksplor-kegiatan" class="w-full p-3 rounded-lg inline-flex items-center justify-between transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
+          <div class="inline-flex items-center gap-3">
+            <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <span class="text-xs leading-5">Daftar Kegiatan Baru</span>
+          </div>
+          @if($availableEvents->count() > 0)
+            <span class="px-2 py-0.5 bg-emerald-700 text-emerald-100 text-[10px] font-semibold rounded-md">
+              {{ $availableEvents->count() }} Tersedia
+            </span>
+          @endif
         </a>
       </div>
     </div>
@@ -100,7 +107,9 @@
           </div>
           <div class="flex flex-col min-w-0">
             <span class="text-white text-xs font-semibold truncate">{{ $user->name ?? 'Peserta' }}</span>
-            <span class="text-slate-400 text-[11px] truncate">{{ $user->institution ?? 'Peserta Eventict' }}</span>
+            <span class="text-slate-400 text-[10px] truncate">
+              @if($user->nik) NIK: {{ $user->nik }} @else {{ $user->institution ?? 'Peserta Eventict' }} @endif
+            </span>
           </div>
         </div>
         <form method="POST" action="{{ route('logout') }}" class="shrink-0">
@@ -269,7 +278,7 @@
       <div id="tiket" class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 lg:p-8 flex flex-col gap-5 shadow-xs">
         <div class="flex justify-between items-center">
           <h3 class="text-slate-900 text-lg font-semibold font-['Poppins']">Tiket & Pendaftaran Saya ({{ $registrations->count() }})</h3>
-          <a href="{{ route('home') }}#kegiatan" class="text-blue-950 text-xs font-medium font-['Poppins'] hover:underline">+ Daftar Kegiatan Lain</a>
+          <a href="#eksplor-kegiatan" class="text-blue-950 text-xs font-semibold font-['Poppins'] hover:underline">+ Daftar Kegiatan Lain</a>
         </div>
 
         <div class="flex flex-col gap-3">
@@ -310,6 +319,70 @@
           @empty
             <div class="p-6 bg-slate-50 rounded-xl text-center text-xs text-slate-500 font-['Poppins']">
               Anda belum mendaftar kegiatan apapun.
+            </div>
+          @endforelse
+        </div>
+      </div>
+
+      <div id="eksplor-kegiatan" class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 lg:p-8 flex flex-col gap-6 shadow-xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-slate-900 text-lg font-semibold font-['Poppins']">Daftar Kegiatan Lain yang Tersedia ({{ $availableEvents->count() }})</h3>
+            <p class="text-slate-500 text-xs font-normal font-['Poppins']">Pilih seminar, simposium, atau workshop untuk menambah perolehan SKP Anda.</p>
+          </div>
+          <a href="{{ route('home') }}#kegiatan" class="text-blue-950 text-xs font-semibold font-['Poppins'] hover:underline self-start sm:self-auto">
+            Katalog Beranda &rarr;
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          @forelse($availableEvents as $avEvent)
+            <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between gap-4 hover:border-blue-950 transition">
+              <div class="flex flex-col gap-2.5">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-1.5">
+                    @if($avEvent->skp_points > 0)
+                      <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">
+                        {{ $avEvent->skp_points }} SKP
+                      </span>
+                    @endif
+                    <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-medium rounded uppercase">
+                      {{ $avEvent->format }}
+                    </span>
+                  </div>
+                  <span class="text-xs font-bold text-blue-950">
+                    {{ $avEvent->price == 0 ? 'Gratis' : 'Rp ' . number_format($avEvent->price, 0, ',', '.') }}
+                  </span>
+                </div>
+
+                <a href="{{ route('events.show', $avEvent->slug) }}" class="text-slate-900 text-sm font-semibold hover:text-blue-950 transition line-clamp-2">
+                  {{ $avEvent->title }}
+                </a>
+
+                <div class="flex items-center gap-2 text-slate-500 text-[11px]">
+                  <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                    <line x1="16" x2="16" y1="2" y2="6"/>
+                    <line x1="8" x2="8" y1="2" y2="6"/>
+                    <line x1="3" x2="21" y1="10" y2="10"/>
+                  </svg>
+                  <span>{{ $avEvent->start_date ? $avEvent->start_date->format('d M Y') : 'Segera' }} &bull; {{ substr($avEvent->start_time ?? '', 0, 5) }} WIB</span>
+                </div>
+              </div>
+
+              <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
+                <span class="text-[11px] text-slate-500">
+                  Sisa {{ max(0, $avEvent->quota - $avEvent->registrations_count) }} kursi
+                </span>
+                <a href="{{ route('events.register.form', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
+                  <span>Daftar Sesi</span>
+                  <span class="text-sm">&rarr;</span>
+                </a>
+              </div>
+            </div>
+          @empty
+            <div class="col-span-full p-6 bg-slate-50 rounded-xl text-center text-xs text-slate-500 font-['Poppins']">
+              Anda telah terdaftar pada seluruh kegiatan yang sedang aktif saat ini.
             </div>
           @endforelse
         </div>
