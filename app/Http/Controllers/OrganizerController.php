@@ -212,14 +212,18 @@ class OrganizerController extends Controller
     {
         $validated = $request->validate([
             'speaker_id' => 'required|exists:speakers,id',
-            'role' => 'nullable|in:Pembicara,Moderator',
+            'role' => 'nullable|in:Pembicara,Moderator,MC',
             'topic' => 'nullable|string|max:255',
             'session_time' => 'nullable|string|max:100',
         ]);
 
         $speaker = Speaker::findOrFail($validated['speaker_id']);
         $role = $validated['role'] ?? 'Pembicara';
-        $defaultTopic = $role === 'Moderator' ? 'Moderator Sesi Acara' : 'Sesi Pemaparan Materi';
+        $defaultTopic = match ($role) {
+            'Moderator' => 'Moderator Sesi Acara',
+            'MC' => 'Master of Ceremony (MC)',
+            default => 'Sesi Pemaparan Materi',
+        };
 
         $event->speakers()->syncWithoutDetaching([
             $validated['speaker_id'] => [
