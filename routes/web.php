@@ -23,6 +23,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 Route::middleware(['auth', 'role:peserta'])->group(function () {
     Route::get('/peserta', [PesertaController::class, 'dashboard'])->name('peserta.dashboard');
+    Route::get('/kegiatan/{slug}/daftar', [EventController::class, 'showRegistrationForm'])->name('events.register.form');
     Route::post('/kegiatan/{slug}/daftar', [EventController::class, 'registerEvent'])->name('events.register');
 });
 

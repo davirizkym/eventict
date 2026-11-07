@@ -210,12 +210,10 @@
                 Kuota Kegiatan Telah Penuh
               </button>
             @else
-              <form method="POST" action="{{ route('events.register', $event->slug) }}">
-                @csrf
-                <button type="submit" class="w-full py-3 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold font-['Poppins'] transition shadow-xs cursor-pointer text-center">
-                  Daftar Sesi Kegiatan Ini
-                </button>
-              </form>
+              <a href="{{ route('events.register.form', $event->slug) }}" class="w-full py-3 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold font-['Poppins'] transition shadow-xs cursor-pointer text-center flex items-center justify-center gap-1.5">
+                <span>Daftar Sesi Kegiatan Ini</span>
+                <span class="text-sm">&rarr;</span>
+              </a>
             @endif
           @endguest
         </div>
