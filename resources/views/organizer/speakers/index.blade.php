@@ -106,7 +106,7 @@
       <div class="flex flex-col gap-1">
         <h1 class="text-lg sm:text-xl font-bold text-slate-900">Bank Data Narasumber & Praktisi</h1>
         <p class="text-xs text-slate-500 leading-relaxed max-w-2xl">
-          Katalog instruktur pelatihan, pembicara seminar, dan dosen pengampu Lab ICT. Profil di sini dapat ditugaskan ke beberapa kegiatan berbeda (relasi M:N) tanpa perlu mengetik ulang profil.
+          Katalog instruktur pelatihan, pembicara seminar, dan dosen pengampu Lab ICT.
         </p>
       </div>
 
