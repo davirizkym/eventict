@@ -28,7 +28,25 @@ Route::middleware(['auth', 'role:peserta'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:penyelenggara'])->group(function () {
-    Route::get('/penyelenggara', [OrganizerController::class, 'index'])->name('organizer.dashboard');
+    Route::get('/penyelenggara', [OrganizerController::class, 'hub'])->name('organizer.dashboard');
+    Route::post('/penyelenggara/event/create', [OrganizerController::class, 'storeEvent'])->name('organizer.event.store');
+
+    Route::get('/penyelenggara/narasumber', [OrganizerController::class, 'speakersIndex'])->name('organizer.speakers.index');
+    Route::post('/penyelenggara/narasumber', [OrganizerController::class, 'speakersStore'])->name('organizer.speakers.store');
+    Route::put('/penyelenggara/narasumber/{speaker}', [OrganizerController::class, 'speakersUpdate'])->name('organizer.speakers.update');
+    Route::delete('/penyelenggara/narasumber/{speaker}', [OrganizerController::class, 'speakersDestroy'])->name('organizer.speakers.destroy');
+
+    Route::get('/penyelenggara/event/{event}', [OrganizerController::class, 'workspace'])->name('organizer.workspace');
+    Route::put('/penyelenggara/event/{event}', [OrganizerController::class, 'updateEvent'])->name('organizer.event.update');
+    Route::post('/penyelenggara/event/{event}/narasumber', [OrganizerController::class, 'assignSpeaker'])->name('organizer.event.speaker.assign');
+    Route::delete('/penyelenggara/event/{event}/narasumber/{speaker}', [OrganizerController::class, 'removeSpeaker'])->name('organizer.event.speaker.remove');
+    Route::post('/penyelenggara/event/{event}/quick-checkin', [OrganizerController::class, 'quickCheckinWorkspace'])->name('organizer.workspace.quick_checkin');
+    Route::get('/penyelenggara/event/{event}/ekspor-peserta', [OrganizerController::class, 'exportEventPeserta'])->name('organizer.workspace.export');
+    Route::post('/penyelenggara/event/{event}/upload-sertifikat-massal', [OrganizerController::class, 'uploadBatchWorkspace'])->name('organizer.workspace.certificate.batch');
+
+    Route::get('/penyelenggara/riwayat', [OrganizerController::class, 'history'])->name('organizer.history');
+    Route::get('/penyelenggara/ekspor-peserta', [OrganizerController::class, 'export'])->name('organizer.export');
+    Route::post('/penyelenggara/quick-checkin', [OrganizerController::class, 'quickCheckin'])->name('organizer.quick_checkin');
     Route::post('/penyelenggara/registrasi/{registration}/upload-sertifikat', [OrganizerController::class, 'uploadSingle'])->name('organizer.certificate.single');
     Route::post('/penyelenggara/upload-sertifikat-massal', [OrganizerController::class, 'uploadBatch'])->name('organizer.certificate.batch');
     Route::post('/penyelenggara/registrasi/{registration}/presensi', [OrganizerController::class, 'toggleAttendance'])->name('organizer.attendance.toggle');
