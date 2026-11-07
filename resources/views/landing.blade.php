@@ -5,56 +5,12 @@
 @section('content')
 <div class="w-full min-h-screen bg-white flex justify-center items-start">
   <div class="w-full max-w-[1440px] bg-white flex flex-col justify-start items-start">
-    <header class="self-stretch h-16 px-6 lg:px-20 bg-blue-950 border-b border-slate-900 flex justify-between items-center sticky top-0 z-50">
-      <div class="w-64 flex justify-start items-center">
-        <a href="{{ route('home') }}" class="flex justify-start items-center gap-2.5 cursor-pointer group">
-          <div class="size-8 bg-white rounded flex items-center justify-center text-blue-950 font-bold text-sm">
-            <svg class="size-5 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-              <path d="M6 6h10"/>
-              <path d="M6 10h7"/>
-            </svg>
-          </div>
-          <span class="text-white text-xl font-semibold font-['Poppins'] leading-7 group-hover:text-blue-100 transition">Eventict</span>
-        </a>
-      </div>
-      <nav class="hidden md:flex justify-start items-center gap-8">
-        <a href="{{ route('home') }}" class="text-white text-sm font-semibold font-['Poppins'] transition">Beranda</a>
-        <a href="{{ route('events.index_public') }}" class="text-white/90 text-sm font-medium font-['Poppins'] hover:text-white transition">Jelajahi Kegiatan</a>
-        <a href="{{ route('about') }}" class="text-white/90 text-sm font-medium font-['Poppins'] hover:text-white transition">Tentang Kami</a>
-      </nav>
-      <div class="flex justify-start items-center gap-3">
-        @auth
-          @if(Auth::user()->role === 'penyelenggara')
-            <a href="{{ route('organizer.dashboard') }}" class="px-3.5 py-2 bg-white rounded-md text-blue-900 flex justify-center items-center gap-2 hover:bg-blue-50 transition cursor-pointer font-semibold shadow-xs">
-              <span class="text-xs font-semibold font-['Poppins'] leading-4">Dashboard Panitia</span>
-            </a>
-          @else
-            <a href="{{ route('peserta.dashboard') }}" class="px-3.5 py-2 bg-white rounded-md text-blue-900 flex justify-center items-center gap-2 hover:bg-blue-50 transition cursor-pointer font-semibold shadow-xs">
-              <span class="text-xs font-semibold font-['Poppins'] leading-4">Portal Peserta</span>
-            </a>
-          @endif
-          <form method="POST" action="{{ route('logout') }}" class="inline">
-            @csrf
-            <button type="submit" class="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-medium font-['Poppins'] rounded-md transition cursor-pointer">
-              Keluar
-            </button>
-          </form>
-        @else
-          <a href="{{ route('login') }}" class="px-3.5 py-2 bg-transparent text-white border border-white/40 rounded-md flex justify-center items-center gap-2 hover:bg-white/10 transition cursor-pointer">
-            <span class="text-white text-xs font-medium font-['Poppins'] leading-4">Masuk Akun</span>
-          </a>
-          <a href="{{ route('register') }}" class="px-3.5 py-2 bg-white text-blue-950 rounded-md flex justify-center items-center gap-2 hover:bg-blue-50 transition cursor-pointer font-semibold shadow-xs">
-            <span class="text-blue-950 text-xs font-semibold font-['Poppins'] leading-4">Daftar Sekarang</span>
-          </a>
-        @endauth
-      </div>
-    </header>
+    @include('partials.navbar')
 
     <main class="self-stretch flex flex-col justify-start items-start">
       <section class="self-stretch px-6 lg:px-20 pt-16 md:pt-24 pb-14 flex flex-col justify-start items-center gap-6">
         <h1 class="w-full max-w-[980px] text-center text-blue-950 text-3xl sm:text-4xl lg:text-5xl font-semibold font-['Poppins'] leading-tight lg:leading-[60px] tracking-tight min-h-[96px] sm:min-h-[110px] lg:min-h-[130px] flex items-center justify-center">
-          <span><span id="typewriter-text"></span><span class="inline-block w-[3px] h-[0.85em] bg-blue-950 ml-1.5 align-middle animate-pulse"></span></span>
+          <span><span id="typewriter-text"></span><span class="inline-block w-[3px] h-[0.85em] bg-blue-950 ml-1.5 align-middle"></span></span>
         </h1>
         
         <div class="w-full max-w-[960px] pt-4 flex flex-col justify-start items-center">
@@ -466,52 +422,7 @@
       </section>
     </main>
 
-    <footer class="self-stretch px-6 lg:px-20 py-12 bg-blue-950 flex flex-col justify-start items-start gap-12">
-      <div class="self-stretch grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <div class="flex flex-col gap-4">
-          <div class="flex items-center gap-2.5">
-            <div class="size-8 bg-white rounded flex items-center justify-center text-blue-950 font-bold text-sm">
-              <svg class="size-5 text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-                <path d="M6 6h10"/>
-                <path d="M6 10h7"/>
-              </svg>
-            </div>
-            <span class="text-white text-xl font-semibold font-['Poppins'] leading-7">Eventict</span>
-          </div>
-          <p class="text-slate-300 text-xs font-normal font-['Poppins'] leading-relaxed">Platform terpadu pendaftaran dan manajemen workshop, seminar teknologi, pelatihan praktikum, dan sertifikasi komputasi Laboratorium ICT.</p>
-          <div class="text-slate-400 text-xs font-normal font-['Poppins']">Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur</div>
-        </div>
-
-        <div class="flex flex-col gap-3">
-          <span class="text-white text-sm font-semibold font-['Poppins']">Kategori Event</span>
-          <a href="{{ route('events.index_public') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Workshop Pemrograman & Web/Mobile</a>
-          <a href="{{ route('events.index_public') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Pelatihan AI, Data & Machine Learning</a>
-          <a href="{{ route('events.index_public') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Jaringan Komputer & Cyber Security</a>
-          <a href="{{ route('events.index_public') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Seminar Teknologi & Tech Talk</a>
-        </div>
-
-        <div class="flex flex-col gap-3">
-          <span class="text-white text-sm font-semibold font-['Poppins']">Informasi & Layanan</span>
-          <a href="{{ route('about') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Tentang Laboratorium ICT</a>
-          <a href="{{ route('about') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Fasilitas Ruang Lab Komputer</a>
-          <a href="{{ route('peserta.dashboard') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Ketentuan Presensi & Sertifikat Lab</a>
-        </div>
-
-        <div class="flex flex-col gap-3">
-          <span class="text-white text-sm font-semibold font-['Poppins']">Pusat Bantuan & Kontak</span>
-          <a href="{{ route('peserta.dashboard') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Portal Peserta & Mahasiswa</a>
-          <a href="{{ route('login') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Akses Panitia / Asisten Lab</a>
-          <span class="text-slate-300 text-xs font-normal font-['Poppins']">help@eventict.id</span>
-          <span class="text-slate-400 text-xs font-normal font-['Poppins']">Senin–Jumat, 08:00–17:00 WIB</span>
-        </div>
-      </div>
-
-      <div class="self-stretch pt-6 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-normal font-['Poppins'] text-slate-400">
-        <div>© 2026 Eventict — Laboratorium ICT. Seluruh hak dilindungi.</div>
-        <div>Sistem Informasi Manajemen Event Laboratorium Komputer & Teknologi Informasi.</div>
-      </div>
-    </footer>
+    @include('partials.footer')
   </div>
 </div>
 @push('scripts')
