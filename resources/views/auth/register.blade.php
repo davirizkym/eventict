@@ -28,7 +28,7 @@
       <div class="flex flex-col gap-6">
         <div class="flex flex-col gap-2">
           <h2 class="text-2xl font-bold font-['Poppins'] leading-snug">Portal Peserta Eventict</h2>
-          <p class="text-slate-300 text-xs font-normal font-['Poppins'] leading-relaxed">Pendaftaran peserta untuk kemudahan akses seminar ilmiah, absensi digital presisi, dan portofolio SKP terpadu.</p>
+          <p class="text-slate-300 text-xs font-normal font-['Poppins'] leading-relaxed">Pendaftaran peserta untuk kemudahan akses seminar teknologi, absensi digital presisi, dan portofolio sertifikat terpadu.</p>
         </div>
 
         <div class="p-4 bg-white/5 border border-white/10 rounded-xl flex flex-col gap-3">

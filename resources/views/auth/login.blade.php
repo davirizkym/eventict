@@ -28,7 +28,7 @@
       <div class="flex flex-col gap-6">
         <div class="flex flex-col gap-2">
           <h2 class="text-2xl font-bold font-['Poppins'] leading-snug">Satu Akun untuk Semua Seminar & Workshop</h2>
-          <p class="text-slate-300 text-xs font-normal font-['Poppins'] leading-relaxed">Kelola tiket, absensi QR presisi, dan sertifikat ber-SKP resmi dalam satu platform terpadu.</p>
+          <p class="text-slate-300 text-xs font-normal font-['Poppins'] leading-relaxed">Kelola tiket, absensi QR presisi, dan sertifikat resmi dalam satu platform terpadu.</p>
         </div>
 
         <div class="flex flex-col gap-3 pt-2">

@@ -93,8 +93,8 @@
           </svg>
           <span class="text-white text-xs font-semibold">Butuh panduan?</span>
         </div>
-        <div class="text-slate-300 text-xs font-normal leading-4">Kenali alur registrasi, presensi, hingga klaim sertifikat ber-SKP.</div>
-        <a href="{{ route('home') }}#alur" class="text-white text-xs font-semibold hover:underline inline-flex items-center gap-1">
+        <div class="text-slate-300 text-xs font-normal leading-4">Kenali alur registrasi, presensi, hingga klaim sertifikat kegiatan.</div>
+        <a href="{{ route('about') }}" class="text-white text-xs font-semibold hover:underline inline-flex items-center gap-1">
           <span>Buka panduan</span>
           <span class="text-[10px]">↗</span>
         </a>
@@ -407,11 +407,9 @@
                   <div class="text-slate-900 text-sm font-semibold font-['Poppins']">{{ $cert->event->title ?? 'Kegiatan Ilmiah' }}</div>
                   <div class="text-slate-500 text-xs font-normal font-['Poppins']">No. Sertifikat: {{ $cert->certificate_number }}</div>
                   <div class="text-slate-400 text-[11px] font-mono mt-0.5">Hash Verifikasi: {{ $cert->verify_hash }}</div>
-                  @if($cert->event && $cert->event->skp_points > 0)
-                    <span class="inline-block px-2 py-0.5 bg-blue-100 text-blue-950 font-semibold text-[10px] rounded mt-1">
-                      {{ $cert->event->skp_points }} SKP Resmi
-                    </span>
-                  @endif
+                  <span class="inline-block px-2 py-0.5 bg-blue-100 text-blue-950 font-semibold text-[10px] rounded mt-1">
+                    Sertifikat Resmi
+                  </span>
                 </div>
               </div>
               <div class="flex items-center gap-2 self-start sm:self-auto">
