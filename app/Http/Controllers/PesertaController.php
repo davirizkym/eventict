@@ -5,14 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Certificate;
 use App\Models\Event;
 use App\Models\Registration;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class PesertaController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $user = Auth::user();
+        $tab = $request->query('tab', 'dashboard');
 
         $registrations = Registration::with(['event.speakers'])
             ->where('user_id', $user->id)
@@ -38,6 +40,6 @@ class PesertaController extends Controller
             ->orderBy('start_date', 'asc')
             ->get();
 
-        return view('peserta.index', compact('user', 'registrations', 'todayRegistration', 'certificates', 'availableEvents'));
+        return view('peserta.index', compact('user', 'registrations', 'todayRegistration', 'certificates', 'availableEvents', 'tab'));
     }
 }
