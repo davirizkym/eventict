@@ -37,7 +37,7 @@
               <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
-            <span>Master Narasumber</span>
+            <span>Pengisi Acara</span>
           </a>
         </nav>
       </div>
@@ -105,7 +105,7 @@
           Selamat Datang, {{ Auth::user()->name }}
         </h1>
         <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
-          Pilih salah satu kegiatan di bawah untuk membuka ruang kerja operasional (presensi, e-sertifikat, tiket) atau tambahkan kegiatan baru.
+          Pilih salah satu kegiatan di bawah untuk membuka ruang kerja operasional (presensi, <span class="whitespace-nowrap">e-sertifikat</span>, tiket) atau tambahkan kegiatan baru.
         </p>
       </div>
 
@@ -230,7 +230,7 @@
               <div class="flex items-center justify-between text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                 <span>Kehadiran: <strong class="text-slate-900">{{ $evt->attended_count }}</strong></span>
                 <span>Sertifikat: <strong class="text-slate-900">{{ $evt->certificates_count }}</strong></span>
-                <span>Narasumber: <strong class="text-slate-900">{{ $evt->speakers->count() }}</strong></span>
+                <span>Pengisi Acara: <strong class="text-slate-900">{{ $evt->speakers->count() }}</strong></span>
               </div>
             </div>
 
@@ -334,8 +334,7 @@
 
         <div class="p-3.5 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-2.5">
           <div class="flex items-center justify-between">
-            <span class="font-semibold text-blue-950">Pilih Narasumber Pertama (Dari Master Data)</span>
-            <a href="{{ route('organizer.speakers.index') }}" class="text-[11px] text-blue-900 font-semibold hover:underline">Kelola Master</a>
+            <span class="font-semibold text-blue-950">Pilih Narasumber (Opsional)</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <select name="speaker_id" class="px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs outline-none">

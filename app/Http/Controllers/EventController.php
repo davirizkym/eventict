@@ -7,6 +7,7 @@ use App\Models\Registration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
@@ -36,7 +37,23 @@ class EventController extends Controller
 
         $events = $query->orderBy('start_date', 'asc')->get();
 
-        return view('landing', compact('events'));
+        // Kategori dinamis dengan total kegiatan aktif
+        $allCategories = Event::where('status', '!=', 'draft')
+            ->select('category')
+            ->distinct()
+            ->pluck('category')
+            ->merge(['Kedokteran & Kesehatan', 'Teknologi & Rekayasa', 'Hukum & Kebijakan', 'Ekonomi & Bisnis'])
+            ->unique()
+            ->values();
+
+        $categoryCounts = Event::where('status', '!=', 'draft')
+            ->select('category', DB::raw('count(*) as total'))
+            ->groupBy('category')
+            ->pluck('total', 'category');
+
+        $categories = $this->getPopularCategories($categoryCounts);
+
+        return view('landing', compact('events', 'categories', 'allCategories'));
     }
 
     public function catalog(Request $request)
@@ -65,7 +82,87 @@ class EventController extends Controller
 
         $events = $query->orderBy('start_date', 'asc')->get();
 
-        return view('events.catalog', compact('events'));
+        $allCategories = Event::where('status', '!=', 'draft')
+            ->select('category')
+            ->distinct()
+            ->pluck('category')
+            ->merge(['Kedokteran & Kesehatan', 'Teknologi & Rekayasa', 'Hukum & Kebijakan', 'Ekonomi & Bisnis'])
+            ->unique()
+            ->values();
+
+        return view('events.catalog', compact('events', 'allCategories'));
+    }
+
+    private function getPopularCategories($categoryCounts)
+    {
+        $definitions = [
+            [
+                'name' => 'Pemrograman & Web/Mobile',
+                'category' => 'Teknologi & Rekayasa',
+                'description' => 'Frontend, Backend API, Framework Modern, Aplikasi Mobile',
+                'icon' => 'code',
+            ],
+            [
+                'name' => 'Kecerdasan Buatan & Data',
+                'category' => 'Teknologi & Rekayasa',
+                'description' => 'Machine Learning, Deep Learning, Python Data Science, Analitika',
+                'icon' => 'ai',
+            ],
+            [
+                'name' => 'Keamanan Siber & Jaringan',
+                'category' => 'Teknologi & Rekayasa',
+                'description' => 'Cyber Security, Jaringan Komputer, Infrastruktur Server, Ethical Hacking',
+                'icon' => 'security',
+            ],
+            [
+                'name' => 'Teknologi Medis & Telemedicine',
+                'category' => 'Kedokteran & Kesehatan',
+                'description' => 'Sistem Rekam Medis Elektronik, Interoperabilitas Data Klinis',
+                'icon' => 'health',
+            ],
+            [
+                'name' => 'Hukum Siber & Privasi Data',
+                'category' => 'Hukum & Kebijakan',
+                'description' => 'UU Pelindungan Data Pribadi (UU PDP), Kepatuhan Tata Kelola Digital',
+                'icon' => 'law',
+            ],
+            [
+                'name' => 'Bisnis Digital & Manajemen Produk',
+                'category' => 'Ekonomi & Bisnis',
+                'description' => 'Kewirausahaan Teknologi, Manajemen Produk Digital, Inovasi Startup',
+                'icon' => 'business',
+            ],
+        ];
+
+        $items = collect($definitions)->map(function ($item) use ($categoryCounts) {
+            $item['count'] = $categoryCounts[$item['category']] ?? 0;
+            return $item;
+        });
+
+        // Jika ada kategori lain di database yang belum terdaftar di predefined, sertakan juga secara dinamis
+        $covered = collect($definitions)->pluck('category')->unique()->all();
+        $extras = Event::where('status', '!=', 'draft')
+            ->whereNotIn('category', $covered)
+            ->select('category', DB::raw('count(*) as total'))
+            ->groupBy('category')
+            ->get();
+
+        foreach ($extras as $extra) {
+            $items->push([
+                'name' => $extra->category,
+                'category' => $extra->category,
+                'description' => 'Kumpulan seminar dan workshop bidang ' . $extra->category,
+                'icon' => 'default',
+                'count' => $extra->total,
+            ]);
+        }
+
+        return $items;
+    }
+
+    public function about()
+    {
+        return view('pages.about');
     }
 
     public function show(string $slug)

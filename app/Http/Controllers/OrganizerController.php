@@ -212,21 +212,29 @@ class OrganizerController extends Controller
     {
         $validated = $request->validate([
             'speaker_id' => 'required|exists:speakers,id',
+            'role' => 'nullable|in:Pembicara,Moderator,MC',
             'topic' => 'nullable|string|max:255',
             'session_time' => 'nullable|string|max:100',
         ]);
 
         $speaker = Speaker::findOrFail($validated['speaker_id']);
+        $role = $validated['role'] ?? 'Pembicara';
+        $defaultTopic = match ($role) {
+            'Moderator' => 'Moderator Sesi Acara',
+            'MC' => 'Master of Ceremony (MC)',
+            default => 'Sesi Pemaparan Materi',
+        };
 
         $event->speakers()->syncWithoutDetaching([
             $validated['speaker_id'] => [
-                'topic' => $validated['topic'] ?? 'Sesi Pemaparan Materi',
+                'role' => $role,
+                'topic' => !empty($validated['topic']) ? $validated['topic'] : $defaultTopic,
                 'session_time' => $validated['session_time'] ?? ($event->start_time . ' - ' . $event->end_time),
             ]
         ]);
 
         return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber'])
-            ->with('success', "Narasumber {$speaker->name} berhasil ditugaskan pada kegiatan ini.");
+            ->with('success', "Pengisi acara {$speaker->name} berhasil ditugaskan sebagai {$role} pada kegiatan ini.");
     }
 
     public function removeSpeaker(Event $event, Speaker $speaker)
@@ -234,7 +242,7 @@ class OrganizerController extends Controller
         $event->speakers()->detach($speaker->id);
 
         return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber'])
-            ->with('success', "Narasumber {$speaker->name} berhasil dilepas dari kegiatan ini.");
+            ->with('success', "Pengisi acara {$speaker->name} berhasil dilepas dari kegiatan ini.");
     }
 
     public function quickCheckinWorkspace(Request $request, Event $event)

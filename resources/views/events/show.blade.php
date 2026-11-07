@@ -112,7 +112,20 @@
                     {{ strtoupper(substr($speaker->name, 0, 2)) }}
                   </div>
                   <div>
-                    <h3 class="text-slate-900 text-sm font-semibold font-['Poppins']">{{ $speaker->name }}</h3>
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-slate-900 text-sm font-semibold font-['Poppins']">{{ $speaker->name }}</h3>
+                      @php
+                        $spkRole = $speaker->pivot->role ?? 'Pembicara';
+                        $roleBadgeColor = match($spkRole) {
+                          'Moderator' => 'bg-amber-100 text-amber-800',
+                          'MC' => 'bg-purple-100 text-purple-800',
+                          default => 'bg-blue-100 text-blue-900',
+                        };
+                      @endphp
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold {{ $roleBadgeColor }}">
+                        {{ $spkRole }}
+                      </span>
+                    </div>
                     <div class="text-slate-600 text-xs font-normal font-['Poppins']">{{ $speaker->institution }}</div>
                     @if($speaker->pivot->topic)
                       <div class="text-blue-950 text-xs font-medium font-['Poppins'] mt-1 flex items-center gap-1.5">

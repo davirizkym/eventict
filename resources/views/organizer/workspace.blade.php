@@ -131,7 +131,7 @@
               <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
               <line x1="12" x2="12" y1="19" y2="22"/>
             </svg>
-            <span>Narasumber Sesi</span>
+            <span>Pengisi Acara</span>
           </div>
           <span class="px-2 py-0.5 rounded-md text-[10px] {{ $tab === 'narasumber' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $event->speakers->count() }}</span>
         </a>
@@ -255,11 +255,11 @@
 
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-4 shadow-2xs">
           <div class="flex items-center justify-between">
-            <h3 class="text-sm font-bold text-slate-900">Narasumber Sesi Ini ({{ $event->speakers->count() }})</h3>
-            <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber']) }}" class="text-xs font-semibold text-blue-950 hover:underline">Kelola Narasumber →</a>
+            <h3 class="text-sm font-bold text-slate-900">Pengisi Acara Sesi Ini ({{ $event->speakers->count() }})</h3>
+            <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber']) }}" class="text-xs font-semibold text-blue-950 hover:underline">Kelola Pengisi Acara →</a>
           </div>
           @if($event->speakers->isEmpty())
-            <p class="text-xs text-slate-500">Belum ada narasumber yang ditugaskan ke sesi ini. Silakan pilih dari Master Narasumber.</p>
+            <p class="text-xs text-slate-500">Belum ada pengisi acara yang ditugaskan ke sesi ini.</p>
           @else
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               @foreach($event->speakers as $spk)
@@ -268,7 +268,20 @@
                     {{ strtoupper(substr($spk->name, 0, 2)) }}
                   </div>
                   <div class="flex flex-col min-w-0">
-                    <span class="text-xs font-semibold text-slate-900 truncate">{{ $spk->name }}</span>
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-xs font-semibold text-slate-900 truncate">{{ $spk->name }}</span>
+                      @php
+                        $spkRole = $spk->pivot->role ?? 'Pembicara';
+                        $roleBadgeColor = match($spkRole) {
+                          'Moderator' => 'bg-amber-100 text-amber-800',
+                          'MC' => 'bg-purple-100 text-purple-800',
+                          default => 'bg-blue-100 text-blue-900',
+                        };
+                      @endphp
+                      <span class="px-1.5 py-0.5 rounded text-[9px] font-medium {{ $roleBadgeColor }}">
+                        {{ $spkRole }}
+                      </span>
+                    </div>
                     <span class="text-[11px] text-slate-500 truncate">{{ $spk->pivot->topic ?? $spk->institution }}</span>
                   </div>
                 </div>
@@ -454,9 +467,9 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-6 shadow-2xs">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex flex-col gap-1">
-              <h3 class="text-sm font-bold text-slate-900">Narasumber & Pembicara Sesi Kegiatan</h3>
+              <h3 class="text-sm font-bold text-slate-900">Pengisi Acara Sesi Kegiatan</h3>
               <p class="text-xs text-slate-500 leading-relaxed">
-                Pilih narasumber dari Bank Master untuk ditugaskan pada kegiatan ini, lalu tentukan topik materi dan jam sesinya.
+                Pilih pengisi acara untuk ditugaskan pada kegiatan ini, lalu tentukan topik materi dan jam sesinya.
               </p>
             </div>
 
@@ -465,14 +478,14 @@
                 <line x1="12" y1="5" x2="12" y2="19"/>
                 <line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
-              <span>Tugaskan dari Master Data</span>
+              <span>Tambah Pengisi Acara</span>
             </button>
           </div>
 
           @if($event->speakers->isEmpty())
             <div class="p-8 border border-slate-200 rounded-xl text-center flex flex-col items-center justify-center gap-2">
-              <span class="text-xs font-semibold text-slate-800">Belum Ada Narasumber yang Ditugaskan</span>
-              <p class="text-[11px] text-slate-400 max-w-sm">Tekan tombol di atas untuk memilih narasumber dari Master Data Pembicara Lab ICT.</p>
+              <span class="text-xs font-semibold text-slate-800">Belum Ada Pengisi Acara yang Ditugaskan</span>
+              <p class="text-[11px] text-slate-400 max-w-sm">Tekan tombol di atas untuk memilih pengisi acara Lab ICT.</p>
             </div>
           @else
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -484,12 +497,25 @@
                         {{ strtoupper(substr($spk->name, 0, 2)) }}
                       </div>
                       <div class="flex flex-col min-w-0">
-                        <span class="text-xs font-bold text-slate-900 truncate">{{ $spk->name }}</span>
+                        <div class="flex items-center gap-2">
+                          <span class="text-xs font-bold text-slate-900 truncate">{{ $spk->name }}</span>
+                          @php
+                            $spkRole = $spk->pivot->role ?? 'Pembicara';
+                            $roleBadgeColor = match($spkRole) {
+                              'Moderator' => 'bg-amber-100 text-amber-800',
+                              'MC' => 'bg-purple-100 text-purple-800',
+                              default => 'bg-blue-100 text-blue-900',
+                            };
+                          @endphp
+                          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold {{ $roleBadgeColor }}">
+                            {{ $spkRole }}
+                          </span>
+                        </div>
                         <span class="text-[11px] text-slate-500 truncate">{{ $spk->institution }}</span>
                       </div>
                     </div>
 
-                    <form method="POST" action="{{ route('organizer.event.speaker.remove', ['event' => $event->id, 'speaker' => $spk->id]) }}" onsubmit="return confirm('Lepaskan narasumber ini dari kegiatan?')">
+                    <form method="POST" action="{{ route('organizer.event.speaker.remove', ['event' => $event->id, 'speaker' => $spk->id]) }}" onsubmit="return confirm('Lepaskan pengisi acara ini dari kegiatan?')">
                       @csrf
                       @method('DELETE')
                       <button type="submit" class="p-1 rounded-md text-rose-500 hover:bg-rose-50 transition cursor-pointer" title="Lepaskan">
@@ -621,8 +647,8 @@
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 flex flex-col gap-6 shadow-2xl">
       <div class="flex items-start justify-between gap-4 pb-4 border-b border-slate-100">
         <div class="flex flex-col">
-          <h2 class="text-base sm:text-lg font-bold text-slate-900">Tugaskan Narasumber dari Master</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Pilih pembicara terdaftar dan tentukan materi sesi untuk acara ini.</p>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">Tugaskan Pengisi Acara</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Pilih pengisi acara terdaftar dan tentukan materi sesi untuk acara ini.</p>
         </div>
         <button type="button" onclick="closeAssignSpeakerModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -636,11 +662,11 @@
         @csrf
         <div class="flex flex-col gap-1.5">
           <div class="flex items-center justify-between">
-            <label class="font-semibold text-slate-700">Pilih Narasumber Master</label>
-            <a href="{{ route('organizer.speakers.index') }}" target="_blank" class="text-[11px] text-blue-950 font-semibold hover:underline">+ Tambah Master Baru ↗</a>
+            <label class="font-semibold text-slate-700">Pilih Pengisi Acara</label>
+            <a href="{{ route('organizer.speakers.index') }}" target="_blank" class="text-[11px] text-blue-950 font-semibold hover:underline">+ Tambah Pengisi Acara Baru ↗</a>
           </div>
           <select name="speaker_id" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-            <option value="">-- Pilih Pembicara --</option>
+            <option value="">-- Pilih Pengisi Acara --</option>
             @foreach($allMasterSpeakers as $mspk)
               <option value="{{ $mspk->id }}">{{ $mspk->name }} — {{ $mspk->institution ?? 'Lab ICT' }}</option>
             @endforeach
@@ -648,8 +674,12 @@
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <label class="font-semibold text-slate-700">Topik Materi / Judul Sesi</label>
-          <input type="text" name="topic" placeholder="Contoh: Implementasi Arsitektur Microservices & CI/CD" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+          <label class="font-semibold text-slate-700">Peran</label>
+          <select name="role" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+            <option value="Pembicara">Pembicara</option>
+            <option value="Moderator">Moderator</option>
+            <option value="MC">MC</option>
+          </select>
         </div>
 
         <div class="flex flex-col gap-1.5">
