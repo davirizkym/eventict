@@ -29,16 +29,6 @@
         </button>
       </div>
 
-      <div class="w-full p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-1">
-        <div class="flex items-center justify-between">
-          <span class="text-white text-xs font-semibold leading-tight truncate">{{ $activeEvent->title ?? 'Simposium Telemedicine 2026' }}</span>
-          <svg class="size-4 text-blue-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </div>
-        <span class="text-slate-400 text-[11px] font-normal">Workspace Panitia Aktif</span>
-      </div>
-
       <div class="w-full flex flex-col justify-start items-start gap-1">
         <a href="{{ route('organizer.dashboard') }}" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 bg-blue-900 text-white font-semibold">
           <svg class="w-4 h-4 shrink-0 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -70,6 +60,19 @@
           <span class="text-xs leading-5">Upload Sertifikat Massal</span>
         </button>
 
+        <a href="{{ route('organizer.history') }}" class="w-full p-3 rounded-lg inline-flex items-center justify-between transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
+          <div class="inline-flex items-center gap-3">
+            <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span class="text-xs leading-5">Riwayat Event Selesai</span>
+          </div>
+          @if($pastEventsCount > 0)
+            <span class="px-2 py-0.5 bg-white/15 text-slate-200 text-[10px] font-semibold rounded-md">{{ $pastEventsCount }}</span>
+          @endif
+        </a>
+
         <a href="{{ route('home') }}" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
           <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="8" x2="21" y1="6" y2="6"/>
@@ -79,20 +82,20 @@
             <line x1="3" x2="3.01" y1="12" y2="12"/>
             <line x1="3" x2="3.01" y1="18" y2="18"/>
           </svg>
-          <span class="text-xs leading-5">Lihat Katalog Publik</span>
+          <span class="text-xs leading-5">Lihat Halaman Utama</span>
         </a>
       </div>
     </div>
 
     <div class="flex flex-col justify-start items-start gap-4 shrink-0 pt-6 mt-auto">
-      <div class="w-full p-4 bg-white/5 border border-white/10 rounded-xl flex flex-col justify-start items-start gap-2.5">
+      <div class="w-full p-3.5 bg-white/5 border border-white/10 rounded-xl flex flex-col justify-start items-start gap-2">
         <div class="inline-flex items-center gap-2">
           <svg class="w-4 h-4 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          <span class="text-white text-xs font-semibold">Format Unggah Sertifikat</span>
+          <span class="text-white text-xs font-semibold">Format Sertifikat Lab</span>
         </div>
-        <div class="text-slate-300 text-xs font-normal leading-4">Nama file otomatis dipetakan lewat No. Registrasi (REG-xxxx), NIK, atau Email.</div>
+        <div class="text-slate-300 text-xs font-normal leading-4">Penamaan otomatis via No. Registrasi (REG-xxxx) atau Email peserta.</div>
       </div>
 
       <div class="w-full p-2.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between gap-2">
@@ -102,7 +105,7 @@
           </div>
           <div class="flex flex-col min-w-0">
             <span class="text-white text-xs font-semibold truncate">{{ Auth::user()->name ?? 'Sekretariat Panitia' }}</span>
-            <span class="text-slate-400 text-[11px] truncate">{{ Auth::user()->institution ?? 'Administrator Kegiatan' }}</span>
+            <span class="text-slate-400 text-[11px] truncate">{{ Auth::user()->institution ?? 'Laboratorium ICT' }}</span>
           </div>
         </div>
         <form method="POST" action="{{ route('logout') }}" class="shrink-0">
@@ -118,7 +121,7 @@
       </div>
 
       <div class="w-full flex justify-between items-center text-slate-400 text-[10px] px-1">
-        <span>Eventict</span>
+        <span>Eventict Lab ICT</span>
         <span>Versi 1.0</span>
       </div>
     </div>
@@ -138,23 +141,50 @@
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-        <div class="hidden sm:flex items-center gap-1.5 text-xs text-slate-500">
-          <svg class="size-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="{{ route('organizer.history') }}" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5">
+          <svg class="size-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
             <polyline points="12 6 12 12 16 14"/>
           </svg>
-          <span>Workspace Aktif</span>
-        </div>
-        <a href="{{ route('home') }}" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
-          Lihat Beranda
+          <span class="hidden sm:inline">Riwayat Event Selesai</span>
+          @if($pastEventsCount > 0)
+            <span class="px-1.5 py-0.2 bg-slate-100 text-slate-600 rounded text-[10px] font-semibold">{{ $pastEventsCount }}</span>
+          @endif
+        </a>
+        <a href="{{ route('home') }}" class="px-3 py-1.5 rounded-lg bg-blue-950 text-white text-xs font-semibold hover:bg-blue-900 transition shadow-xs">
+          Halaman Depan
         </a>
       </div>
     </header>
 
-    <main class="flex-1 p-6 lg:p-10 flex flex-col gap-8 overflow-y-auto">
-      <div>
-        <div class="text-slate-500 text-xs font-normal font-['Poppins']">Organizer / {{ $activeEvent->title ?? 'Simposium Telemedicine 2026' }}</div>
-        <h2 class="text-slate-900 text-2xl lg:text-3xl font-semibold font-['Poppins'] leading-tight">Pusat Kendali Operasional Hari-H</h2>
+    <main class="flex-1 p-6 lg:p-10 flex flex-col gap-6 overflow-y-auto">
+      <div class="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <form method="GET" action="{{ route('organizer.dashboard') }}" class="flex-1 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div class="flex flex-col">
+            <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 font-['Poppins']">Event Aktif yang Dikelola (Mendatang / Berjalan)</label>
+            <div class="flex items-center gap-2 mt-1">
+              <select name="event_id" onchange="this.form.submit()" class="px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 outline-none focus:border-blue-950 cursor-pointer min-w-[260px] sm:min-w-[340px]">
+                @if($upcomingEvents->isNotEmpty())
+                  <optgroup label="Event yang Akan Datang / Berjalan ({{ $upcomingEvents->count() }})">
+                    @foreach($upcomingEvents as $evt)
+                      <option value="{{ $evt->id }}" {{ $activeEvent && $activeEvent->id === $evt->id && request('event_id') !== 'all' ? 'selected' : '' }}>
+                        {{ $evt->title }} ({{ \Carbon\Carbon::parse($evt->start_date)->translatedFormat('d M Y') }})
+                      </option>
+                    @endforeach
+                  </optgroup>
+                @endif
+                <option value="all" {{ request('event_id') === 'all' ? 'selected' : '' }}>Semua Event Terdaftar</option>
+              </select>
+            </div>
+          </div>
+        </form>
+
+        <div class="flex items-center gap-2.5 self-start lg:self-center">
+          <a href="{{ route('organizer.history') }}" class="text-xs text-blue-950 font-semibold hover:underline flex items-center gap-1.5 py-1.5 px-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <span>Buka Riwayat Event Selesai</span>
+            <span class="size-4 rounded-full bg-blue-950 text-white text-[10px] flex items-center justify-center font-bold">{{ $pastEventsCount }}</span>
+          </a>
+        </div>
       </div>
 
       @if (session('success'))
@@ -188,39 +218,68 @@
         </div>
       @endif
 
-      <div class="flex flex-wrap items-center gap-3">
-        <button type="button" onclick="openBatchUploadModal()" class="px-4 py-2 bg-emerald-700 text-white hover:bg-emerald-800 rounded-lg text-xs font-semibold font-['Poppins'] transition flex items-center gap-2 cursor-pointer shadow-xs">
-          <svg class="size-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" x2="12" y1="3" y2="15"/>
-          </svg>
-          <span>Unggah Sertifikat Massal</span>
-        </button>
-        <a href="#tabel-peserta" class="px-4 py-2 bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 rounded-lg text-xs font-medium font-['Poppins'] transition flex items-center gap-2 cursor-pointer shadow-2xs">
-          <svg class="size-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span>Panduan Format Nama File</span>
-        </a>
+      <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        <form action="{{ route('organizer.quick_checkin') }}" method="POST" class="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          @csrf
+          <input type="hidden" name="event_id" value="{{ $activeEvent ? $activeEvent->id : '' }}">
+          <div class="flex-1 flex items-center gap-2 px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs">
+            <svg class="size-4 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+              <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+              <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+              <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+              <line x1="7" x2="17" y1="12" y2="12"/>
+            </svg>
+            <input type="text" name="code" placeholder="Scan QR Pass atau ketik No. Registrasi / Email peserta untuk presensi cepat hari-H..." required class="w-full bg-transparent border-none outline-none text-xs text-slate-900 placeholder:text-slate-400">
+          </div>
+          <button type="submit" class="px-5 py-2.5 bg-blue-950 hover:bg-blue-900 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-2 shadow-xs cursor-pointer">
+            <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Check-in Hadir</span>
+          </button>
+        </form>
+
+        <div class="flex items-center gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+          <a href="{{ route('organizer.export', ['event_id' => $activeEvent ? $activeEvent->id : 'all']) }}" class="px-3.5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2 shadow-2xs">
+            <svg class="size-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" x2="12" y1="15" y2="3"/>
+            </svg>
+            <span>Ekspor CSV</span>
+          </a>
+          <button type="button" onclick="openBatchUploadModal()" class="px-3.5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" x2="12" y1="3" y2="15"/>
+            </svg>
+            <span>Upload Massal</span>
+          </button>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div class="p-5 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col gap-2 shadow-xs">
           <div class="flex justify-between items-center text-slate-500 text-xs font-medium font-['Poppins']">
-            <span>Total Pendaftar Terkonfirmasi</span>
+            <span>Total Peserta Terdaftar</span>
             <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
             </svg>
           </div>
-          <div class="text-slate-900 text-2xl font-bold font-['Poppins']">{{ $totalRegistrations }} / {{ $activeEvent->quota ?? 400 }} Kursi</div>
+          <div class="text-slate-900 text-2xl font-bold font-['Poppins']">{{ $totalRegistrations }} Peserta</div>
           <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
-            <div class="bg-blue-950 h-1.5 rounded-full" style="width: {{ $activeEvent && $activeEvent->quota > 0 ? min(100, round(($totalRegistrations / $activeEvent->quota) * 100)) : 0 }}%"></div>
+            <div class="bg-blue-950 h-1.5 rounded-full" style="width: {{ $activeEvent && $activeEvent->quota > 0 ? min(100, round(($totalRegistrations / $activeEvent->quota) * 100)) : 100 }}%"></div>
           </div>
-          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">{{ $activeEvent && $activeEvent->quota > 0 ? round(($totalRegistrations / $activeEvent->quota) * 100) : 0 }}% kapasitas terisi</div>
+          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">
+            @if($activeEvent && $activeEvent->quota > 0)
+              {{ round(($totalRegistrations / $activeEvent->quota) * 100) }}% dari target kuota ({{ $activeEvent->quota }} kuota)
+            @else
+              Pendaftaran aktif terdata di sistem
+            @endif
+          </div>
         </div>
 
         <div class="p-5 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col gap-2 shadow-xs">
@@ -236,7 +295,7 @@
           <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
             <div class="bg-emerald-600 h-1.5 rounded-full" style="width: {{ $totalRegistrations > 0 ? round(($totalAttended / $totalRegistrations) * 100) : 0 }}%"></div>
           </div>
-          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">{{ $totalRegistrations > 0 ? round(($totalAttended / $totalRegistrations) * 100) : 0 }}% tingkat kehadiran</div>
+          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">{{ $totalRegistrations > 0 ? round(($totalAttended / $totalRegistrations) * 100) : 0 }}% tingkat kehadiran kegiatan</div>
         </div>
 
         <div class="p-5 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col gap-2 shadow-xs">
@@ -251,12 +310,12 @@
           <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
             <div class="bg-blue-950 h-1.5 rounded-full" style="width: {{ $totalRegistrations > 0 ? round(($totalCertificates / $totalRegistrations) * 100) : 0 }}%"></div>
           </div>
-          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">{{ $totalRegistrations > 0 ? round(($totalCertificates / $totalRegistrations) * 100) : 0 }}% peserta memiliki sertifikat</div>
+          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">{{ $totalRegistrations > 0 ? round(($totalCertificates / $totalRegistrations) * 100) : 0 }}% peserta memiliki sertifikat digital</div>
         </div>
 
         <div class="p-5 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col gap-2 shadow-xs">
           <div class="flex justify-between items-center text-slate-500 text-xs font-medium font-['Poppins']">
-            <span>Total Pemasukan Bersih Tiket</span>
+            <span>Total Pemasukan Tiket</span>
             <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" x2="12" y1="2" y2="22"/>
               <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -266,7 +325,7 @@
           <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
             <div class="bg-blue-950 h-1.5 rounded-full" style="width: 100%"></div>
           </div>
-          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">Tiket terkonfirmasi • bersih</div>
+          <div class="text-slate-500 text-[11px] font-normal font-['Poppins']">Registrasi terkonfirmasi lunas</div>
         </div>
       </div>
 
@@ -274,21 +333,30 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 class="text-slate-900 text-lg font-semibold font-['Poppins']">Presensi & Pengelolaan Sertifikat Peserta</h3>
-            <p class="text-slate-500 text-xs font-normal font-['Poppins']">Upload sertifikat satuan di setiap baris peserta atau gunakan upload massal.</p>
+            <p class="text-slate-500 text-xs font-normal font-['Poppins']">
+              Kelola status kehadiran dan unggah berkas sertifikat resmi peserta secara satuan maupun massal.
+            </p>
           </div>
-          <button type="button" onclick="openBatchUploadModal()" class="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-lg transition cursor-pointer self-start sm:self-auto flex items-center gap-1.5">
-            <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-            <span>Upload Massal (Multi-File)</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <a href="{{ route('organizer.export', ['event_id' => $activeEvent ? $activeEvent->id : 'all']) }}" class="px-3.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-lg transition flex items-center gap-1.5 shadow-2xs">
+              <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+              <span>Unduh CSV</span>
+            </a>
+            <button type="button" onclick="openBatchUploadModal()" class="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5 shadow-xs">
+              <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+              <span>Upload Massal</span>
+            </button>
+          </div>
         </div>
 
         <form method="GET" action="{{ route('organizer.dashboard') }}" class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col md:flex-row items-center gap-3">
+          <input type="hidden" name="event_id" value="{{ request('event_id', $activeEvent ? $activeEvent->id : '') }}">
           <div class="flex-1 w-full flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-lg">
             <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.35-4.35"/>
             </svg>
-            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama / NIK / institusi / no. registrasi..." class="w-full bg-transparent border-none outline-none text-xs text-slate-800 placeholder:text-slate-400">
+            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama peserta, email, instansi, atau no. registrasi..." class="w-full bg-transparent border-none outline-none text-xs text-slate-800 placeholder:text-slate-400">
           </div>
           <select name="attendance" onchange="this.form.submit()" class="w-full md:w-44 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 outline-none cursor-pointer">
             <option value="">Semua Presensi</option>
@@ -304,7 +372,7 @@
             Filter
           </button>
           @if(request()->hasAny(['q', 'attendance', 'certificate']))
-            <a href="{{ route('organizer.dashboard') }}" class="px-3 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-medium hover:bg-slate-300 transition">
+            <a href="{{ route('organizer.dashboard', ['event_id' => request('event_id')]) }}" class="px-3 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-medium hover:bg-slate-300 transition">
               Reset
             </a>
           @endif
@@ -317,7 +385,7 @@
                 <th class="p-3 w-10 text-center"><input type="checkbox" class="rounded border-slate-300"></th>
                 <th class="p-3 whitespace-nowrap">No. Registrasi</th>
                 <th class="p-3 whitespace-nowrap">Nama Peserta</th>
-                <th class="p-3 whitespace-nowrap">Asal Instansi</th>
+                <th class="p-3 whitespace-nowrap">Asal Instansi / Kampus</th>
                 <th class="p-3 whitespace-nowrap">Status Presensi</th>
                 <th class="p-3 whitespace-nowrap">Status Tiket</th>
                 <th class="p-3 whitespace-nowrap">Status Sertifikat</th>
@@ -332,7 +400,7 @@
                   <td class="p-3 font-semibold text-slate-900">
                     <div>{{ $reg->user->name }}</div>
                     <div class="text-[11px] text-slate-500 font-normal">
-                      NIK: {{ $reg->user->nik ?? '-' }} • {{ $reg->user->email }}
+                      {{ $reg->user->email }} @if($reg->user->phone) • {{ $reg->user->phone }} @endif
                     </div>
                   </td>
                   <td class="p-3 text-slate-700">{{ $reg->user->institution ?? '-' }}</td>
@@ -411,7 +479,7 @@
               @empty
                 <tr>
                   <td colspan="8" class="p-8 text-center text-slate-500 font-['Poppins']">
-                    Tidak ada data peserta yang sesuai dengan kriteria filter.
+                    Tidak ada data peserta yang sesuai dengan kriteria pencarian.
                   </td>
                 </tr>
               @endforelse
@@ -428,7 +496,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 class="text-slate-900 text-lg font-semibold font-['Poppins']">Panduan Penamaan File untuk Upload Massal</h3>
-            <p class="text-slate-500 text-xs font-normal font-['Poppins']">Sistem akan secara otomatis mencocokkan setiap file sertifikat ke profil peserta yang tepat.</p>
+            <p class="text-slate-500 text-xs font-normal font-['Poppins']">Sistem mencocokkan setiap berkas sertifikat ke akun peserta secara otomatis.</p>
           </div>
           <button type="button" onclick="openBatchUploadModal()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-lg transition cursor-pointer self-start sm:self-auto flex items-center gap-1.5 shadow-2xs">
             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
@@ -446,33 +514,33 @@
               Beri nama file PDF sesuai nomor registrasi yang tertera di tiket peserta.
             </p>
             <div class="mt-auto pt-2 font-mono text-[11px] text-blue-950 bg-white p-2 rounded border border-slate-200">
-              REG-2026-0104.pdf
+              REG-2026-0001.pdf
             </div>
           </div>
 
           <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-2">
             <div class="font-semibold text-slate-900 flex items-center gap-2">
               <span class="size-6 rounded-full bg-blue-950 text-white flex items-center justify-center text-[11px] font-bold">2</span>
-              <span>Berdasarkan NIK Peserta</span>
+              <span>Berdasarkan Email Peserta</span>
             </div>
             <p class="text-slate-600 text-[11px] leading-relaxed">
-              Gunakan 16 digit NIK peserta KTP/Kemenkes sebagai nama file dokumen sertifikat.
+              Gunakan alamat email resmi peserta yang terdaftar pada sistem Eventict.
             </p>
             <div class="mt-auto pt-2 font-mono text-[11px] text-blue-950 bg-white p-2 rounded border border-slate-200">
-              3171012345670001.pdf
+              peserta@gmail.com.pdf
             </div>
           </div>
 
           <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-2">
             <div class="font-semibold text-slate-900 flex items-center gap-2">
               <span class="size-6 rounded-full bg-blue-950 text-white flex items-center justify-center text-[11px] font-bold">3</span>
-              <span>Berdasarkan Email Peserta</span>
+              <span>Berdasarkan Kode Pass Tiket</span>
             </div>
             <p class="text-slate-600 text-[11px] leading-relaxed">
-              Beri nama file dengan alamat email resmi peserta yang terdaftar di sistem.
+              Beri nama file sesuai kode QR pass unik yang tercantum pada E-Tiket peserta.
             </p>
             <div class="mt-auto pt-2 font-mono text-[11px] text-blue-950 bg-white p-2 rounded border border-slate-200">
-              amanda@rsupcm.co.id.pdf
+              PASS-1024-DAVI.pdf
             </div>
           </div>
         </div>
@@ -486,7 +554,7 @@
     <div class="flex justify-between items-center pb-3 border-b border-slate-200">
       <div>
         <h3 class="text-slate-900 font-bold text-base font-['Poppins']">Unggah Sertifikat Peserta</h3>
-        <p class="text-slate-500 text-xs">Unggah file PDF atau Gambar sertifikat buatan panitia.</p>
+        <p class="text-slate-500 text-xs">Unggah file PDF atau Gambar sertifikat resmi Lab ICT.</p>
       </div>
       <button type="button" onclick="closeSingleUploadModal()" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
         <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -514,7 +582,7 @@
 
       <div class="flex flex-col gap-1.5">
         <label class="text-xs font-semibold text-slate-700 font-['Poppins']">Nomor Sertifikat Resmi (Opsional)</label>
-        <input type="text" id="single-modal-cert-number" name="certificate_number" placeholder="Contoh: CERT/LAB-ICT/2026/001 (Kosongkan untuk otomatis)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg outline-none focus:border-blue-950">
+        <input type="text" id="single-modal-cert-number" name="certificate_number" placeholder="Contoh: CERT/ICT/2026/001 (Kosongkan untuk otomatis)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg outline-none focus:border-blue-950">
       </div>
 
       <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
@@ -543,9 +611,9 @@
         <span>Format Penamaan File Otomatis:</span>
       </div>
       <ul class="list-disc list-inside space-y-1 text-slate-700 pl-1 text-[11px]">
-        <li><strong>Nomor Registrasi:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">REG-2026-0104.pdf</code></li>
-        <li><strong>Nomor NIK Peserta:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">3171012345670001.pdf</code></li>
-        <li><strong>Email Peserta:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">amanda@rsupcm.co.id.pdf</code></li>
+        <li><strong>Nomor Registrasi:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">REG-2026-0001.pdf</code></li>
+        <li><strong>Email Peserta:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">peserta@gmail.com.pdf</code></li>
+        <li><strong>Kode Pass Tiket:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">PASS-1024-DAVI.pdf</code></li>
       </ul>
     </div>
 
