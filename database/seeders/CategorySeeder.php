@@ -1,0 +1,64 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Category;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
+
+class CategorySeeder extends Seeder
+{
+    public function run(): void
+    {
+        $categories = [
+            [
+                'name' => 'Cyber Security',
+                'description' => 'Keamanan siber, ethical hacking, digital forensics, analisis kerentanan, dan pertahanan jaringan komputer.',
+                'icon' => 'shield',
+                'color' => 'blue',
+            ],
+            [
+                'name' => 'Kecerdasan Buatan & Data Science',
+                'description' => 'Machine learning, generative AI, deep learning, NLP, data analytics, dan analitika data modern.',
+                'icon' => 'cpu',
+                'color' => 'purple',
+            ],
+            [
+                'name' => 'Pengembangan Web & Mobile',
+                'description' => 'Fullstack development, arsitektur REST API, framework modern (Laravel, React, Flutter), dan mobile apps.',
+                'icon' => 'code',
+                'color' => 'emerald',
+            ],
+            [
+                'name' => 'Cloud Computing & DevOps',
+                'description' => 'Infrastruktur cloud (AWS/GCP/Azure), containerization Docker, orkestrasi Kubernetes, dan CI/CD automation.',
+                'icon' => 'cloud',
+                'color' => 'sky',
+            ],
+            [
+                'name' => 'UI/UX & Desain Produk',
+                'description' => 'User experience research, design system, usability testing, wireframing, dan prototyping interaktif Figma.',
+                'icon' => 'layout',
+                'color' => 'pink',
+            ],
+            [
+                'name' => 'Jaringan Komputer & IoT',
+                'description' => 'Konfigurasi routing & switching, mikrotik, cisco networking, sensor pintar, dan implementasi Internet of Things.',
+                'icon' => 'wifi',
+                'color' => 'amber',
+            ],
+        ];
+
+        foreach ($categories as $cat) {
+            Category::updateOrCreate(
+                ['slug' => Str::slug($cat['name'])],
+                [
+                    'name' => $cat['name'],
+                    'description' => $cat['description'],
+                    'icon' => $cat['icon'],
+                    'color' => $cat['color'],
+                ]
+            );
+        }
+    }
+}

@@ -14,6 +14,13 @@ class Speaker extends Model
         'name',
         'title_degree',
         'institution',
+        'profession',
+        'email',
+        'phone',
+        'city',
+        'topics',
+        'is_featured',
+        'is_verified',
         'photo_url',
         'bio',
     ];

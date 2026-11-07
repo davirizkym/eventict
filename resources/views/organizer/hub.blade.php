@@ -30,6 +30,12 @@
             </svg>
             <span>Semua Kegiatan</span>
           </a>
+          <a href="{{ route('organizer.categories.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 6h16M4 12h16M4 18h7"/>
+            </svg>
+            <span>Kategori</span>
+          </a>
           <a href="{{ route('organizer.speakers.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -93,6 +99,24 @@
           <line x1="12" y1="16" x2="12.01" y2="16"/>
         </svg>
         <div class="font-medium">{{ session('warning') }}</div>
+      </div>
+    @endif
+
+    @if ($errors->any())
+      <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-xs text-rose-800">
+        <svg class="size-4 text-rose-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <div class="flex flex-col gap-1">
+          <span class="font-bold">Gagal Menyimpan Kegiatan:</span>
+          <ul class="list-disc list-inside">
+            @foreach ($errors->all() as $err)
+              <li>{{ $err }}</li>
+            @endforeach
+          </ul>
+        </div>
       </div>
     @endif
 
@@ -273,23 +297,36 @@
           <input type="text" name="title" required placeholder="Contoh: Workshop Cloud Computing & DevSecOps 2026" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="flex flex-col gap-1.5">
-            <label class="font-semibold text-slate-700">Kategori</label>
-            <select name="category" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-              <option value="Workshop & Pelatihan">Workshop & Pelatihan</option>
-              <option value="Seminar Teknologi">Seminar Teknologi</option>
-              <option value="Sertifikasi Kompetensi">Sertifikasi Kompetensi</option>
-              <option value="Webinar Teknis">Webinar Teknis</option>
+            <label class="font-semibold text-slate-700">Tipe Kegiatan <span class="text-rose-500">*</span></label>
+            <select name="type" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+              <option value="Workshop" selected>Workshop</option>
+              <option value="Seminar">Seminar</option>
+              <option value="Webinar">Webinar</option>
+              <option value="Sertifikasi">Sertifikasi</option>
             </select>
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="font-semibold text-slate-700">Format Pelaksanaan</label>
+            <div class="flex items-center justify-between">
+              <label class="font-semibold text-slate-700">Kategori Acara <span class="text-rose-500">*</span></label>
+              <a href="{{ route('organizer.categories.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola</a>
+            </div>
+            <select name="category_id" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+              <option value="" disabled selected>-- Pilih Kategori --</option>
+              @foreach($masterCategories as $mcat)
+                <option value="{{ $mcat->id }}">{{ $mcat->name }}</option>
+              @endforeach
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="font-semibold text-slate-700">Format Pelaksanaan <span class="text-rose-500">*</span></label>
             <select name="format" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-              <option value="offline">Offline (Tatap Muka di Lab)</option>
-              <option value="hybrid">Hybrid (Lab & Online)</option>
-              <option value="online">Online Penuh</option>
+              <option value="offline" selected>Offline</option>
+              <option value="online">Online</option>
+              <option value="hybrid">Hybrid</option>
             </select>
           </div>
         </div>
@@ -332,18 +369,42 @@
           </div>
         </div>
 
-        <div class="p-3.5 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-2.5">
+        <!-- Pengisi Acara Kegiatan -->
+        <div class="flex flex-col gap-2">
           <div class="flex items-center justify-between">
-            <span class="font-semibold text-blue-950">Pilih Narasumber (Opsional)</span>
+            <label class="font-semibold text-slate-700">Pengisi Acara <span class="text-rose-500">*</span></label>
+            <button type="button" onclick="addSpeakerRow()" class="text-xs text-blue-950 font-bold hover:underline flex items-center gap-1 cursor-pointer">
+              <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              <span>Tambah Pengisi Acara</span>
+            </button>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <select name="speaker_id" class="px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs outline-none">
-              <option value="">-- Lewati / Tambah Nanti di Workspace --</option>
-              @foreach($masterSpeakers as $spk)
-                <option value="{{ $spk->id }}">{{ $spk->name }} ({{ $spk->institution ?? 'Lab ICT' }})</option>
-              @endforeach
-            </select>
-            <input type="text" name="speaker_topic" placeholder="Topik materi narasumber..." class="px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs outline-none">
+
+          <div id="speaker-rows-container" class="flex flex-col gap-2.5">
+            <!-- Row -->
+            <div class="speaker-row flex items-center gap-2">
+              <select name="speaker_ids[]" onchange="onSpeakerSelectChange(this)" required class="flex-1 min-w-0 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
+                <option value="" disabled selected>-- Pilih Pengisi Acara --</option>
+                @foreach($masterSpeakers as $spk)
+                  <option value="{{ $spk->id }}">{{ $spk->name }} ({{ $spk->institution ?? 'Lab ICT' }})</option>
+                @endforeach
+              </select>
+
+              <select name="speaker_roles[]" onchange="updateSpeakerRoleLabels()" class="role-select w-36 shrink-0 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
+                <option value="Pemateri" selected>Pemateri</option>
+                <option value="Moderator">Moderator</option>
+                <option value="MC">MC</option>
+              </select>
+
+              <button type="button" onclick="removeSpeakerRow(this)" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer shrink-0" title="Hapus">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -366,6 +427,192 @@
 </div>
 
 <script>
+const speakerMasterOptions = `@foreach($masterSpeakers as $spk)<option value="{{ $spk->id }}">{{ addslashes($spk->name) }} ({{ addslashes($spk->institution ?? 'Lab ICT') }})</option>@endforeach`;
+
+function updateSpeakerRoleLabels() {
+  const container = document.getElementById('speaker-rows-container');
+  if (!container) return;
+  const rows = container.querySelectorAll('.speaker-row');
+
+  // Count each role
+  const roleCounts = {};
+  rows.forEach(r => {
+    const sel = r.querySelector('.role-select');
+    if (sel) {
+      const val = sel.value;
+      roleCounts[val] = (roleCounts[val] || 0) + 1;
+    }
+  });
+
+  // Dynamic numbering on the role options
+  const roleRunning = {};
+  rows.forEach(r => {
+    const sel = r.querySelector('.role-select');
+    if (sel) {
+      const val = sel.value;
+      const pemateriOpt = sel.querySelector('option[value="Pemateri"]');
+      const moderatorOpt = sel.querySelector('option[value="Moderator"]');
+      const mcOpt = sel.querySelector('option[value="MC"]');
+
+      if (val === 'Pemateri') {
+        if (roleCounts['Pemateri'] > 1) {
+          roleRunning['Pemateri'] = (roleRunning['Pemateri'] || 0) + 1;
+          if (pemateriOpt) pemateriOpt.textContent = `Pemateri ${roleRunning['Pemateri']}`;
+        } else {
+          if (pemateriOpt) pemateriOpt.textContent = 'Pemateri';
+        }
+      } else {
+        if (pemateriOpt) pemateriOpt.textContent = 'Pemateri';
+      }
+
+      if (val === 'Moderator') {
+        if (roleCounts['Moderator'] > 1) {
+          roleRunning['Moderator'] = (roleRunning['Moderator'] || 0) + 1;
+          if (moderatorOpt) moderatorOpt.textContent = `Moderator ${roleRunning['Moderator']}`;
+        } else {
+          if (moderatorOpt) moderatorOpt.textContent = 'Moderator';
+        }
+      } else {
+        if (moderatorOpt) moderatorOpt.textContent = 'Moderator';
+      }
+
+      if (val === 'MC') {
+        if (roleCounts['MC'] > 1) {
+          roleRunning['MC'] = (roleRunning['MC'] || 0) + 1;
+          if (mcOpt) mcOpt.textContent = `MC ${roleRunning['MC']}`;
+        } else {
+          if (mcOpt) mcOpt.textContent = 'MC';
+        }
+      } else {
+        if (mcOpt) mcOpt.textContent = 'MC';
+      }
+    }
+  });
+}
+
+function onSpeakerSelectChange(selectElem) {
+  const container = document.getElementById('speaker-rows-container');
+  if (!container) return;
+  const currentVal = selectElem.value;
+
+  if (currentVal) {
+    const allSelects = container.querySelectorAll('select[name="speaker_ids[]"]');
+    let duplicateCount = 0;
+    allSelects.forEach(sel => {
+      if (sel.value === currentVal) {
+        duplicateCount++;
+      }
+    });
+
+    if (duplicateCount > 1) {
+      alert('Pengisi acara ini sudah dipilih untuk peran lain di kegiatan ini. Satu orang hanya boleh memiliki 1 peran.');
+      selectElem.value = '';
+    }
+  }
+
+  syncSpeakerOptionsState();
+  updateSpeakerRoleLabels();
+}
+
+function syncSpeakerOptionsState() {
+  const container = document.getElementById('speaker-rows-container');
+  if (!container) return;
+  const allSelects = container.querySelectorAll('select[name="speaker_ids[]"]');
+
+  const selectedValues = new Set();
+  allSelects.forEach(sel => {
+    if (sel.value) selectedValues.add(sel.value);
+  });
+
+  allSelects.forEach(sel => {
+    const cur = sel.value;
+    Array.from(sel.options).forEach(opt => {
+      if (!opt.value) return;
+      if (!opt.hasAttribute('data-orig-text')) {
+        opt.setAttribute('data-orig-text', opt.textContent);
+      }
+      const origText = opt.getAttribute('data-orig-text');
+      if (opt.value !== cur && selectedValues.has(opt.value)) {
+        opt.disabled = true;
+        opt.textContent = origText + ' (Sudah dipilih)';
+      } else {
+        opt.disabled = false;
+        opt.textContent = origText;
+      }
+    });
+  });
+}
+
+function addSpeakerRow() {
+  const container = document.getElementById('speaker-rows-container');
+  if (!container) return;
+
+  const div = document.createElement('div');
+  div.className = 'speaker-row flex items-center gap-2';
+  div.innerHTML = `
+    <select name="speaker_ids[]" onchange="onSpeakerSelectChange(this)" required class="flex-1 min-w-0 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
+      <option value="" disabled selected>-- Pilih Pengisi Acara --</option>
+      ${speakerMasterOptions}
+    </select>
+
+    <select name="speaker_roles[]" onchange="updateSpeakerRoleLabels()" class="role-select w-36 shrink-0 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
+      <option value="Pemateri" selected>Pemateri</option>
+      <option value="Moderator">Moderator</option>
+      <option value="MC">MC</option>
+    </select>
+
+    <button type="button" onclick="removeSpeakerRow(this)" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer shrink-0" title="Hapus">
+      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  `;
+
+  container.appendChild(div);
+  syncSpeakerOptionsState();
+  updateSpeakerRoleLabels();
+}
+
+function removeSpeakerRow(btn) {
+  const row = btn.closest('.speaker-row');
+  const container = document.getElementById('speaker-rows-container');
+  if (row && container) {
+    if (container.querySelectorAll('.speaker-row').length > 1) {
+      row.remove();
+    } else {
+      const sel = row.querySelector('select[name="speaker_ids[]"]');
+      if (sel) sel.value = '';
+      const roleSel = row.querySelector('.role-select');
+      if (roleSel) roleSel.value = 'Pemateri';
+    }
+    syncSpeakerOptionsState();
+    updateSpeakerRoleLabels();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const createForm = document.querySelector('#modal-create-event form');
+  if (createForm) {
+    createForm.addEventListener('submit', function(e) {
+      const container = document.getElementById('speaker-rows-container');
+      if (!container) return;
+      const selects = container.querySelectorAll('select[name="speaker_ids[]"]');
+      const seen = new Set();
+      for (const sel of selects) {
+        if (!sel.value) continue;
+        if (seen.has(sel.value)) {
+          e.preventDefault();
+          alert('Pengisi acara tidak boleh dipilih lebih dari 1 kali. Satu orang hanya boleh memiliki 1 peran dalam kegiatan yang sama.');
+          sel.focus();
+          return false;
+        }
+        seen.add(sel.value);
+      }
+    });
+  }
+});
+
 function openCreateEventModal() {
   const m = document.getElementById('modal-create-event');
   m.classList.remove('hidden');
