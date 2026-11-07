@@ -334,8 +334,7 @@
 
         <div class="p-3.5 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-2.5">
           <div class="flex items-center justify-between">
-            <span class="font-semibold text-blue-950">Pilih Narasumber Pertama (Dari Master Data)</span>
-            <a href="{{ route('organizer.speakers.index') }}" class="text-[11px] text-blue-900 font-semibold hover:underline">Kelola Master</a>
+            <span class="font-semibold text-blue-950">Pilih Narasumber (Opsional)</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <select name="speaker_id" class="px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs outline-none">
