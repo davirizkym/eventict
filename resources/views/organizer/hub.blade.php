@@ -311,7 +311,7 @@
           <div class="flex flex-col gap-1.5">
             <div class="flex items-center justify-between">
               <label class="font-semibold text-slate-700">Kategori Acara <span class="text-rose-500">*</span></label>
-              <a href="{{ route('organizer.categories.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">+ Kelola</a>
+              <a href="{{ route('organizer.categories.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola</a>
             </div>
             <select name="category_id" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
               <option value="" disabled selected>-- Pilih Kategori --</option>
@@ -369,7 +369,7 @@
           </div>
         </div>
 
-        <!-- Pengisi Acara Kegiatan (Simple & Bersih) -->
+        <!-- Pengisi Acara Kegiatan -->
         <div class="flex flex-col gap-2">
           <div class="flex items-center justify-between">
             <label class="font-semibold text-slate-700">Pengisi Acara <span class="text-rose-500">*</span></label>
@@ -378,7 +378,7 @@
                 <line x1="12" y1="5" x2="12" y2="19"/>
                 <line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
-              <span>+ Tambah Pengisi Acara</span>
+              <span>Tambah Pengisi Acara</span>
             </button>
           </div>
 

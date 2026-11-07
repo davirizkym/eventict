@@ -123,8 +123,8 @@
             {{ $categories->total() }} Kategori
           </span>
         </div>
-        <p class="text-xs text-slate-500 leading-relaxed max-w-2xl">
-          Bank data kategori untuk mengelompokkan kegiatan Lab ICT (Cyber Security, AI, Web Development, Cloud Computing, dll).
+        <p class="text-xs text-slate-500 leading-relaxed">
+          Daftar kategori kegiatan.
         </p>
       </div>
 
@@ -134,7 +134,7 @@
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          <span>+ Tambah Kategori</span>
+          <span>Tambah Kategori</span>
         </button>
       </div>
     </div>
@@ -183,11 +183,8 @@
                 <td class="py-3.5 px-4 text-center text-slate-400 font-mono text-[11px]">
                   {{ $categories->firstItem() + $index }}
                 </td>
-                <td class="py-3.5 px-4 font-bold text-slate-900">
-                  <div class="flex items-center gap-2">
-                    <span class="size-2 rounded-full bg-blue-600"></span>
-                    <span>{{ $cat->name }}</span>
-                  </div>
+                <td class="py-3.5 px-4 font-semibold text-slate-900">
+                  {{ $cat->name }}
                 </td>
                 <td class="py-3.5 px-4 text-slate-500 font-mono text-[11px]">
                   {{ $cat->slug }}
@@ -230,7 +227,7 @@
                     </svg>
                   </div>
                   <span class="font-semibold text-slate-800 block text-xs">Belum Ada Data Kategori</span>
-                  <p class="text-[11px] text-slate-400 mt-0.5">Gunakan tombol "+ Tambah Kategori" di atas untuk menambahkan kategori baru.</p>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Gunakan tombol "Tambah Kategori" di atas untuk menambahkan kategori baru.</p>
                 </td>
               </tr>
             @endforelse

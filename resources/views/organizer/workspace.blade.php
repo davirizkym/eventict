@@ -614,7 +614,7 @@
                 <div class="flex items-center justify-between">
                   <label class="font-semibold text-slate-700">Kategori Acara</label>
                   <a href="{{ route('organizer.categories.index') }}" target="_blank" class="text-[11px] text-blue-900 font-semibold hover:underline">
-                    + Kelola
+                    Kelola
                   </a>
                 </div>
                 <select name="category_id" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
