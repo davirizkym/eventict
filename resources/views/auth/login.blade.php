@@ -62,7 +62,7 @@
         <p class="text-xs text-slate-500 font-normal font-['Poppins']">Masukkan alamat email dan kata sandi akun Eventict Anda.</p>
       </div>
 
-      @if ($errors->any())
+      @if (isset($errors) && $errors->any())
         <div class="p-3.5 mb-5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-800">
           <svg class="size-4 text-rose-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
