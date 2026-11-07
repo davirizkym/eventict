@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Certificate;
 use App\Models\Event;
 use App\Models\Registration;
@@ -53,6 +54,7 @@ class OrganizerController extends Controller
 
         $totalSpeakers = Speaker::count();
         $masterSpeakers = Speaker::orderBy('name', 'asc')->get();
+        $masterCategories = Category::orderBy('name', 'asc')->get();
 
         return view('organizer.hub', compact(
             'events',
@@ -60,7 +62,8 @@ class OrganizerController extends Controller
             'pastCount',
             'totalSpeakers',
             'statusFilter',
-            'masterSpeakers'
+            'masterSpeakers',
+            'masterCategories'
         ));
     }
 
@@ -73,7 +76,9 @@ class OrganizerController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'category' => 'required|string|max:100',
+            'type' => 'nullable|string|in:Workshop,Seminar,Webinar,Sertifikasi',
+            'category_id' => 'nullable|exists:categories,id',
+            'category' => 'nullable|string|max:100',
             'format' => 'required|in:online,offline,hybrid',
             'location' => 'required|string|max:255',
             'start_date' => 'required|date',
@@ -106,10 +111,32 @@ class OrganizerController extends Controller
             $counter++;
         }
 
+        $categoryId = $validated['category_id'] ?? null;
+        $categoryName = $validated['category'] ?? null;
+        if (!empty($categoryId)) {
+            $cat = Category::find($categoryId);
+            if ($cat) {
+                $categoryName = $cat->name;
+            }
+        } elseif (!empty($categoryName)) {
+            $cat = Category::where('name', $categoryName)->first();
+            if ($cat) {
+                $categoryId = $cat->id;
+            }
+        }
+
+        if (empty($categoryName)) {
+            $categoryName = 'Teknologi & Rekayasa';
+        }
+
+        $eventType = !empty($validated['type']) ? $validated['type'] : 'Workshop';
+
         $event = Event::create([
             'title' => $validated['title'],
             'slug' => $slug,
-            'category' => $validated['category'],
+            'category_id' => $categoryId,
+            'category' => $categoryName,
+            'type' => $eventType,
             'format' => $validated['format'],
             'location' => $validated['location'],
             'start_date' => $validated['start_date'],
@@ -219,6 +246,7 @@ class OrganizerController extends Controller
         $registrations = $query->get();
 
         $allMasterSpeakers = Speaker::orderBy('name', 'asc')->get();
+        $allCategories = Category::orderBy('name', 'asc')->get();
         $otherActiveEvents = Event::where('status', '!=', 'draft')
             ->whereDate('end_date', '>=', now()->toDateString())
             ->where('id', '!=', $event->id)
@@ -235,6 +263,7 @@ class OrganizerController extends Controller
             'certificatesCount',
             'totalRevenue',
             'allMasterSpeakers',
+            'allCategories',
             'otherActiveEvents'
         ));
     }
@@ -243,7 +272,9 @@ class OrganizerController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'category' => 'required|string|max:100',
+            'type' => 'nullable|string|in:Workshop,Seminar,Webinar,Sertifikasi',
+            'category_id' => 'nullable|exists:categories,id',
+            'category' => 'nullable|string|max:100',
             'format' => 'required|in:online,offline,hybrid',
             'location' => 'required|string|max:255',
             'start_date' => 'required|date',
@@ -256,6 +287,13 @@ class OrganizerController extends Controller
             'status' => 'required|in:published,draft,completed',
             'virtual_meeting_url' => 'nullable|url|max:255',
         ]);
+
+        if (!empty($validated['category_id'])) {
+            $cat = Category::find($validated['category_id']);
+            if ($cat) {
+                $validated['category'] = $cat->name;
+            }
+        }
 
         $event->update($validated);
 
@@ -920,5 +958,72 @@ class OrganizerController extends Controller
         }
 
         return back()->with('error', 'Sertifikat tidak ditemukan.');
+    }
+
+    public function categoriesIndex(Request $request)
+    {
+        $query = Category::withCount('events');
+
+        if ($request->filled('q')) {
+            $keyword = $request->query('q');
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('description', 'like', "%{$keyword}%");
+            });
+        }
+
+        $categories = $query->orderBy('name', 'asc')->paginate(10)->withQueryString();
+
+        return view('organizer.categories.index', compact('categories'));
+    }
+
+    public function categoriesStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:100|unique:categories,name',
+            'description' => 'nullable|string|max:500',
+            'color' => 'nullable|string|max:30',
+        ]);
+
+        $category = Category::create([
+            'name' => trim($validated['name']),
+            'slug' => Str::slug($validated['name']),
+            'description' => $validated['description'] ?? null,
+            'color' => $validated['color'] ?? null,
+        ]);
+
+        return redirect()->route('organizer.categories.index')
+            ->with('success', "Kategori '{$category->name}' berhasil ditambahkan ke katalog master.");
+    }
+
+    public function categoriesUpdate(Request $request, Category $category)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:100|unique:categories,name,' . $category->id,
+            'description' => 'nullable|string|max:500',
+            'color' => 'nullable|string|max:30',
+        ]);
+
+        $category->update([
+            'name' => trim($validated['name']),
+            'slug' => Str::slug($validated['name']),
+            'description' => $validated['description'] ?? null,
+            'color' => $validated['color'] ?? null,
+        ]);
+
+        Event::where('category_id', $category->id)->update(['category' => $category->name]);
+
+        return redirect()->route('organizer.categories.index')
+            ->with('success', "Kategori '{$category->name}' berhasil diperbarui.");
+    }
+
+    public function categoriesDestroy(Category $category)
+    {
+        $name = $category->name;
+        Event::where('category_id', $category->id)->update(['category_id' => null]);
+        $category->delete();
+
+        return redirect()->route('organizer.categories.index')
+            ->with('success', "Kategori '{$name}' berhasil dihapus dari sistem.");
     }
 }

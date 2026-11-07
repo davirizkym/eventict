@@ -38,6 +38,11 @@ Route::middleware(['auth', 'role:penyelenggara'])->group(function () {
     Route::delete('/penyelenggara/narasumber/{speaker}', [OrganizerController::class, 'speakersDestroy'])->name('organizer.speakers.destroy');
     Route::post('/penyelenggara/narasumber/{speaker}/penempatan', [OrganizerController::class, 'speakersAssignEvents'])->name('organizer.speakers.assign_events');
 
+    Route::get('/penyelenggara/kategori', [OrganizerController::class, 'categoriesIndex'])->name('organizer.categories.index');
+    Route::post('/penyelenggara/kategori', [OrganizerController::class, 'categoriesStore'])->name('organizer.categories.store');
+    Route::put('/penyelenggara/kategori/{category}', [OrganizerController::class, 'categoriesUpdate'])->name('organizer.categories.update');
+    Route::delete('/penyelenggara/kategori/{category}', [OrganizerController::class, 'categoriesDestroy'])->name('organizer.categories.destroy');
+
     Route::get('/penyelenggara/event/{event}', [OrganizerController::class, 'workspace'])->name('organizer.workspace');
     Route::put('/penyelenggara/event/{event}', [OrganizerController::class, 'updateEvent'])->name('organizer.event.update');
     Route::post('/penyelenggara/event/{event}/narasumber', [OrganizerController::class, 'assignSpeaker'])->name('organizer.event.speaker.assign');

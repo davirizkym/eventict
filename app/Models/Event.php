@@ -14,7 +14,9 @@ class Event extends Model
     protected $fillable = [
         'title',
         'slug',
+        'category_id',
         'category',
+        'type',
         'format',
         'location',
         'start_date',
@@ -40,6 +42,11 @@ class Event extends Model
             'price' => 'integer',
             'skp_points' => 'integer',
         ];
+    }
+
+    public function categoryRel(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function speakers(): BelongsToMany

@@ -30,6 +30,12 @@
             </svg>
             <span>Semua Kegiatan</span>
           </a>
+          <a href="{{ route('organizer.categories.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 6h16M4 12h16M4 18h7"/>
+            </svg>
+            <span>Kategori</span>
+          </a>
           <a href="{{ route('organizer.speakers.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -87,9 +93,16 @@
         <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Kegiatan Terpilih</span>
         <h2 class="text-xs sm:text-sm font-bold text-slate-900 leading-snug">{{ $event->title }}</h2>
         <div class="flex items-center gap-1.5 mt-1 flex-wrap">
-          <span class="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-slate-100 text-slate-700">
-            {{ $event->category }}
-          </span>
+          @if(!empty($event->type))
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-blue-100 text-blue-900 border border-blue-200">
+              {{ $event->type }}
+            </span>
+          @endif
+          @if(!empty($event->category))
+            <span class="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-slate-100 text-slate-700">
+              {{ $event->category }}
+            </span>
+          @endif
           <span class="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-blue-50 text-blue-900 border border-blue-100">
             {{ $event->format }}
           </span>
@@ -569,16 +582,35 @@
               <input type="text" name="title" value="{{ $event->title }}" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="flex flex-col gap-1.5">
-                <label class="font-semibold text-slate-700">Kategori</label>
-                <select name="category" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-                  <option value="Workshop" {{ $event->category === 'Workshop' ? 'selected' : '' }}>Workshop</option>
-                  <option value="Seminar" {{ $event->category === 'Seminar' ? 'selected' : '' }}>Seminar</option>
-                  <option value="Webinar" {{ $event->category === 'Webinar' ? 'selected' : '' }}>Webinar</option>
-                  <option value="Sertifikasi" {{ $event->category === 'Sertifikasi' ? 'selected' : '' }}>Sertifikasi</option>
+                <label class="font-semibold text-slate-700">Jenis Kegiatan</label>
+                <select name="type" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+                  <option value="Workshop" {{ ($event->type ?? $event->category) === 'Workshop' ? 'selected' : '' }}>Workshop</option>
+                  <option value="Seminar" {{ ($event->type ?? $event->category) === 'Seminar' ? 'selected' : '' }}>Seminar</option>
+                  <option value="Webinar" {{ ($event->type ?? $event->category) === 'Webinar' ? 'selected' : '' }}>Webinar</option>
+                  <option value="Sertifikasi" {{ ($event->type ?? $event->category) === 'Sertifikasi' ? 'selected' : '' }}>Sertifikasi</option>
                 </select>
               </div>
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="font-semibold text-slate-700">Kategori Acara</label>
+                  <a href="{{ route('organizer.categories.index') }}" target="_blank" class="text-[11px] text-blue-900 font-semibold hover:underline">
+                    + Kelola
+                  </a>
+                </div>
+                <select name="category_id" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+                  <option value="">-- Pilih Kategori --</option>
+                  @foreach($allCategories as $cat)
+                    <option value="{{ $cat->id }}" {{ ($event->category_id == $cat->id || $event->category === $cat->name) ? 'selected' : '' }}>
+                      {{ $cat->name }}
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="flex flex-col gap-1.5">
                 <label class="font-semibold text-slate-700">Format Pelaksanaan</label>
                 <select name="format" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">

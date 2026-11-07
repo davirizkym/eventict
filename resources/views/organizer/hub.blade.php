@@ -30,6 +30,12 @@
             </svg>
             <span>Semua Kegiatan</span>
           </a>
+          <a href="{{ route('organizer.categories.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 6h16M4 12h16M4 18h7"/>
+            </svg>
+            <span>Kategori</span>
+          </a>
           <a href="{{ route('organizer.speakers.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -273,11 +279,11 @@
           <input type="text" name="title" required placeholder="Contoh: Workshop Cloud Computing & DevSecOps 2026" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="flex flex-col gap-1.5">
-            <label class="font-semibold text-slate-700">Kategori <span class="text-rose-500">*</span></label>
-            <select name="category" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-              <option value="Workshop">Workshop</option>
+            <label class="font-semibold text-slate-700">Tipe Kegiatan <span class="text-rose-500">*</span></label>
+            <select name="type" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+              <option value="Workshop" selected>Workshop</option>
               <option value="Seminar">Seminar</option>
               <option value="Webinar">Webinar</option>
               <option value="Sertifikasi">Sertifikasi</option>
@@ -285,9 +291,22 @@
           </div>
 
           <div class="flex flex-col gap-1.5">
+            <div class="flex items-center justify-between">
+              <label class="font-semibold text-slate-700">Kategori Acara <span class="text-rose-500">*</span></label>
+              <a href="{{ route('organizer.categories.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">+ Kelola</a>
+            </div>
+            <select name="category_id" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+              <option value="" disabled selected>-- Pilih Kategori --</option>
+              @foreach($masterCategories as $mcat)
+                <option value="{{ $mcat->id }}">{{ $mcat->name }}</option>
+              @endforeach
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
             <label class="font-semibold text-slate-700">Format Pelaksanaan <span class="text-rose-500">*</span></label>
             <select name="format" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-              <option value="offline">Offline</option>
+              <option value="offline" selected>Offline</option>
               <option value="online">Online</option>
               <option value="hybrid">Hybrid</option>
             </select>
