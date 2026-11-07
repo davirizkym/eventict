@@ -332,22 +332,6 @@
           </div>
         </div>
 
-        <div class="p-3.5 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-2.5">
-          <div class="flex items-center justify-between">
-            <span class="font-semibold text-blue-950">Pilih Narasumber Pertama (Dari Master Data)</span>
-            <a href="{{ route('organizer.speakers.index') }}" class="text-[11px] text-blue-900 font-semibold hover:underline">Kelola Master</a>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <select name="speaker_id" class="px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs outline-none">
-              <option value="">-- Lewati / Tambah Nanti di Workspace --</option>
-              @foreach($masterSpeakers as $spk)
-                <option value="{{ $spk->id }}">{{ $spk->name }} ({{ $spk->institution ?? 'Lab ICT' }})</option>
-              @endforeach
-            </select>
-            <input type="text" name="speaker_topic" placeholder="Topik materi narasumber..." class="px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs outline-none">
-          </div>
-        </div>
-
         <div class="flex flex-col gap-1.5">
           <label class="font-semibold text-slate-700">Deskripsi Ringkas Kegiatan</label>
           <textarea name="description" rows="3" required placeholder="Tuliskan tujuan dan pokok materi kegiatan..." class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 leading-relaxed"></textarea>
