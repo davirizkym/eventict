@@ -105,7 +105,7 @@
           Selamat Datang, {{ Auth::user()->name }}
         </h1>
         <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
-          Pilih salah satu kegiatan di bawah untuk membuka ruang kerja operasional (presensi, e-sertifikat, tiket) atau tambahkan kegiatan baru.
+          Pilih salah satu kegiatan di bawah untuk membuka ruang kerja operasional (presensi, <span class="whitespace-nowrap">e-sertifikat</span>, tiket) atau tambahkan kegiatan baru.
         </p>
       </div>
 
