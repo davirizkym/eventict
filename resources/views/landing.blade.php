@@ -114,7 +114,7 @@
           <div class="relative w-full overflow-hidden">
             <div id="event-carousel-track" class="flex" style="transform: translateX({{ $events->count() > 1 ? '-100%' : '0%' }});">
               @foreach($carouselEvents as $index => $event)
-              <div class="w-full shrink-0 flex flex-col lg:flex-row justify-between items-stretch p-6 sm:p-10 lg:p-12 pb-14 sm:pb-14 lg:pb-14 gap-8 min-h-[360px] relative">
+              <div class="w-full shrink-0 flex flex-col lg:flex-row justify-between items-stretch px-8 sm:px-12 lg:px-14 py-6 sm:py-10 lg:py-12 pb-14 sm:pb-14 lg:pb-14 gap-8 min-h-[360px] relative">
                 <div class="flex-1 flex flex-col justify-between gap-6 z-10">
                   <div class="flex flex-col gap-3">
                     <div class="flex flex-wrap items-center gap-2.5">
@@ -237,13 +237,13 @@
           </div>
 
           @if($events->count() > 1)
-          <button type="button" id="carousel-prev" class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-20 size-10 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white flex items-center justify-center transition border border-white/20 backdrop-blur-md shadow-lg cursor-pointer">
-            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <button type="button" id="carousel-prev" class="absolute left-2.5 sm:left-3.5 top-1/2 -translate-y-1/2 z-20 size-9 sm:size-10 rounded-full bg-slate-950/20 hover:bg-slate-900/70 text-white/60 hover:text-white flex items-center justify-center transition-all duration-200 border border-white/10 hover:border-white/30 backdrop-blur-xs shadow-md opacity-40 hover:opacity-100 cursor-pointer" aria-label="Sebelumnya">
+            <svg class="size-4 sm:size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="m15 18-6-6 6-6"/>
             </svg>
           </button>
-          <button type="button" id="carousel-next" class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-20 size-10 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white flex items-center justify-center transition border border-white/20 backdrop-blur-md shadow-lg cursor-pointer">
-            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <button type="button" id="carousel-next" class="absolute right-2.5 sm:right-3.5 top-1/2 -translate-y-1/2 z-20 size-9 sm:size-10 rounded-full bg-slate-950/20 hover:bg-slate-900/70 text-white/60 hover:text-white flex items-center justify-center transition-all duration-200 border border-white/10 hover:border-white/30 backdrop-blur-xs shadow-md opacity-40 hover:opacity-100 cursor-pointer" aria-label="Berikutnya">
+            <svg class="size-4 sm:size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="m9 18 6-6-6-6"/>
             </svg>
           </button>
@@ -605,6 +605,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentIndex = 1;
     let isTransitioning = false;
     let timer = null;
+    const TRANSITION_TIME = 500; // durasi transisi disamakan merata untuk semua slide (500ms)
+    const TRANSITION_EASING = 'cubic-bezier(0.25, 1, 0.5, 1)';
 
     function updateDots() {
       const activeIdx = (currentIndex - 1 + totalEvents) % totalEvents;
@@ -623,7 +625,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isTransitioning) return;
       isTransitioning = true;
       currentIndex = idx;
-      track.style.transition = 'transform 600ms cubic-bezier(0.16, 1, 0.3, 1)';
+      track.style.transition = `transform ${TRANSITION_TIME}ms ${TRANSITION_EASING}`;
       track.style.transform = `translateX(-${currentIndex * 100}%)`;
       updateDots();
     }
@@ -669,8 +671,22 @@ document.addEventListener('DOMContentLoaded', () => {
     dots.forEach((dot) => {
       dot.addEventListener('click', () => {
         if (isTransitioning) return;
-        const slideIdx = parseInt(dot.getAttribute('data-slide'), 10);
-        slideTo(slideIdx + 1);
+        const targetEventIdx = parseInt(dot.getAttribute('data-slide'), 10);
+        const currentEventIdx = (currentIndex - 1 + totalEvents) % totalEvents;
+
+        if (targetEventIdx === currentEventIdx) return;
+
+        // Jika dari acara paling belakang ke acara paling depan, maju mulus 1 langkah ke clone pertama dengan waktu yang sama
+        if (currentEventIdx === totalEvents - 1 && targetEventIdx === 0) {
+          slideTo(totalSlides - 1);
+        }
+        // Jika dari acara paling depan ke acara paling belakang, mundur mulus 1 langkah ke clone terakhir dengan waktu yang sama
+        else if (currentEventIdx === 0 && targetEventIdx === totalEvents - 1) {
+          slideTo(0);
+        }
+        else {
+          slideTo(targetEventIdx + 1);
+        }
         resetTimer();
       });
     });
