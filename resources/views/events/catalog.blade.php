@@ -92,10 +92,9 @@
               <label class="text-slate-500 text-[10px] uppercase tracking-wider font-semibold font-['Poppins']">Rumpun Ilmu</label>
               <select name="category" class="w-full bg-transparent border-none outline-none text-slate-900 text-xs font-medium font-['Poppins'] cursor-pointer">
                 <option value="">Semua Rumpun</option>
-                <option value="Kedokteran & Kesehatan" {{ request('category') === 'Kedokteran & Kesehatan' ? 'selected' : '' }}>Kedokteran & Kesehatan</option>
-                <option value="Teknologi & Rekayasa" {{ request('category') === 'Teknologi & Rekayasa' ? 'selected' : '' }}>Teknologi & Rekayasa</option>
-                <option value="Hukum & Kebijakan" {{ request('category') === 'Hukum & Kebijakan' ? 'selected' : '' }}>Hukum & Kebijakan</option>
-                <option value="Ekonomi & Bisnis" {{ request('category') === 'Ekonomi & Bisnis' ? 'selected' : '' }}>Ekonomi & Bisnis</option>
+                @foreach($allCategories ?? ['Kedokteran & Kesehatan', 'Teknologi & Rekayasa', 'Hukum & Kebijakan', 'Ekonomi & Bisnis'] as $catOption)
+                <option value="{{ $catOption }}" {{ request('category') === $catOption ? 'selected' : '' }}>{{ $catOption }}</option>
+                @endforeach
               </select>
             </div>
             <button type="submit" class="w-full md:w-auto px-6 py-3 bg-blue-950 rounded-lg outline outline-1 outline-offset-[-1px] outline-transparent flex justify-center items-center gap-2 hover:bg-blue-900 transition cursor-pointer shrink-0">

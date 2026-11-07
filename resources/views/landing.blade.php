@@ -81,10 +81,9 @@
               <label class="text-slate-500 text-[10px] uppercase tracking-wider font-semibold font-['Poppins']">Rumpun Ilmu</label>
               <select name="category" class="w-full bg-transparent border-none outline-none text-slate-900 text-xs font-medium font-['Poppins'] cursor-pointer">
                 <option value="">Semua Rumpun</option>
-                <option value="Kedokteran & Kesehatan" {{ request('category') === 'Kedokteran & Kesehatan' ? 'selected' : '' }}>Kedokteran & Kesehatan</option>
-                <option value="Teknologi & Rekayasa" {{ request('category') === 'Teknologi & Rekayasa' ? 'selected' : '' }}>Teknologi & Rekayasa</option>
-                <option value="Hukum & Kebijakan" {{ request('category') === 'Hukum & Kebijakan' ? 'selected' : '' }}>Hukum & Kebijakan</option>
-                <option value="Ekonomi & Bisnis" {{ request('category') === 'Ekonomi & Bisnis' ? 'selected' : '' }}>Ekonomi & Bisnis</option>
+                @foreach($allCategories ?? ['Kedokteran & Kesehatan', 'Teknologi & Rekayasa', 'Hukum & Kebijakan', 'Ekonomi & Bisnis'] as $catOption)
+                <option value="{{ $catOption }}" {{ request('category') === $catOption ? 'selected' : '' }}>{{ $catOption }}</option>
+                @endforeach
               </select>
             </div>
             <button type="submit" class="w-full md:w-auto px-6 py-3 bg-blue-950 rounded-lg outline outline-1 outline-offset-[-1px] outline-transparent flex justify-center items-center gap-2 hover:bg-blue-900 transition cursor-pointer shrink-0">
@@ -271,72 +270,30 @@
         </div>
 
         <div class="self-stretch grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <a href="{{ route('events.index_public', ['category' => 'Teknologi & Rekayasa']) }}" class="p-5 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between gap-4 group">
+          @forelse($categories ?? [] as $category)
+          <a href="{{ route('events.index_public', ['category' => $category['category']]) }}" class="p-5 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between gap-4 group">
             <div class="flex items-start justify-between">
               <div class="size-11 rounded-lg bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center transition-colors duration-200">
+                @if(($category['icon'] ?? '') === 'code')
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="16 18 22 12 16 6"/>
                   <polyline points="8 6 2 12 8 18"/>
                 </svg>
-              </div>
-              <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
-            </div>
-            <div>
-              <h3 class="text-slate-900 group-hover:text-blue-950 font-semibold text-sm font-['Poppins'] transition">Pemrograman & Web/Mobile</h3>
-              <p class="text-slate-500 text-xs font-normal font-['Poppins'] mt-1">Frontend, Backend API, Framework Modern, Aplikasi Mobile</p>
-            </div>
-          </a>
-
-          <a href="{{ route('events.index_public', ['category' => 'Teknologi & Rekayasa']) }}" class="p-5 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between gap-4 group">
-            <div class="flex items-start justify-between">
-              <div class="size-11 rounded-lg bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center transition-colors duration-200">
+                @elseif(($category['icon'] ?? '') === 'ai')
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M12 2a8 8 0 0 0-8 8c0 3.36 2.06 6.24 5 7.42V20a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2.58c2.94-1.18 5-4.06 5-7.42a8 8 0 0 0-8-8z"/>
                   <line x1="9.5" y1="9" x2="9.5" y2="9.01"/>
                   <line x1="14.5" y1="9" x2="14.5" y2="9.01"/>
                 </svg>
-              </div>
-              <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
-            </div>
-            <div>
-              <h3 class="text-slate-900 group-hover:text-blue-950 font-semibold text-sm font-['Poppins'] transition">Kecerdasan Buatan & Data</h3>
-              <p class="text-slate-500 text-xs font-normal font-['Poppins'] mt-1">Machine Learning, Deep Learning, Python Data Science, Analitika</p>
-            </div>
-          </a>
-
-          <a href="{{ route('events.index_public', ['category' => 'Teknologi & Rekayasa']) }}" class="p-5 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between gap-4 group">
-            <div class="flex items-start justify-between">
-              <div class="size-11 rounded-lg bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center transition-colors duration-200">
+                @elseif(($category['icon'] ?? '') === 'security')
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 </svg>
-              </div>
-              <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
-            </div>
-            <div>
-              <h3 class="text-slate-900 group-hover:text-blue-950 font-semibold text-sm font-['Poppins'] transition">Keamanan Siber & Jaringan</h3>
-              <p class="text-slate-500 text-xs font-normal font-['Poppins'] mt-1">Cyber Security, Jaringan Komputer, Infrastruktur Server, Ethical Hacking</p>
-            </div>
-          </a>
-
-          <a href="{{ route('events.index_public', ['category' => 'Kedokteran & Kesehatan']) }}" class="p-5 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between gap-4 group">
-            <div class="flex items-start justify-between">
-              <div class="size-11 rounded-lg bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center transition-colors duration-200">
+                @elseif(($category['icon'] ?? '') === 'health')
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                 </svg>
-              </div>
-              <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
-            </div>
-            <div>
-              <h3 class="text-slate-900 group-hover:text-blue-950 font-semibold text-sm font-['Poppins'] transition">Teknologi Medis & Telemedicine</h3>
-              <p class="text-slate-500 text-xs font-normal font-['Poppins'] mt-1">Sistem Rekam Medis Elektronik, Interoperabilitas Data Klinis</p>
-            </div>
-          </a>
-
-          <a href="{{ route('events.index_public', ['category' => 'Hukum & Kebijakan']) }}" class="p-5 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between gap-4 group">
-            <div class="flex items-start justify-between">
-              <div class="size-11 rounded-lg bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center transition-colors duration-200">
+                @elseif(($category['icon'] ?? '') === 'law')
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
                   <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
@@ -344,30 +301,35 @@
                   <path d="M12 3v18"/>
                   <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
                 </svg>
-              </div>
-              <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
-            </div>
-            <div>
-              <h3 class="text-slate-900 group-hover:text-blue-950 font-semibold text-sm font-['Poppins'] transition">Hukum Siber & Privasi Data</h3>
-              <p class="text-slate-500 text-xs font-normal font-['Poppins'] mt-1">UU Pelindungan Data Pribadi (UU PDP), Kepatuhan Tata Kelola Digital</p>
-            </div>
-          </a>
-
-          <a href="{{ route('events.index_public', ['category' => 'Ekonomi & Bisnis']) }}" class="p-5 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between gap-4 group">
-            <div class="flex items-start justify-between">
-              <div class="size-11 rounded-lg bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center transition-colors duration-200">
+                @elseif(($category['icon'] ?? '') === 'business')
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M3 3v18h18"/>
                   <path d="m19 9-5 5-4-4-3 3"/>
                 </svg>
+                @else
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="m10 15 5-3-5-3v6Z"/>
+                </svg>
+                @endif
               </div>
-              <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-medium text-slate-500 group-hover:text-blue-900 bg-slate-100 group-hover:bg-blue-50 px-2.5 py-1 rounded-full transition">
+                  {{ $category['count'] ?? 0 }} Kegiatan
+                </span>
+                <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
+              </div>
             </div>
             <div>
-              <h3 class="text-slate-900 group-hover:text-blue-950 font-semibold text-sm font-['Poppins'] transition">Bisnis Digital & Manajemen Produk</h3>
-              <p class="text-slate-500 text-xs font-normal font-['Poppins'] mt-1">Kewirausahaan Teknologi, Manajemen Produk Digital, Inovasi Startup</p>
+              <h3 class="text-slate-900 group-hover:text-blue-950 font-semibold text-sm font-['Poppins'] transition">{{ $category['name'] }}</h3>
+              <p class="text-slate-500 text-xs font-normal font-['Poppins'] mt-1">{{ $category['description'] }}</p>
             </div>
           </a>
+          @empty
+          <div class="col-span-full text-center py-8 text-slate-500 text-xs font-['Poppins']">
+            Belum ada kategori kegiatan yang tersedia.
+          </div>
+          @endforelse
         </div>
       </section>
 

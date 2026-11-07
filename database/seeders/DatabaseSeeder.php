@@ -223,6 +223,27 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        $event5 = Event::updateOrCreate(
+            ['slug' => 'masterclass-akselerasi-bisnis-digital-dan-manajemen-produk'],
+            [
+                'title' => 'Masterclass Akselerasi Bisnis Digital & Manajemen Produk Startup',
+                'category' => 'Ekonomi & Bisnis',
+                'format' => 'online',
+                'location' => 'Auditorium Virtual Eventict Business Hub',
+                'start_date' => $today->copy()->addDays(28),
+                'end_date' => $today->copy()->addDays(28),
+                'start_time' => '10:00:00',
+                'end_time' => '15:00:00',
+                'quota' => 250,
+                'price' => 150000,
+                'skp_points' => 16,
+                'sk_number' => 'EKB-STARTUP-2026-005',
+                'description' => 'Strategi validasi ide produk digital, perancangan unit economics, product-market fit, dan teknik pitching pendanaan ventura bagi perintis startup teknologi.',
+                'status' => 'published',
+                'virtual_meeting_url' => 'https://meet.eventict.id/room-bisnis-digital',
+            ]
+        );
+
         $event1->speakers()->syncWithoutDetaching([
             $speaker1->id => [
                 'topic' => 'Plenary Session: Standar Etik Telehealth Global & Penerapan Klinis',
@@ -253,6 +274,24 @@ class DatabaseSeeder extends Seeder
             $speaker3->id => [
                 'topic' => 'Kebijakan Akreditasi Fasilitas Kesehatan Tingkat Pertama',
                 'session_time' => '10:15 – 11:45 WIB',
+            ],
+        ]);
+
+        $event4->speakers()->syncWithoutDetaching([
+            $speaker3->id => [
+                'topic' => 'Kajian Hukum dan Perlindungan Data Pasien di Era Digital',
+                'session_time' => '13:00 – 14:30 WIB',
+            ],
+            $speaker4->id => [
+                'topic' => 'Mitigasi Insiden Keamanan Informasi dan Audit Forensik',
+                'session_time' => '14:45 – 16:30 WIB',
+            ],
+        ]);
+
+        $event5->speakers()->syncWithoutDetaching([
+            $speaker2->id => [
+                'topic' => 'Strategi Manajemen Risiko Finansial & Tata Kelola Teknologi Startup',
+                'session_time' => '10:00 – 12:00 WIB',
             ],
         ]);
 
