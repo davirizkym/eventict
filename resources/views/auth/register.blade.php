@@ -99,15 +99,15 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label for="nik" class="text-xs font-semibold text-slate-700 font-['Poppins']">
-              NIK (16 Digit KTP) <span class="text-slate-400 font-normal">(opsional untuk SKP)</span>
+              NIM / NIP <span class="text-slate-400 font-normal">(opsional)</span>
             </label>
             <input
               type="text"
               id="nik"
               name="nik"
               value="{{ old('nik') }}"
-              maxlength="16"
-              placeholder="3171012345670001"
+              maxlength="20"
+              placeholder="Contoh: 2210511001"
               class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950 font-['Poppins'] font-mono"
             >
           </div>

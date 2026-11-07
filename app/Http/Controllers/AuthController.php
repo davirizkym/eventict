@@ -53,12 +53,12 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'nik' => ['nullable', 'string', 'digits:16'],
+            'nik' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'string', 'confirmed', Password::min(8)],
             'institution' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:25'],
         ], [
-            'nik.digits' => 'Nomor Induk Kependudukan (NIK) harus berjumlah 16 digit angka.',
+            'nik.max' => 'NIM / NIP maksimal 20 karakter.',
             'email.unique' => 'Alamat email ini sudah terdaftar sebagai pengguna.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
             'password.min' => 'Kata sandi minimal terdiri dari :min karakter.',

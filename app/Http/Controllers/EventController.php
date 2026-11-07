@@ -98,7 +98,7 @@ class EventController extends Controller
         }
 
         $request->validate([
-            'nik' => ['nullable', 'string', 'digits:16'],
+            'nik' => ['nullable', 'string', 'max:20'],
             'phone' => ['nullable', 'string', 'max:25'],
             'institution' => ['nullable', 'string', 'max:255'],
             'attendance_mode' => ['nullable', 'string', 'in:offline,online,hybrid'],
@@ -106,7 +106,7 @@ class EventController extends Controller
             'agree_terms' => ['required', 'accepted'],
         ], [
             'agree_terms.accepted' => 'Anda wajib menyetujui syarat & ketentuan kehadiran kegiatan.',
-            'nik.digits' => 'Nomor Induk Kependudukan (NIK) harus berjumlah 16 digit angka.',
+            'nik.max' => 'NIM / NIP maksimal 20 karakter.',
         ]);
 
         // Perbarui data profil peserta jika diisi dan data sebelumnya belum ada

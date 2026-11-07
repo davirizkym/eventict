@@ -66,7 +66,7 @@
       <!-- Kolom Formulir Pendaftaran -->
       <div class="lg:col-span-2 flex flex-col gap-6">
         <div class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 sm:p-8 shadow-xs flex flex-col gap-6">
-          <div class="border-b border-slate-100 pb-4">
+          <div>
             <span class="text-xs font-bold text-blue-950 uppercase tracking-wider font-['Poppins']">Langkah Konfirmasi</span>
             <h1 class="text-2xl font-bold text-slate-900 font-['Poppins'] mt-1">Formulir Pendaftaran Peserta</h1>
             <p class="text-xs text-slate-500 font-['Poppins'] mt-1">Lengkapi data berikut untuk penerbitan E-Tiket dan pengesahan portofolio sertifikat SKP Anda.</p>
@@ -96,18 +96,18 @@
 
                 <div class="flex flex-col gap-1.5">
                   <label for="nik" class="text-xs font-semibold text-slate-700">
-                    Nomor NIK (KTP / Kemenkes) <span class="text-rose-500">*</span>
+                    NIM / NIP <span class="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     id="nik"
                     name="nik"
                     value="{{ old('nik', $user->nik) }}"
-                    maxlength="16"
-                    placeholder="3171012345670001"
+                    maxlength="20"
+                    placeholder="Contoh: 2210511001"
                     class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950 font-mono"
                   >
-                  <span class="text-[10px] text-slate-400">Digunakan panitia untuk integrasi SKP & penomoran sertifikat resmi.</span>
+                  <span class="text-[10px] text-slate-400">Digunakan panitia untuk pendataan dan penomoran sertifikat resmi.</span>
                 </div>
               </div>
 
@@ -151,7 +151,7 @@
             </div>
 
             <!-- Section 2: Mode Kehadiran (khusus jika format hybrid) -->
-            <div class="flex flex-col gap-3 pt-4 border-t border-slate-100">
+            <div class="flex flex-col gap-3">
               <div class="flex items-center gap-2 text-sm font-semibold text-slate-800">
                 <span class="size-6 rounded-full bg-blue-950 text-white text-xs flex items-center justify-center font-bold">2</span>
                 <span>Pilihan Format Kehadiran</span>
@@ -202,7 +202,7 @@
             </div>
 
             <!-- Section 3: Rincian Pembayaran / Tiket -->
-            <div class="flex flex-col gap-3 pt-4 border-t border-slate-100">
+            <div class="flex flex-col gap-3">
               <div class="flex items-center gap-2 text-sm font-semibold text-slate-800">
                 <span class="size-6 rounded-full bg-blue-950 text-white text-xs flex items-center justify-center font-bold">3</span>
                 <span>Rincian Biaya & Status Tiket</span>
@@ -223,7 +223,7 @@
                 </div>
               @else
                 <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-3">
-                  <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                  <div class="flex justify-between items-center pb-2">
                     <div>
                       <div class="text-xs font-semibold text-slate-900">Total Biaya Pendaftaran</div>
                       <div class="text-[11px] text-slate-500">Termasuk materi simposium, konsumsi (offline), dan sertifikat SKP resmi.</div>
@@ -254,7 +254,7 @@
             </div>
 
             <!-- Section 4: Persetujuan Syarat & Ketentuan -->
-            <div class="flex flex-col gap-3 pt-4 border-t border-slate-100">
+            <div class="flex flex-col gap-3">
               <label class="flex items-start gap-2.5 cursor-pointer p-3.5 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100/80 transition">
                 <input
                   type="checkbox"
@@ -307,7 +307,7 @@
             {{ $event->title }}
           </h2>
 
-          <div class="pt-3 border-t border-white/10 flex flex-col gap-2.5 text-xs text-slate-300">
+          <div class="flex flex-col gap-2.5 text-xs text-slate-300">
             <div class="flex items-center gap-2">
               <svg class="size-4 text-blue-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
