@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Master Data Narasumber — Eventict Lab ICT')
+@section('title', 'Pengisi Acara — Eventict Lab ICT')
 
 @section('content')
 <div class="min-h-screen bg-slate-50 text-slate-800 antialiased font-['Poppins'] flex flex-col">
@@ -37,7 +37,7 @@
               <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
-            <span>Master Narasumber</span>
+            <span>Pengisi Acara</span>
           </a>
         </nav>
       </div>
@@ -79,7 +79,7 @@
     <div class="flex items-center gap-2 text-xs text-slate-500">
       <a href="{{ route('organizer.dashboard') }}" class="hover:text-blue-950 font-medium">Portal Pengelola</a>
       <span>/</span>
-      <span class="text-slate-900 font-semibold">Master Data Narasumber</span>
+      <span class="text-slate-900 font-semibold">Pengisi Acara</span>
     </div>
 
     @if (session('success'))
@@ -104,7 +104,7 @@
 
     <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
       <div class="flex flex-col gap-1">
-        <h1 class="text-lg sm:text-xl font-bold text-slate-900">Bank Data Narasumber & Praktisi</h1>
+        <h1 class="text-lg sm:text-xl font-bold text-slate-900">Data Pengisi Acara & Praktisi</h1>
         <p class="text-xs text-slate-500 leading-relaxed max-w-2xl">
           Katalog instruktur pelatihan, pembicara seminar, dan dosen pengampu Lab ICT.
         </p>
@@ -116,13 +116,13 @@
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          <span>Tambah Narasumber Baru</span>
+          <span>Tambah Pengisi Acara Baru</span>
         </button>
       </div>
     </div>
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <span class="text-xs font-semibold text-slate-600">Total Terdaftar: {{ $speakers->count() }} Narasumber</span>
+      <span class="text-xs font-semibold text-slate-600">Total Terdaftar: {{ $speakers->count() }} Pengisi Acara</span>
 
       <form method="GET" action="{{ route('organizer.speakers.index') }}" class="flex items-center gap-2 max-w-sm w-full">
         <div class="relative w-full">
@@ -148,10 +148,10 @@
             <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
         </div>
-        <h3 class="text-sm font-semibold text-slate-900">Belum Ada Data Narasumber</h3>
+        <h3 class="text-sm font-semibold text-slate-900">Belum Ada Data Pengisi Acara</h3>
         <p class="text-xs text-slate-500 max-w-md">Tambahkan pembicara atau instruktur pertama untuk mulai menugaskannya ke kegiatan.</p>
         <button type="button" onclick="openCreateSpeakerModal()" class="mt-2 px-4 py-2 bg-blue-950 text-white rounded-lg text-xs font-semibold hover:bg-blue-900 transition">
-          Tambah Narasumber
+          Tambah Pengisi Acara
         </button>
       </div>
     @else
@@ -222,7 +222,7 @@
                 <span>Edit Profil</span>
               </button>
 
-              <form method="POST" action="{{ route('organizer.speakers.destroy', ['speaker' => $spk->id]) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus narasumber ini dari master data?')">
+              <form method="POST" action="{{ route('organizer.speakers.destroy', ['speaker' => $spk->id]) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengisi acara ini?')">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition cursor-pointer" title="Hapus">
@@ -244,8 +244,8 @@
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 flex flex-col gap-6 shadow-2xl">
       <div class="flex items-start justify-between gap-4 pb-4 border-b border-slate-100">
         <div class="flex flex-col">
-          <h2 class="text-base sm:text-lg font-bold text-slate-900">Tambah Narasumber Master Baru</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Daftarkan pembicara/instruktur ke bank data untuk ditugaskan ke berbagai kegiatan.</p>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">Tambah Pengisi Acara Baru</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Daftarkan pengisi acara untuk ditugaskan ke berbagai kegiatan.</p>
         </div>
         <button type="button" onclick="closeCreateSpeakerModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -299,7 +299,7 @@
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 flex flex-col gap-6 shadow-2xl">
       <div class="flex items-start justify-between gap-4 pb-4 border-b border-slate-100">
         <div class="flex flex-col">
-          <h2 class="text-base sm:text-lg font-bold text-slate-900">Perbarui Data Narasumber</h2>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">Perbarui Data Pengisi Acara</h2>
           <p class="text-xs text-slate-500 mt-0.5">Perubahan profil akan terbarui di seluruh kegiatan yang diampunya.</p>
         </div>
         <button type="button" onclick="closeEditSpeakerModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">

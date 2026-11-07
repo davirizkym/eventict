@@ -37,7 +37,7 @@
               <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
-            <span>Master Narasumber</span>
+            <span>Pengisi Acara</span>
           </a>
         </nav>
       </div>
@@ -230,7 +230,7 @@
               <div class="flex items-center justify-between text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                 <span>Kehadiran: <strong class="text-slate-900">{{ $evt->attended_count }}</strong></span>
                 <span>Sertifikat: <strong class="text-slate-900">{{ $evt->certificates_count }}</strong></span>
-                <span>Narasumber: <strong class="text-slate-900">{{ $evt->speakers->count() }}</strong></span>
+                <span>Pengisi Acara: <strong class="text-slate-900">{{ $evt->speakers->count() }}</strong></span>
               </div>
             </div>
 
