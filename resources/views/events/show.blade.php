@@ -112,7 +112,12 @@
                     {{ strtoupper(substr($speaker->name, 0, 2)) }}
                   </div>
                   <div>
-                    <h3 class="text-slate-900 text-sm font-semibold font-['Poppins']">{{ $speaker->name }}</h3>
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-slate-900 text-sm font-semibold font-['Poppins']">{{ $speaker->name }}</h3>
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold {{ ($speaker->pivot->role ?? 'Pembicara') === 'Moderator' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-900' }}">
+                        {{ $speaker->pivot->role ?? 'Pembicara' }}
+                      </span>
+                    </div>
                     <div class="text-slate-600 text-xs font-normal font-['Poppins']">{{ $speaker->institution }}</div>
                     @if($speaker->pivot->topic)
                       <div class="text-blue-950 text-xs font-medium font-['Poppins'] mt-1 flex items-center gap-1.5">

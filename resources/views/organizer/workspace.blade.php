@@ -268,7 +268,12 @@
                     {{ strtoupper(substr($spk->name, 0, 2)) }}
                   </div>
                   <div class="flex flex-col min-w-0">
-                    <span class="text-xs font-semibold text-slate-900 truncate">{{ $spk->name }}</span>
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-xs font-semibold text-slate-900 truncate">{{ $spk->name }}</span>
+                      <span class="px-1.5 py-0.5 rounded text-[9px] font-medium {{ ($spk->pivot->role ?? 'Pembicara') === 'Moderator' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-900' }}">
+                        {{ $spk->pivot->role ?? 'Pembicara' }}
+                      </span>
+                    </div>
                     <span class="text-[11px] text-slate-500 truncate">{{ $spk->pivot->topic ?? $spk->institution }}</span>
                   </div>
                 </div>
@@ -484,7 +489,12 @@
                         {{ strtoupper(substr($spk->name, 0, 2)) }}
                       </div>
                       <div class="flex flex-col min-w-0">
-                        <span class="text-xs font-bold text-slate-900 truncate">{{ $spk->name }}</span>
+                        <div class="flex items-center gap-2">
+                          <span class="text-xs font-bold text-slate-900 truncate">{{ $spk->name }}</span>
+                          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold {{ ($spk->pivot->role ?? 'Pembicara') === 'Moderator' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-900' }}">
+                            {{ $spk->pivot->role ?? 'Pembicara' }}
+                          </span>
+                        </div>
                         <span class="text-[11px] text-slate-500 truncate">{{ $spk->institution }}</span>
                       </div>
                     </div>
@@ -644,6 +654,14 @@
             @foreach($allMasterSpeakers as $mspk)
               <option value="{{ $mspk->id }}">{{ $mspk->name }} — {{ $mspk->institution ?? 'Lab ICT' }}</option>
             @endforeach
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="font-semibold text-slate-700">Peran</label>
+          <select name="role" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+            <option value="Pembicara">Pembicara</option>
+            <option value="Moderator">Moderator</option>
           </select>
         </div>
 

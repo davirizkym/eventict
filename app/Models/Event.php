@@ -45,7 +45,7 @@ class Event extends Model
     public function speakers(): BelongsToMany
     {
         return $this->belongsToMany(Speaker::class, 'event_speaker')
-            ->withPivot(['topic', 'session_time'])
+            ->withPivot(['topic', 'session_time', 'role'])
             ->withTimestamps();
     }
 
