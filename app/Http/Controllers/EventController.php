@@ -68,6 +68,11 @@ class EventController extends Controller
         return view('events.catalog', compact('events'));
     }
 
+    public function about()
+    {
+        return view('pages.about');
+    }
+
     public function show(string $slug)
     {
         $event = Event::with('speakers')->where('slug', $slug)->firstOrFail();
