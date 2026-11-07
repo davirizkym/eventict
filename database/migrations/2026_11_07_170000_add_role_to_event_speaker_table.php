@@ -8,16 +8,20 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('event_speaker', function (Blueprint $table) {
-            $table->string('role')->default('Pembicara')->after('speaker_id');
-        });
+        if (!Schema::hasColumn('event_speaker', 'role')) {
+            Schema::table('event_speaker', function (Blueprint $table) {
+                $table->string('role')->default('Pembicara')->after('speaker_id');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('event_speaker', function (Blueprint $table) {
-            $table->dropColumn('role');
-        });
+        if (Schema::hasColumn('event_speaker', 'role')) {
+            Schema::table('event_speaker', function (Blueprint $table) {
+                $table->dropColumn('role');
+            });
+        }
     }
 };
 

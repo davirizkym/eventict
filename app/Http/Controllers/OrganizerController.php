@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Registration;
 use App\Models\Speaker;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -82,8 +83,19 @@ class OrganizerController extends Controller
             'quota' => 'required|integer|min:1',
             'price' => 'required|integer|min:0',
             'description' => 'required|string',
+            'speaker_ids' => 'required_without:speaker_id|array|min:1',
+            'speaker_ids.*' => 'required|exists:speakers,id',
+            'speaker_roles' => 'nullable|array',
+            'speaker_roles.*' => 'nullable|string|max:50',
+            'speaker_topics' => 'nullable|array',
+            'speaker_topics.*' => 'nullable|string|max:255',
             'speaker_id' => 'nullable|exists:speakers,id',
             'speaker_topic' => 'nullable|string|max:255',
+        ], [
+            'speaker_ids.required_without' => 'Pengisi acara kegiatan wajib dipilih minimal 1 orang.',
+            'speaker_ids.min' => 'Pengisi acara kegiatan wajib dipilih minimal 1 orang.',
+            'speaker_ids.*.required' => 'Pengisi acara kegiatan wajib dipilih minimal 1 orang.',
+            'speaker_ids.*.exists' => 'Pengisi acara yang dipilih tidak valid.',
         ]);
 
         $baseSlug = Str::slug($validated['title']);
@@ -111,11 +123,54 @@ class OrganizerController extends Controller
             'skp_points' => 0,
         ]);
 
-        if (!empty($validated['speaker_id'])) {
-            $event->speakers()->attach($validated['speaker_id'], [
-                'topic' => $validated['speaker_topic'] ?? 'Sesi Pembicara',
-                'session_time' => $validated['start_time'] . ' - ' . $validated['end_time'],
-            ]);
+        $speakerIds = $request->input('speaker_ids', []);
+        $speakerRoles = $request->input('speaker_roles', []);
+        $speakerTopics = $request->input('speaker_topics', []);
+
+        if (empty($speakerIds) && !empty($validated['speaker_id'])) {
+            $speakerIds = [$validated['speaker_id']];
+            $speakerRoles = ['Pemateri'];
+            $speakerTopics = [$validated['speaker_topic'] ?? 'Sesi Pembicara'];
+        }
+
+        $validSpeakers = [];
+        $roleCounts = [];
+
+        foreach ($speakerIds as $index => $spkId) {
+            if (!empty($spkId)) {
+                $rawRole = !empty($speakerRoles[$index]) ? trim($speakerRoles[$index]) : 'Pemateri';
+                $roleBase = in_array($rawRole, ['MC', 'Pemateri', 'Moderator']) ? $rawRole : 'Pemateri';
+                $roleCounts[$roleBase] = ($roleCounts[$roleBase] ?? 0) + 1;
+                $validSpeakers[] = [
+                    'id' => $spkId,
+                    'base_role' => $roleBase,
+                    'topic' => !empty($speakerTopics[$index]) ? trim($speakerTopics[$index]) : null,
+                ];
+            }
+        }
+
+        $roleCounters = [];
+        $attachData = [];
+        $defaultSessionTime = $validated['start_time'] . ' - ' . $validated['end_time'];
+
+        foreach ($validSpeakers as $item) {
+            $base = $item['base_role'];
+            if (($roleCounts[$base] ?? 0) > 1) {
+                $roleCounters[$base] = ($roleCounters[$base] ?? 0) + 1;
+                $finalRole = "{$base} " . $roleCounters[$base];
+            } else {
+                $finalRole = $base;
+            }
+
+            $attachData[$item['id']] = [
+                'role' => $finalRole,
+                'topic' => $item['topic'] ?? "Sesi {$finalRole}",
+                'session_time' => $defaultSessionTime,
+            ];
+        }
+
+        if (!empty($attachData)) {
+            $event->speakers()->sync($attachData);
         }
 
         return redirect()->route('organizer.workspace', ['event' => $event->id])
@@ -131,7 +186,7 @@ class OrganizerController extends Controller
         $attendedRegistrations = $event->registrations()->where('attendance_status', 'attended')->count();
         $attendancePercentage = $totalRegistrations > 0 ? round(($attendedRegistrations / $totalRegistrations) * 100, 1) : 0;
         $certificatesCount = $event->registrations()->whereHas('certificate')->count();
-        $totalRevenue = $event->registrations()->where('payment_status', 'paid')->sum('amount_paid');
+        $totalRevenue = $event->registrations()->where('payment_status', 'paid')->count() * (float) $event->price;
 
         $query = $event->registrations()->with(['user', 'certificate'])->latest();
 
@@ -212,29 +267,44 @@ class OrganizerController extends Controller
     {
         $validated = $request->validate([
             'speaker_id' => 'required|exists:speakers,id',
-            'role' => 'nullable|in:Pembicara,Moderator,MC',
+            'role' => 'nullable|string|max:50',
             'topic' => 'nullable|string|max:255',
             'session_time' => 'nullable|string|max:100',
         ]);
 
         $speaker = Speaker::findOrFail($validated['speaker_id']);
-        $role = $validated['role'] ?? 'Pembicara';
-        $defaultTopic = match ($role) {
+
+        $rawRole = !empty($validated['role']) ? trim($validated['role']) : 'Pemateri';
+        $baseRole = match ($rawRole) {
+            'Moderator' => 'Moderator',
+            'MC' => 'MC',
+            default => 'Pemateri',
+        };
+
+        // Hitung berapa pengisi acara dengan peran dasar yang sama pada acara ini
+        $existingCount = $event->speakers()->wherePivot('role', 'like', "{$baseRole}%")->count();
+        if ($existingCount > 0) {
+            $roleLabel = "{$baseRole} " . ($existingCount + 1);
+        } else {
+            $roleLabel = $baseRole;
+        }
+
+        $defaultTopic = match ($baseRole) {
             'Moderator' => 'Moderator Sesi Acara',
             'MC' => 'Master of Ceremony (MC)',
-            default => 'Sesi Pemaparan Materi',
+            default => "Sesi {$roleLabel}",
         };
 
         $event->speakers()->syncWithoutDetaching([
             $validated['speaker_id'] => [
-                'role' => $role,
+                'role' => $roleLabel,
                 'topic' => !empty($validated['topic']) ? $validated['topic'] : $defaultTopic,
                 'session_time' => $validated['session_time'] ?? ($event->start_time . ' - ' . $event->end_time),
             ]
         ]);
 
         return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber'])
-            ->with('success', "Pengisi acara {$speaker->name} berhasil ditugaskan sebagai {$role} pada kegiatan ini.");
+            ->with('success', "{$roleLabel} ({$speaker->name}) berhasil ditugaskan pada kegiatan ini.");
     }
 
     public function removeSpeaker(Event $event, Speaker $speaker)
@@ -415,47 +485,178 @@ class OrganizerController extends Controller
             $keyword = $request->query('q');
             $query->where(function ($q) use ($keyword) {
                 $q->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('title_degree', 'like', "%{$keyword}%")
                     ->orWhere('institution', 'like', "%{$keyword}%")
+                    ->orWhere('profession', 'like', "%{$keyword}%")
+                    ->orWhere('title_degree', 'like', "%{$keyword}%")
+                    ->orWhere('email', 'like', "%{$keyword}%")
+                    ->orWhere('phone', 'like', "%{$keyword}%")
+                    ->orWhere('city', 'like', "%{$keyword}%")
+                    ->orWhere('topics', 'like', "%{$keyword}%")
                     ->orWhere('bio', 'like', "%{$keyword}%");
             });
         }
 
-        $speakers = $query->orderBy('name', 'asc')->get();
+        if ($request->filled('event_id')) {
+            $eventId = (int) $request->query('event_id');
+            $query->whereHas('events', function ($eq) use ($eventId) {
+                $eq->where('events.id', $eventId);
+            });
+        }
 
-        return view('organizer.speakers.index', compact('speakers'));
+        if ($request->filled('assignment')) {
+            if ($request->query('assignment') === 'assigned') {
+                $query->has('events');
+            } elseif ($request->query('assignment') === 'unassigned') {
+                $query->doesntHave('events');
+            }
+        }
+
+        if ($request->filled('institution')) {
+            $query->where('institution', $request->query('institution'));
+        }
+
+        if ($request->filled('city')) {
+            $query->where('city', $request->query('city'));
+        }
+
+        $sort = $request->query('sort', 'name_asc');
+        if ($sort === 'name_desc') {
+            $query->orderBy('name', 'desc');
+        } elseif ($sort === 'events_desc') {
+            $query->orderBy('events_count', 'desc');
+        } elseif ($sort === 'latest') {
+            $query->orderBy('id', 'desc');
+        } else {
+            $query->orderBy('name', 'asc');
+        }
+
+        $speakers = $query->paginate(10)->withQueryString();
+        $allEvents = Event::orderBy('start_date', 'asc')->get();
+        $institutions = Speaker::whereNotNull('institution')->where('institution', '!=', '')->distinct()->pluck('institution');
+        $cities = Speaker::whereNotNull('city')->where('city', '!=', '')->distinct()->pluck('city');
+        $totalSpeakers = Speaker::count();
+        $assignedSpeakersCount = Speaker::has('events')->count();
+        $totalAssignments = DB::table('event_speaker')->count();
+
+        return view('organizer.speakers.index', compact(
+            'speakers',
+            'allEvents',
+            'institutions',
+            'cities',
+            'totalSpeakers',
+            'assignedSpeakersCount',
+            'totalAssignments'
+        ));
     }
 
     public function speakersStore(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'institution' => 'required|string|max:255',
+            'profession' => 'nullable|string|max:255',
             'title_degree' => 'nullable|string|max:255',
-            'institution' => 'nullable|string|max:255',
-            'photo_url' => 'nullable|url|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:30',
+            'city' => 'nullable|string|max:100',
+            'topics' => 'nullable|string|max:500',
             'bio' => 'nullable|string',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'photo_url' => 'nullable|string|max:500',
         ]);
 
-        $speaker = Speaker::create($validated);
+        $photoUrl = $validated['photo_url'] ?? null;
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $filename = 'speaker_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('speakers', $filename, 'public');
+            $photoUrl = 'storage/' . $path;
+        }
+
+        $speaker = Speaker::create([
+            'name' => $validated['name'],
+            'institution' => $validated['institution'],
+            'profession' => $validated['profession'] ?? null,
+            'title_degree' => $validated['title_degree'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'city' => $validated['city'] ?? null,
+            'topics' => $validated['topics'] ?? null,
+            'bio' => $validated['bio'] ?? null,
+            'photo_url' => $photoUrl,
+        ]);
 
         return redirect()->route('organizer.speakers.index')
-            ->with('success', "Narasumber {$speaker->name} berhasil ditambahkan ke Bank Master.");
+            ->with('success', "Pengisi acara {$speaker->name} berhasil ditambahkan ke Bank Data.");
+    }
+
+    public function speakersShow(Speaker $speaker)
+    {
+        $speaker->load(['events' => function ($q) {
+            $q->orderBy('start_date', 'desc');
+        }]);
+
+        $allEvents = Event::orderBy('start_date', 'asc')->get();
+
+        return view('organizer.speakers.show', compact('speaker', 'allEvents'));
     }
 
     public function speakersUpdate(Request $request, Speaker $speaker)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'institution' => 'required|string|max:255',
+            'profession' => 'nullable|string|max:255',
             'title_degree' => 'nullable|string|max:255',
-            'institution' => 'nullable|string|max:255',
-            'photo_url' => 'nullable|url|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:30',
+            'city' => 'nullable|string|max:100',
+            'topics' => 'nullable|string|max:500',
             'bio' => 'nullable|string',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'photo_url' => 'nullable|string|max:500',
         ]);
 
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $filename = 'speaker_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('speakers', $filename, 'public');
+            $validated['photo_url'] = 'storage/' . $path;
+        }
+
+        unset($validated['photo']);
         $speaker->update($validated);
 
-        return redirect()->route('organizer.speakers.index')
-            ->with('success', "Data narasumber {$speaker->name} berhasil diperbarui.");
+        return back()->with('success', "Data pengisi acara {$speaker->name} berhasil diperbarui.");
+    }
+
+    public function speakersAssignEvents(Request $request, Speaker $speaker)
+    {
+        $validated = $request->validate([
+            'event_ids' => 'nullable|array',
+            'event_ids.*' => 'exists:events,id',
+            'roles' => 'nullable|array',
+            'topics' => 'nullable|array',
+            'session_times' => 'nullable|array',
+        ]);
+
+        $syncData = [];
+        $eventIds = $request->input('event_ids', []);
+        $roles = $request->input('roles', []);
+        $topics = $request->input('topics', []);
+        $sessionTimes = $request->input('session_times', []);
+
+        foreach ($eventIds as $eventId) {
+            $syncData[$eventId] = [
+                'role' => !empty($roles[$eventId]) ? trim($roles[$eventId]) : 'Pemateri',
+                'topic' => !empty($topics[$eventId]) ? trim($topics[$eventId]) : 'Sesi Pemaparan Materi',
+                'session_time' => !empty($sessionTimes[$eventId]) ? trim($sessionTimes[$eventId]) : null,
+            ];
+        }
+
+        $speaker->events()->sync($syncData);
+
+        return back()->with('success', "Penempatan kegiatan untuk pengisi acara {$speaker->name} berhasil diperbarui.");
     }
 
     public function speakersDestroy(Speaker $speaker)
@@ -463,14 +664,14 @@ class OrganizerController extends Controller
         $eventsCount = $speaker->events()->count();
         if ($eventsCount > 0) {
             return redirect()->route('organizer.speakers.index')
-                ->with('warning', "Narasumber {$speaker->name} masih ditugaskan pada {$eventsCount} kegiatan. Lepaskan penugasan terlebih dahulu sebelum menghapus master data.");
+                ->with('warning', "Pengisi acara {$speaker->name} masih ditugaskan pada {$eventsCount} kegiatan. Lepaskan penugasan terlebih dahulu sebelum menghapus master data.");
         }
 
         $name = $speaker->name;
         $speaker->delete();
 
         return redirect()->route('organizer.speakers.index')
-            ->with('success', "Data narasumber {$name} berhasil dihapus dari Bank Master.");
+            ->with('success', "Data pengisi acara {$name} berhasil dihapus dari Bank Master.");
     }
 
     public function history(Request $request)

@@ -275,21 +275,21 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="flex flex-col gap-1.5">
-            <label class="font-semibold text-slate-700">Kategori</label>
+            <label class="font-semibold text-slate-700">Kategori <span class="text-rose-500">*</span></label>
             <select name="category" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-              <option value="Workshop & Pelatihan">Workshop & Pelatihan</option>
-              <option value="Seminar Teknologi">Seminar Teknologi</option>
-              <option value="Sertifikasi Kompetensi">Sertifikasi Kompetensi</option>
-              <option value="Webinar Teknis">Webinar Teknis</option>
+              <option value="Workshop">Workshop</option>
+              <option value="Seminar">Seminar</option>
+              <option value="Webinar">Webinar</option>
+              <option value="Sertifikasi">Sertifikasi</option>
             </select>
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="font-semibold text-slate-700">Format Pelaksanaan</label>
+            <label class="font-semibold text-slate-700">Format Pelaksanaan <span class="text-rose-500">*</span></label>
             <select name="format" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-              <option value="offline">Offline (Tatap Muka di Lab)</option>
-              <option value="hybrid">Hybrid (Lab & Online)</option>
-              <option value="online">Online Penuh</option>
+              <option value="offline">Offline</option>
+              <option value="online">Online</option>
+              <option value="hybrid">Hybrid</option>
             </select>
           </div>
         </div>
@@ -332,18 +332,82 @@
           </div>
         </div>
 
-        <div class="p-3.5 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-2.5">
-          <div class="flex items-center justify-between">
-            <span class="font-semibold text-blue-950">Pilih Narasumber (Opsional)</span>
+        <!-- Bagian Pengisi Acara Kegiatan (Dinamis: Nama, Peran [MC, Pemateri, Moderator], + Tambah) -->
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col gap-3">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-800 text-xs">Pengisi Acara Kegiatan <span class="text-rose-500">*</span></span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800 border border-rose-200">Wajib minimal 1 orang</span>
+            </div>
+            <a href="{{ route('organizer.speakers.index') }}" target="_blank" class="text-[11px] text-blue-900 font-semibold hover:underline inline-flex items-center gap-1">
+              <span>Kelola Data Pengisi Acara</span>
+              <svg class="size-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </a>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <select name="speaker_id" class="px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs outline-none">
-              <option value="">-- Lewati / Tambah Nanti di Workspace --</option>
-              @foreach($masterSpeakers as $spk)
-                <option value="{{ $spk->id }}">{{ $spk->name }} ({{ $spk->institution ?? 'Lab ICT' }})</option>
-              @endforeach
-            </select>
-            <input type="text" name="speaker_topic" placeholder="Topik materi narasumber..." class="px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs outline-none">
+
+          <!-- Table Header (Desktop) -->
+          <div class="hidden sm:grid sm:grid-cols-12 gap-2 px-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+            <div class="col-span-3">Peran</div>
+            <div class="col-span-5">Nama Pengisi Acara <span class="text-rose-500">*</span></div>
+            <div class="col-span-3">Pilihan Peran</div>
+            <div class="col-span-1 text-center">Hapus</div>
+          </div>
+
+          <!-- Dynamic Container -->
+          <div id="speaker-rows-container" class="flex flex-col gap-2">
+            <!-- Row Default -->
+            <div class="speaker-row p-2.5 sm:p-2 bg-white border border-slate-200 rounded-xl grid grid-cols-1 sm:grid-cols-12 items-center gap-2 transition hover:border-slate-300 shadow-2xs">
+              <!-- Label / Badge Peran -->
+              <div class="sm:col-span-3 flex items-center justify-between sm:justify-start">
+                <span class="sm:hidden text-[11px] font-semibold text-slate-500">Peran:</span>
+                <span class="role-badge px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-blue-100 text-blue-950 border border-blue-200 w-full text-center truncate">
+                  Pemateri
+                </span>
+              </div>
+
+              <!-- Select Nama Pengisi Acara -->
+              <div class="sm:col-span-5">
+                <select name="speaker_ids[]" required onchange="updateSpeakerRoleLabels()" class="speaker-select w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
+                  <option value="" disabled selected>-- Pilih Pengisi Acara (Wajib) --</option>
+                  @foreach($masterSpeakers as $spk)
+                    <option value="{{ $spk->id }}">{{ $spk->name }} ({{ $spk->institution ?? 'Lab ICT' }})</option>
+                  @endforeach
+                </select>
+              </div>
+
+              <!-- Select Peran (MC, Pemateri, Moderator) -->
+              <div class="sm:col-span-3">
+                <select name="speaker_roles[]" onchange="updateSpeakerRoleLabels()" class="role-select w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
+                  <option value="Pemateri" selected>Pemateri</option>
+                  <option value="Moderator">Moderator</option>
+                  <option value="MC">MC</option>
+                </select>
+              </div>
+
+              <!-- Tombol Hapus -->
+              <div class="sm:col-span-1 flex justify-end sm:justify-center">
+                <button type="button" onclick="removeSpeakerRow(this)" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer" title="Hapus pengisi acara ini">
+                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-1">
+            <button type="button" onclick="addSpeakerRow()" class="px-3.5 py-2 rounded-xl border border-dashed border-blue-400 bg-white hover:bg-blue-50 text-blue-950 font-semibold text-xs transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+              <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              <span>Tambah Pengisi Acara (Pemateri, MC, Moderator)</span>
+            </button>
           </div>
         </div>
 
@@ -366,6 +430,109 @@
 </div>
 
 <script>
+const speakerMasterOptions = `@foreach($masterSpeakers as $spk)<option value="{{ $spk->id }}">{{ addslashes($spk->name) }} ({{ addslashes($spk->institution ?? 'Lab ICT') }})</option>@endforeach`;
+
+function updateSpeakerRoleLabels() {
+  const container = document.getElementById('speaker-rows-container');
+  if (!container) return;
+  const rows = container.querySelectorAll('.speaker-row');
+
+  // Count each role
+  const roleCounts = {};
+  rows.forEach(r => {
+    const sel = r.querySelector('.role-select');
+    if (sel) {
+      const val = sel.value;
+      roleCounts[val] = (roleCounts[val] || 0) + 1;
+    }
+  });
+
+  // Assign indexed label and badge color
+  const roleRunning = {};
+  rows.forEach(r => {
+    const sel = r.querySelector('.role-select');
+    const badge = r.querySelector('.role-badge');
+    if (sel && badge) {
+      const val = sel.value;
+      let labelText = val;
+      if (roleCounts[val] > 1) {
+        roleRunning[val] = (roleRunning[val] || 0) + 1;
+        labelText = `${val} ${roleRunning[val]}`;
+      }
+      badge.textContent = labelText;
+
+      // Color scheme based on role
+      badge.className = 'role-badge px-2.5 py-1.5 rounded-lg text-[11px] font-bold w-full text-center truncate border transition ';
+      if (val === 'Moderator') {
+        badge.className += 'bg-amber-100 text-amber-900 border-amber-200';
+      } else if (val === 'MC') {
+        badge.className += 'bg-purple-100 text-purple-900 border-purple-200';
+      } else {
+        badge.className += 'bg-blue-100 text-blue-950 border-blue-200';
+      }
+    }
+  });
+}
+
+function addSpeakerRow() {
+  const container = document.getElementById('speaker-rows-container');
+  if (!container) return;
+
+  const div = document.createElement('div');
+  div.className = 'speaker-row p-2.5 sm:p-2 bg-white border border-slate-200 rounded-xl grid grid-cols-1 sm:grid-cols-12 items-center gap-2 transition hover:border-slate-300 shadow-2xs';
+  div.innerHTML = `
+    <div class="sm:col-span-3 flex items-center justify-between sm:justify-start">
+      <span class="sm:hidden text-[11px] font-semibold text-slate-500">Peran:</span>
+      <span class="role-badge px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-blue-100 text-blue-950 border border-blue-200 w-full text-center truncate">
+        Pemateri
+      </span>
+    </div>
+
+    <div class="sm:col-span-5">
+      <select name="speaker_ids[]" required onchange="updateSpeakerRoleLabels()" class="speaker-select w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
+        <option value="" disabled selected>-- Pilih Pengisi Acara (Wajib) --</option>
+        ${speakerMasterOptions}
+      </select>
+    </div>
+
+    <div class="sm:col-span-3">
+      <select name="speaker_roles[]" onchange="updateSpeakerRoleLabels()" class="role-select w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
+        <option value="Pemateri" selected>Pemateri</option>
+        <option value="Moderator">Moderator</option>
+        <option value="MC">MC</option>
+      </select>
+    </div>
+
+    <div class="sm:col-span-1 flex justify-end sm:justify-center">
+      <button type="button" onclick="removeSpeakerRow(this)" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer" title="Hapus pengisi acara ini">
+        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  `;
+
+  container.appendChild(div);
+  updateSpeakerRoleLabels();
+}
+
+function removeSpeakerRow(btn) {
+  const row = btn.closest('.speaker-row');
+  const container = document.getElementById('speaker-rows-container');
+  if (row && container) {
+    if (container.querySelectorAll('.speaker-row').length > 1) {
+      row.remove();
+    } else {
+      const sel = row.querySelector('.speaker-select');
+      if (sel) sel.value = '';
+      const roleSel = row.querySelector('.role-select');
+      if (roleSel) roleSel.value = 'Pemateri';
+    }
+    updateSpeakerRoleLabels();
+  }
+}
+
 function openCreateEventModal() {
   const m = document.getElementById('modal-create-event');
   m.classList.remove('hidden');

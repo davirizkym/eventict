@@ -6,42 +6,40 @@
 <div class="min-h-screen bg-slate-50 text-slate-800 antialiased font-['Poppins'] flex flex-col">
   <header class="bg-blue-950 text-white border-b border-blue-900 sticky top-0 z-40 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-        <a href="{{ route('organizer.dashboard') }}" class="px-2.5 py-1.5 rounded-lg border border-white/20 text-xs font-semibold text-slate-200 hover:bg-white/10 hover:text-white transition flex items-center gap-1.5 shrink-0" title="Kembali ke Semua Kegiatan">
-          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-          <span class="hidden sm:inline">Semua Kegiatan</span>
+      <div class="flex items-center gap-6 sm:gap-8">
+        <a href="{{ route('organizer.dashboard') }}" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-950 font-bold shadow-xs">
+            <svg class="w-5 h-5 text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+              <path d="M6 6h10"/>
+              <path d="M6 10h7"/>
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-white text-base font-semibold leading-tight tracking-tight">Eventict</span>
+            <span class="text-blue-200 text-xs font-normal">Organizer Hub</span>
+          </div>
         </a>
 
-        <div class="h-6 w-px bg-white/20 hidden sm:block shrink-0"></div>
-
-        <div class="flex items-center gap-2 min-w-0">
-          <span class="text-xs text-blue-200 hidden lg:inline shrink-0">Ruang Kerja:</span>
-          <select onchange="window.location.href='/penyelenggara/event/' + this.value + '?tab={{ $tab }}'" class="bg-blue-900 border border-blue-800 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white outline-none cursor-pointer max-w-[220px] sm:max-w-[340px] truncate">
-            <option value="{{ $event->id }}" selected>{{ $event->title }}</option>
-            @if($otherActiveEvents->isNotEmpty())
-              <optgroup label="Pindah ke Acara Lain">
-                @foreach($otherActiveEvents as $oe)
-                  <option value="{{ $oe->id }}">{{ $oe->title }}</option>
-                @endforeach
-              </optgroup>
-            @endif
-          </select>
-
-          @php
-            $isPast = \Carbon\Carbon::parse($event->end_date)->isPast();
-          @endphp
-          @if($isPast)
-            <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/10 text-slate-300 border border-white/15 shrink-0 hidden md:inline">
-              Selesai
-            </span>
-          @else
-            <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 shrink-0 hidden md:inline">
-              Aktif
-            </span>
-          @endif
-        </div>
+        <nav class="hidden md:flex items-center gap-2">
+          <a href="{{ route('organizer.dashboard') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="18" x="3" y="3" rx="2"/>
+              <path d="M3 9h18"/>
+              <path d="M9 21V9"/>
+            </svg>
+            <span>Semua Kegiatan</span>
+          </a>
+          <a href="{{ route('organizer.speakers.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>Pengisi Acara</span>
+          </a>
+        </nav>
       </div>
 
       <div class="flex items-center gap-3 shrink-0">
@@ -73,7 +71,17 @@
     </div>
   </header>
 
-  <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col md:flex-row gap-6">
+  <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
+    <div class="flex items-center gap-2 text-xs text-slate-500">
+      <a href="{{ route('organizer.dashboard') }}" class="hover:text-blue-950 font-medium">Portal Pengelola</a>
+      <span>/</span>
+      <a href="{{ route('organizer.dashboard') }}" class="hover:text-blue-950 font-medium">Semua Kegiatan</a>
+      <span>/</span>
+      <span class="text-slate-900 font-semibold truncate">{{ $event->title }}</span>
+    </div>
+  </div>
+
+  <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 flex-1 flex flex-col md:flex-row gap-6">
     <aside class="w-full md:w-64 shrink-0 flex flex-col gap-4">
       <div class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col gap-2 shadow-2xs">
         <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Kegiatan Terpilih</span>
@@ -259,7 +267,7 @@
             <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber']) }}" class="text-xs font-semibold text-blue-950 hover:underline">Kelola Pengisi Acara →</a>
           </div>
           @if($event->speakers->isEmpty())
-            <p class="text-xs text-slate-500">Belum ada pengisi acara yang ditugaskan ke sesi ini.</p>
+            <p class="text-xs text-slate-500">Belum ada pengisi acara yang ditugaskan ke sesi ini. Silakan pilih dari daftar Pengisi Acara.</p>
           @else
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               @foreach($event->speakers as $spk)
@@ -268,17 +276,17 @@
                     {{ strtoupper(substr($spk->name, 0, 2)) }}
                   </div>
                   <div class="flex flex-col min-w-0">
-                    <div class="flex items-center gap-1.5">
+                    <div class="flex items-center gap-1.5 flex-wrap">
                       <span class="text-xs font-semibold text-slate-900 truncate">{{ $spk->name }}</span>
                       @php
-                        $spkRole = $spk->pivot->role ?? 'Pembicara';
-                        $roleBadgeColor = match($spkRole) {
-                          'Moderator' => 'bg-amber-100 text-amber-800',
-                          'MC' => 'bg-purple-100 text-purple-800',
-                          default => 'bg-blue-100 text-blue-900',
+                        $spkRole = $spk->pivot->role ?? 'Pemateri';
+                        $roleBadgeColor = match(true) {
+                          str_starts_with($spkRole, 'Moderator') => 'bg-amber-100 text-amber-800 border-amber-200',
+                          str_starts_with($spkRole, 'MC') => 'bg-purple-100 text-purple-800 border-purple-200',
+                          default => 'bg-blue-100 text-blue-900 border-blue-200',
                         };
                       @endphp
-                      <span class="px-1.5 py-0.5 rounded text-[9px] font-medium {{ $roleBadgeColor }}">
+                      <span class="px-1.5 py-0.5 rounded text-[9px] font-medium border {{ $roleBadgeColor }}">
                         {{ $spkRole }}
                       </span>
                     </div>
@@ -497,17 +505,17 @@
                         {{ strtoupper(substr($spk->name, 0, 2)) }}
                       </div>
                       <div class="flex flex-col min-w-0">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                           <span class="text-xs font-bold text-slate-900 truncate">{{ $spk->name }}</span>
                           @php
-                            $spkRole = $spk->pivot->role ?? 'Pembicara';
-                            $roleBadgeColor = match($spkRole) {
-                              'Moderator' => 'bg-amber-100 text-amber-800',
-                              'MC' => 'bg-purple-100 text-purple-800',
-                              default => 'bg-blue-100 text-blue-900',
+                            $spkRole = $spk->pivot->role ?? 'Pemateri';
+                            $roleBadgeColor = match(true) {
+                              str_starts_with($spkRole, 'Moderator') => 'bg-amber-100 text-amber-800 border-amber-200',
+                              str_starts_with($spkRole, 'MC') => 'bg-purple-100 text-purple-800 border-purple-200',
+                              default => 'bg-blue-100 text-blue-900 border-blue-200',
                             };
                           @endphp
-                          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold {{ $roleBadgeColor }}">
+                          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border {{ $roleBadgeColor }}">
                             {{ $spkRole }}
                           </span>
                         </div>
@@ -564,14 +572,19 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div class="flex flex-col gap-1.5">
                 <label class="font-semibold text-slate-700">Kategori</label>
-                <input type="text" name="category" value="{{ $event->category }}" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+                <select name="category" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+                  <option value="Workshop" {{ $event->category === 'Workshop' ? 'selected' : '' }}>Workshop</option>
+                  <option value="Seminar" {{ $event->category === 'Seminar' ? 'selected' : '' }}>Seminar</option>
+                  <option value="Webinar" {{ $event->category === 'Webinar' ? 'selected' : '' }}>Webinar</option>
+                  <option value="Sertifikasi" {{ $event->category === 'Sertifikasi' ? 'selected' : '' }}>Sertifikasi</option>
+                </select>
               </div>
               <div class="flex flex-col gap-1.5">
                 <label class="font-semibold text-slate-700">Format Pelaksanaan</label>
-                <select name="format" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
-                  <option value="offline" {{ $event->format === 'offline' ? 'selected' : '' }}>Offline (Tatap Muka di Lab)</option>
-                  <option value="hybrid" {{ $event->format === 'hybrid' ? 'selected' : '' }}>Hybrid (Lab & Online)</option>
+                <select name="format" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+                  <option value="offline" {{ $event->format === 'offline' ? 'selected' : '' }}>Offline</option>
                   <option value="online" {{ $event->format === 'online' ? 'selected' : '' }}>Online</option>
+                  <option value="hybrid" {{ $event->format === 'hybrid' ? 'selected' : '' }}>Hybrid</option>
                 </select>
               </div>
               <div class="flex flex-col gap-1.5">
@@ -648,7 +661,7 @@
       <div class="flex items-start justify-between gap-4 pb-4 border-b border-slate-100">
         <div class="flex flex-col">
           <h2 class="text-base sm:text-lg font-bold text-slate-900">Tugaskan Pengisi Acara</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Pilih pengisi acara terdaftar dan tentukan materi sesi untuk acara ini.</p>
+          <p class="text-xs text-slate-500 mt-0.5">Pilih pengisi acara terdaftar dan tentukan perannya untuk acara ini.</p>
         </div>
         <button type="button" onclick="closeAssignSpeakerModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -663,20 +676,27 @@
         <div class="flex flex-col gap-1.5">
           <div class="flex items-center justify-between">
             <label class="font-semibold text-slate-700">Pilih Pengisi Acara</label>
-            <a href="{{ route('organizer.speakers.index') }}" target="_blank" class="text-[11px] text-blue-950 font-semibold hover:underline">+ Tambah Pengisi Acara Baru ↗</a>
+            <a href="{{ route('organizer.speakers.index') }}" target="_blank" class="text-[11px] text-blue-950 font-semibold hover:underline inline-flex items-center gap-1">
+              <span>Kelola Master Pengisi Acara</span>
+              <svg class="size-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </a>
           </div>
           <select name="speaker_id" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
             <option value="">-- Pilih Pengisi Acara --</option>
             @foreach($allMasterSpeakers as $mspk)
-              <option value="{{ $mspk->id }}">{{ $mspk->name }} — {{ $mspk->institution ?? 'Lab ICT' }}</option>
+              <option value="{{ $mspk->id }}">{{ $mspk->name }} ({{ Str::limit($mspk->institution ?? 'Lab ICT', 35) }})</option>
             @endforeach
           </select>
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <label class="font-semibold text-slate-700">Peran</label>
+          <label class="font-semibold text-slate-700">Peran Pengisi Acara</label>
           <select name="role" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-            <option value="Pembicara">Pembicara</option>
+            <option value="Pemateri" selected>Pemateri</option>
             <option value="Moderator">Moderator</option>
             <option value="MC">MC</option>
           </select>
