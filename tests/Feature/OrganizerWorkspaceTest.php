@@ -121,4 +121,49 @@ class OrganizerWorkspaceTest extends TestCase
         $page->assertSee('Siti Aisyah, S.Kom');
         $page->assertSee('Pemateri 2');
     }
+
+    public function test_organizer_cannot_assign_same_speaker_twice_in_same_event(): void
+    {
+        $panitia = User::factory()->create([
+            'role' => 'penyelenggara',
+            'email' => 'panitia3@eventict.id',
+        ]);
+
+        $event = Event::create([
+            'title' => 'Workshop Ethical Hacking',
+            'slug' => 'workshop-ethical-hacking',
+            'category' => 'Workshop',
+            'format' => 'offline',
+            'location' => 'Lab ICT',
+            'start_date' => now()->addDays(4),
+            'end_date' => now()->addDays(4),
+            'start_time' => '09:00:00',
+            'end_time' => '12:00:00',
+            'quota' => 40,
+            'price' => 0,
+            'status' => 'published',
+        ]);
+
+        $spk = \App\Models\Speaker::create([
+            'name' => 'Adhitya Pratama',
+            'email' => 'adhitya@ict.ac.id',
+            'institution' => 'Lab ICT',
+        ]);
+
+        // Assign pertama kali berhasil
+        $res1 = $this->actingAs($panitia)->post(route('organizer.event.speaker.assign', ['event' => $event->id]), [
+            'speaker_id' => $spk->id,
+            'role' => 'Pemateri',
+        ]);
+        $res1->assertRedirect();
+        $this->assertEquals(1, $event->speakers()->count());
+
+        // Assign kedua kali dengan orang yang sama harus gagal
+        $res2 = $this->actingAs($panitia)->post(route('organizer.event.speaker.assign', ['event' => $event->id]), [
+            'speaker_id' => $spk->id,
+            'role' => 'Moderator',
+        ]);
+        $res2->assertSessionHasErrors(['speaker_id']);
+        $this->assertEquals(1, $event->speakers()->count());
+    }
 }

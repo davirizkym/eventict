@@ -102,6 +102,24 @@
       </div>
     @endif
 
+    @if ($errors->any())
+      <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-xs text-rose-800">
+        <svg class="size-4 text-rose-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <div class="flex flex-col gap-1">
+          <span class="font-bold">Gagal Menyimpan Kegiatan:</span>
+          <ul class="list-disc list-inside">
+            @foreach ($errors->all() as $err)
+              <li>{{ $err }}</li>
+            @endforeach
+          </ul>
+        </div>
+      </div>
+    @endif
+
     <div class="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-900 rounded-2xl p-6 sm:p-8 text-white shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
       <div class="flex flex-col gap-2 max-w-2xl">
         <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-white/10 text-blue-200 text-xs font-medium w-fit">
@@ -367,7 +385,7 @@
           <div id="speaker-rows-container" class="flex flex-col gap-2.5">
             <!-- Row -->
             <div class="speaker-row flex items-center gap-2">
-              <select name="speaker_ids[]" required class="flex-1 min-w-0 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
+              <select name="speaker_ids[]" onchange="onSpeakerSelectChange(this)" required class="flex-1 min-w-0 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
                 <option value="" disabled selected>-- Pilih Pengisi Acara --</option>
                 @foreach($masterSpeakers as $spk)
                   <option value="{{ $spk->id }}">{{ $spk->name }} ({{ $spk->institution ?? 'Lab ICT' }})</option>
@@ -472,6 +490,59 @@ function updateSpeakerRoleLabels() {
   });
 }
 
+function onSpeakerSelectChange(selectElem) {
+  const container = document.getElementById('speaker-rows-container');
+  if (!container) return;
+  const currentVal = selectElem.value;
+
+  if (currentVal) {
+    const allSelects = container.querySelectorAll('select[name="speaker_ids[]"]');
+    let duplicateCount = 0;
+    allSelects.forEach(sel => {
+      if (sel.value === currentVal) {
+        duplicateCount++;
+      }
+    });
+
+    if (duplicateCount > 1) {
+      alert('Pengisi acara ini sudah dipilih untuk peran lain di kegiatan ini. Satu orang hanya boleh memiliki 1 peran.');
+      selectElem.value = '';
+    }
+  }
+
+  syncSpeakerOptionsState();
+  updateSpeakerRoleLabels();
+}
+
+function syncSpeakerOptionsState() {
+  const container = document.getElementById('speaker-rows-container');
+  if (!container) return;
+  const allSelects = container.querySelectorAll('select[name="speaker_ids[]"]');
+
+  const selectedValues = new Set();
+  allSelects.forEach(sel => {
+    if (sel.value) selectedValues.add(sel.value);
+  });
+
+  allSelects.forEach(sel => {
+    const cur = sel.value;
+    Array.from(sel.options).forEach(opt => {
+      if (!opt.value) return;
+      if (!opt.hasAttribute('data-orig-text')) {
+        opt.setAttribute('data-orig-text', opt.textContent);
+      }
+      const origText = opt.getAttribute('data-orig-text');
+      if (opt.value !== cur && selectedValues.has(opt.value)) {
+        opt.disabled = true;
+        opt.textContent = origText + ' (Sudah dipilih)';
+      } else {
+        opt.disabled = false;
+        opt.textContent = origText;
+      }
+    });
+  });
+}
+
 function addSpeakerRow() {
   const container = document.getElementById('speaker-rows-container');
   if (!container) return;
@@ -479,7 +550,7 @@ function addSpeakerRow() {
   const div = document.createElement('div');
   div.className = 'speaker-row flex items-center gap-2';
   div.innerHTML = `
-    <select name="speaker_ids[]" required class="flex-1 min-w-0 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
+    <select name="speaker_ids[]" onchange="onSpeakerSelectChange(this)" required class="flex-1 min-w-0 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
       <option value="" disabled selected>-- Pilih Pengisi Acara --</option>
       ${speakerMasterOptions}
     </select>
@@ -499,6 +570,7 @@ function addSpeakerRow() {
   `;
 
   container.appendChild(div);
+  syncSpeakerOptionsState();
   updateSpeakerRoleLabels();
 }
 
@@ -514,9 +586,32 @@ function removeSpeakerRow(btn) {
       const roleSel = row.querySelector('.role-select');
       if (roleSel) roleSel.value = 'Pemateri';
     }
+    syncSpeakerOptionsState();
     updateSpeakerRoleLabels();
   }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const createForm = document.querySelector('#modal-create-event form');
+  if (createForm) {
+    createForm.addEventListener('submit', function(e) {
+      const container = document.getElementById('speaker-rows-container');
+      if (!container) return;
+      const selects = container.querySelectorAll('select[name="speaker_ids[]"]');
+      const seen = new Set();
+      for (const sel of selects) {
+        if (!sel.value) continue;
+        if (seen.has(sel.value)) {
+          e.preventDefault();
+          alert('Pengisi acara tidak boleh dipilih lebih dari 1 kali. Satu orang hanya boleh memiliki 1 peran dalam kegiatan yang sama.');
+          sel.focus();
+          return false;
+        }
+        seen.add(sel.value);
+      }
+    });
+  }
+});
 
 function openCreateEventModal() {
   const m = document.getElementById('modal-create-event');

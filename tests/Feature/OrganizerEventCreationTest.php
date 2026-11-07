@@ -103,4 +103,30 @@ class OrganizerEventCreationTest extends TestCase
         $this->assertEquals('Pemateri 2', $speakerBPivot->role);
         $this->assertEquals('MC', $speakerCPivot->role);
     }
+
+    public function test_pembuatan_kegiatan_gagal_jika_satu_pengisi_acara_dipilih_lebih_dari_satu_kali(): void
+    {
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+
+        $speakerA = Speaker::create(['name' => 'Dr. Budi Santoso', 'institution' => 'Lab ICT']);
+
+        $response = $this->actingAs($panitia)->post('/penyelenggara/event/create', [
+            'title' => 'Workshop Duplikat Narasumber',
+            'category' => 'Workshop',
+            'format' => 'offline',
+            'location' => 'Lab ICT',
+            'start_date' => now()->addDays(5)->toDateString(),
+            'end_date' => now()->addDays(5)->toDateString(),
+            'start_time' => '09:00',
+            'end_time' => '12:00',
+            'quota' => 30,
+            'price' => 0,
+            'description' => 'Test satu orang dengan dua peran.',
+            'speaker_ids' => [$speakerA->id, $speakerA->id],
+            'speaker_roles' => ['Pemateri', 'Moderator'],
+        ]);
+
+        $response->assertSessionHasErrors();
+        $this->assertDatabaseMissing('events', ['title' => 'Workshop Duplikat Narasumber']);
+    }
 }

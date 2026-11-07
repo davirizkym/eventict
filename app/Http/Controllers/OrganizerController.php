@@ -89,7 +89,7 @@ class OrganizerController extends Controller
             'price' => 'required|integer|min:0',
             'description' => 'required|string',
             'speaker_ids' => 'required_without:speaker_id|array|min:1',
-            'speaker_ids.*' => 'required|exists:speakers,id',
+            'speaker_ids.*' => 'required|distinct|exists:speakers,id',
             'speaker_roles' => 'nullable|array',
             'speaker_roles.*' => 'nullable|string|max:50',
             'speaker_topics' => 'nullable|array',
@@ -100,8 +100,17 @@ class OrganizerController extends Controller
             'speaker_ids.required_without' => 'Pengisi acara kegiatan wajib dipilih minimal 1 orang.',
             'speaker_ids.min' => 'Pengisi acara kegiatan wajib dipilih minimal 1 orang.',
             'speaker_ids.*.required' => 'Pengisi acara kegiatan wajib dipilih minimal 1 orang.',
+            'speaker_ids.*.distinct' => 'Satu orang pengisi acara hanya boleh memiliki 1 peran dalam 1 acara (tidak boleh dipilih lebih dari 1 kali).',
             'speaker_ids.*.exists' => 'Pengisi acara yang dipilih tidak valid.',
         ]);
+
+        $speakerIds = $request->input('speaker_ids', []);
+        $filteredSpeakerIds = array_values(array_filter($speakerIds, fn($id) => !empty($id)));
+        if (count($filteredSpeakerIds) !== count(array_unique($filteredSpeakerIds))) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['speaker_ids' => 'Satu orang pengisi acara hanya boleh memiliki 1 peran dalam 1 acara (tidak boleh dipilih lebih dari 1 kali).']);
+        }
 
         $baseSlug = Str::slug($validated['title']);
         $slug = $baseSlug;
@@ -311,6 +320,11 @@ class OrganizerController extends Controller
         ]);
 
         $speaker = Speaker::findOrFail($validated['speaker_id']);
+
+        if ($event->speakers()->where('speakers.id', $speaker->id)->exists()) {
+            return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber'])
+                ->withErrors(['speaker_id' => "Pengisi acara '{$speaker->name}' sudah ditugaskan dalam kegiatan ini. Satu orang hanya boleh memiliki 1 peran."]);
+        }
 
         $rawRole = !empty($validated['role']) ? trim($validated['role']) : 'Pemateri';
         $baseRole = match ($rawRole) {

@@ -211,6 +211,24 @@
         </div>
       @endif
 
+      @if ($errors->any())
+        <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-xs text-rose-800">
+          <svg class="size-4 text-rose-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <div class="flex flex-col gap-1">
+            <span class="font-bold">Perhatian:</span>
+            <ul class="list-disc list-inside">
+              @foreach ($errors->all() as $err)
+                <li>{{ $err }}</li>
+              @endforeach
+            </ul>
+          </div>
+        </div>
+      @endif
+
       @if($tab === 'dashboard')
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between">
@@ -717,10 +735,18 @@
               </svg>
             </a>
           </div>
+          @php
+            $assignedSpeakerIds = $event->speakers->pluck('id')->toArray();
+          @endphp
           <select name="speaker_id" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
             <option value="">-- Pilih Pengisi Acara --</option>
             @foreach($allMasterSpeakers as $mspk)
-              <option value="{{ $mspk->id }}">{{ $mspk->name }} ({{ Str::limit($mspk->institution ?? 'Lab ICT', 35) }})</option>
+              @php
+                $alreadyAssigned = in_array($mspk->id, $assignedSpeakerIds);
+              @endphp
+              <option value="{{ $mspk->id }}" {{ $alreadyAssigned ? 'disabled class=text-slate-400' : '' }}>
+                {{ $mspk->name }} ({{ Str::limit($mspk->institution ?? 'Lab ICT', 35) }}) {{ $alreadyAssigned ? '— [Sudah Ditugaskan]' : '' }}
+              </option>
             @endforeach
           </select>
         </div>
