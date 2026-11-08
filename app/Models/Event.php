@@ -30,6 +30,7 @@ class Event extends Model
         'description',
         'status',
         'organizer_type',
+        'media_partner_id',
         'organizer_name',
         'banner_url',
         'virtual_meeting_url',
@@ -49,6 +50,11 @@ class Event extends Model
     public function categoryRel(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function mediaPartner(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(MediaPartner::class, 'media_partner_id');
     }
 
     public function speakers(): BelongsToMany

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Certificate;
 use App\Models\Event;
+use App\Models\MediaPartner;
 use App\Models\Registration;
 use App\Models\Speaker;
 use Illuminate\Http\Request;
@@ -56,6 +57,7 @@ class OrganizerController extends Controller
         $totalSpeakers = Speaker::count();
         $masterSpeakers = Speaker::orderBy('name', 'asc')->get();
         $masterCategories = Category::orderBy('name', 'asc')->get();
+        $masterMediaPartners = MediaPartner::orderBy('name', 'asc')->get();
 
         return view('organizer.hub', compact(
             'events',
@@ -64,7 +66,8 @@ class OrganizerController extends Controller
             'totalSpeakers',
             'statusFilter',
             'masterSpeakers',
-            'masterCategories'
+            'masterCategories',
+            'masterMediaPartners'
         ));
     }
 
@@ -89,6 +92,7 @@ class OrganizerController extends Controller
             'quota' => 'required|integer|min:1',
             'price' => 'required|integer|min:0',
             'organizer_type' => 'nullable|in:internal,partner',
+            'media_partner_id' => 'nullable|exists:media_partners,id',
             'organizer_name' => 'nullable|string|max:255',
             'description' => 'required|string',
             'speaker_ids' => 'required_without:speaker_id|array|min:1',
@@ -167,7 +171,17 @@ class OrganizerController extends Controller
 
         $eventType = !empty($validated['type']) ? $validated['type'] : 'Workshop';
         $organizerType = $validated['organizer_type'] ?? 'internal';
-        $organizerName = $organizerType === 'partner' ? ($validated['organizer_name'] ?: 'Media Partner') : 'Laboratorium ICT';
+        $mediaPartnerId = null;
+        $organizerName = 'Laboratorium ICT';
+        if ($organizerType === 'partner') {
+            $mediaPartnerId = $validated['media_partner_id'] ?? null;
+            if (!empty($mediaPartnerId)) {
+                $mp = MediaPartner::find($mediaPartnerId);
+                $organizerName = $mp ? $mp->name : ($validated['organizer_name'] ?: 'Media Partner');
+            } else {
+                $organizerName = $validated['organizer_name'] ?: 'Media Partner';
+            }
+        }
 
         $event = Event::create([
             'title' => $validated['title'],
@@ -184,6 +198,7 @@ class OrganizerController extends Controller
             'quota' => $validated['quota'],
             'price' => $validated['price'],
             'organizer_type' => $organizerType,
+            'media_partner_id' => $mediaPartnerId,
             'organizer_name' => $organizerName,
             'description' => $validated['description'],
             'status' => 'published',
@@ -287,6 +302,7 @@ class OrganizerController extends Controller
 
         $allMasterSpeakers = Speaker::orderBy('name', 'asc')->get();
         $allCategories = Category::orderBy('name', 'asc')->get();
+        $allMediaPartners = MediaPartner::orderBy('name', 'asc')->get();
         $otherActiveEvents = Event::where('status', '!=', 'draft')
             ->whereDate('end_date', '>=', now()->toDateString())
             ->where('id', '!=', $event->id)
@@ -304,6 +320,7 @@ class OrganizerController extends Controller
             'totalRevenue',
             'allMasterSpeakers',
             'allCategories',
+            'allMediaPartners',
             'otherActiveEvents'
         ));
     }
@@ -324,6 +341,7 @@ class OrganizerController extends Controller
             'quota' => 'required|integer|min:1',
             'price' => 'required|integer|min:0',
             'organizer_type' => 'nullable|in:internal,partner',
+            'media_partner_id' => 'nullable|exists:media_partners,id',
             'organizer_name' => 'nullable|string|max:255',
             'description' => 'required|string',
             'status' => 'required|in:published,draft,completed',
@@ -366,8 +384,14 @@ class OrganizerController extends Controller
         if (isset($validated['organizer_type'])) {
             if ($validated['organizer_type'] === 'internal') {
                 $validated['organizer_name'] = 'Laboratorium ICT';
-            } elseif (empty($validated['organizer_name'])) {
-                $validated['organizer_name'] = 'Media Partner';
+                $validated['media_partner_id'] = null;
+            } else {
+                if (!empty($validated['media_partner_id'])) {
+                    $mp = MediaPartner::find($validated['media_partner_id']);
+                    $validated['organizer_name'] = $mp ? $mp->name : ($validated['organizer_name'] ?: 'Media Partner');
+                } elseif (empty($validated['organizer_name'])) {
+                    $validated['organizer_name'] = 'Media Partner';
+                }
             }
         }
 
@@ -1106,5 +1130,73 @@ class OrganizerController extends Controller
 
         return redirect()->route('organizer.categories.index')
             ->with('success', "Kategori '{$name}' berhasil dihapus dari sistem.");
+    }
+
+    public function mediaPartnersIndex(Request $request)
+    {
+        $query = MediaPartner::withCount('events');
+
+        if ($request->filled('q')) {
+            $keyword = $request->query('q');
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('institution', 'like', "%{$keyword}%")
+                    ->orWhere('contact_email', 'like', "%{$keyword}%");
+            });
+        }
+
+        $mediaPartners = $query->orderBy('name', 'asc')->paginate(10)->withQueryString();
+
+        return view('organizer.media_partners.index', compact('mediaPartners'));
+    }
+
+    public function mediaPartnersStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:150|unique:media_partners,name',
+            'institution' => 'nullable|string|max:200',
+            'contact_email' => 'nullable|email|max:150',
+        ]);
+
+        $mediaPartner = MediaPartner::create([
+            'name' => trim($validated['name']),
+            'slug' => Str::slug($validated['name']),
+            'institution' => $validated['institution'] ?? null,
+            'contact_email' => $validated['contact_email'] ?? null,
+        ]);
+
+        return redirect()->route('organizer.media_partners.index')
+            ->with('success', "Media Partner '{$mediaPartner->name}' berhasil ditambahkan ke master.");
+    }
+
+    public function mediaPartnersUpdate(Request $request, MediaPartner $mediaPartner)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:150|unique:media_partners,name,' . $mediaPartner->id,
+            'institution' => 'nullable|string|max:200',
+            'contact_email' => 'nullable|email|max:150',
+        ]);
+
+        $mediaPartner->update([
+            'name' => trim($validated['name']),
+            'slug' => Str::slug($validated['name']),
+            'institution' => $validated['institution'] ?? null,
+            'contact_email' => $validated['contact_email'] ?? null,
+        ]);
+
+        Event::where('media_partner_id', $mediaPartner->id)->update(['organizer_name' => $mediaPartner->name]);
+
+        return redirect()->route('organizer.media_partners.index')
+            ->with('success', "Data Media Partner '{$mediaPartner->name}' berhasil diperbarui.");
+    }
+
+    public function mediaPartnersDestroy(MediaPartner $mediaPartner)
+    {
+        $name = $mediaPartner->name;
+        Event::where('media_partner_id', $mediaPartner->id)->update(['media_partner_id' => null]);
+        $mediaPartner->delete();
+
+        return redirect()->route('organizer.media_partners.index')
+            ->with('success', "Media Partner '{$name}' berhasil dihapus dari sistem.");
     }
 }

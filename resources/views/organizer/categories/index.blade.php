@@ -46,6 +46,13 @@
             </svg>
             <span>Pengisi Acara</span>
           </a>
+          <a href="{{ route('organizer.media_partners.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m3 11 18-5v12L3 14v-3z"/>
+              <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
+            </svg>
+            <span>Media Partner</span>
+          </a>
         </nav>
       </div>
 
