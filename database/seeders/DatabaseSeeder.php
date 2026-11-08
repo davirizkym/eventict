@@ -159,6 +159,8 @@ class DatabaseSeeder extends Seeder
                 'sk_number' => '044/PB-IDI/SKP/XI/2026',
                 'description' => 'Simposium akreditasi resmi PB IDI membahas regulasi terbaru praktik telekonsultasi, tanggung jawab hukum tenaga medis, dan standardisasi keamanan rekam medis elektronik terintegrasi SatuSehat.',
                 'status' => 'published',
+                'organizer_type' => 'internal',
+                'organizer_name' => 'Laboratorium ICT',
                 'virtual_meeting_url' => 'https://zoom.us/j/9982440911',
             ]
         );
@@ -180,6 +182,8 @@ class DatabaseSeeder extends Seeder
                 'sk_number' => 'BNSP-TI-2026-881',
                 'description' => 'Pelatihan intensif 32 jam pembelajaran bersertifikasi kompetensi BNSP mengenai pembuatan model deep learning untuk analisis citra radiologi diagnostik dan pemetaan tabular rekam medis.',
                 'status' => 'published',
+                'organizer_type' => 'partner',
+                'organizer_name' => 'Himpunan Mahasiswa Sistem Informasi',
                 'virtual_meeting_url' => 'https://meet.eventict.id/room-ml-32',
             ]
         );
@@ -201,6 +205,8 @@ class DatabaseSeeder extends Seeder
                 'sk_number' => '089/PB-IDI/SKP/XII/2026',
                 'description' => 'Konferensi tahunan pemangku kebijakan rumah sakit dan puskesmas dalam percepatan implementasi rekam medik elektronik serta interoperabilitas data rujukan tingkat lanjut.',
                 'status' => 'published',
+                'organizer_type' => 'internal',
+                'organizer_name' => 'Laboratorium ICT',
             ]
         );
 
@@ -221,6 +227,8 @@ class DatabaseSeeder extends Seeder
                 'sk_number' => 'HK-MED-2026-012',
                 'description' => 'Kajian komprehensif undang-undang pelindungan data pribadi (UU PDP) dalam tata kelola basis data fasilitas kesehatan dan mitigasi risiko kebocoran data medis.',
                 'status' => 'published',
+                'organizer_type' => 'partner',
+                'organizer_name' => 'BEM Fakultas Ilmu Komputer',
                 'virtual_meeting_url' => 'https://zoom.us/j/7721094432',
             ]
         );
@@ -242,6 +250,8 @@ class DatabaseSeeder extends Seeder
                 'sk_number' => 'EKB-STARTUP-2026-005',
                 'description' => 'Strategi validasi ide produk digital, perancangan unit economics, product-market fit, dan teknik pitching pendanaan ventura bagi perintis startup teknologi.',
                 'status' => 'published',
+                'organizer_type' => 'internal',
+                'organizer_name' => 'Laboratorium ICT',
                 'virtual_meeting_url' => 'https://meet.eventict.id/room-bisnis-digital',
             ]
         );

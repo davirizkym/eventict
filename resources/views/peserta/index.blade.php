@@ -337,16 +337,29 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           @forelse($availableEvents as $avEvent)
-            <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between gap-4 hover:border-blue-950 transition">
+            @php
+              $avRemaining = max(0, $avEvent->quota - ($avEvent->registrations_count ?? 0));
+              $isAvFull = $avEvent->quota > 0 && ($avEvent->registrations_count ?? 0) >= $avEvent->quota;
+            @endphp
+            <div class="p-5 bg-white rounded-xl border border-slate-200 flex flex-col justify-between gap-4 hover:border-blue-950 transition">
               <div class="flex flex-col gap-2.5">
                 <div class="flex items-center justify-between gap-2">
-                  <div class="flex items-center gap-1.5">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    @if($isAvFull)
+                      <span class="px-2 py-0.5 bg-rose-50 text-rose-700 text-[10px] font-bold rounded border border-rose-200">
+                        Penuh
+                      </span>
+                    @elseif($avRemaining <= 5 && $avRemaining > 0)
+                      <span class="px-2 py-0.5 bg-amber-50 text-amber-800 text-[10px] font-bold rounded border border-amber-200">
+                        Segera Penuh
+                      </span>
+                    @endif
                     @if($avEvent->skp_points > 0)
                       <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">
                         {{ $avEvent->skp_points }} SKP
                       </span>
                     @endif
-                    <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-medium rounded uppercase">
+                    <span class="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-medium rounded uppercase">
                       {{ $avEvent->format }}
                     </span>
                   </div>
@@ -371,13 +384,31 @@
               </div>
 
               <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
-                <span class="text-[11px] text-slate-500">
-                  Sisa {{ max(0, $avEvent->quota - $avEvent->registrations_count) }} kursi
-                </span>
-                <a href="{{ route('events.register.form', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
-                  <span>Daftar Sesi</span>
-                  <span class="text-sm">&rarr;</span>
-                </a>
+                @if($isAvFull)
+                  <span class="text-[11px] font-semibold text-rose-700">
+                    Kuota Penuh
+                  </span>
+                  <a href="{{ route('events.show', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                    <span>Lihat Sesi</span>
+                    <span class="text-sm">&rarr;</span>
+                  </a>
+                @elseif($avRemaining <= 5 && $avRemaining > 0)
+                  <span class="text-[11px] font-semibold text-amber-700">
+                    Sisa {{ $avRemaining }} kuota lagi
+                  </span>
+                  <a href="{{ route('events.register.form', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
+                    <span>Daftar Sesi</span>
+                    <span class="text-sm">&rarr;</span>
+                  </a>
+                @else
+                  <span class="text-[11px] text-emerald-700 font-medium">
+                    Pendaftaran Terbuka
+                  </span>
+                  <a href="{{ route('events.register.form', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
+                    <span>Daftar Sesi</span>
+                    <span class="text-sm">&rarr;</span>
+                  </a>
+                @endif
               </div>
             </div>
           @empty

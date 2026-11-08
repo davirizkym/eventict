@@ -106,6 +106,16 @@
           <span class="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-blue-50 text-blue-900 border border-blue-100">
             {{ $event->format }}
           </span>
+          @if(($event->organizer_type ?? 'internal') === 'partner')
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+              Partner: {{ $event->organizer_name }}
+            </span>
+          @endif
+          @if($event->quota > 0 && $totalRegistrations >= $event->quota)
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+              Kuota Penuh
+            </span>
+          @endif
         </div>
       </div>
 
@@ -232,13 +242,20 @@
       @if($tab === 'dashboard')
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between">
-            <span class="text-xs text-slate-500 font-medium">Total Peserta Terdaftar</span>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-slate-500 font-medium">Total Peserta Terdaftar</span>
+              @if($event->quota > 0 && $totalRegistrations >= $event->quota)
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                  Penuh
+                </span>
+              @endif
+            </div>
             <div class="flex items-baseline justify-between mt-2">
               <span class="text-xl sm:text-2xl font-bold text-slate-900">{{ $totalRegistrations }}</span>
               <span class="text-xs text-slate-500 font-medium">/ {{ $event->quota }} Kuota</span>
             </div>
             <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-3">
-              <div class="h-full bg-blue-950 rounded-full" style="width: {{ $event->quota > 0 ? min(100, round(($totalRegistrations / $event->quota) * 100)) : 0 }}%"></div>
+              <div class="h-full {{ $event->quota > 0 && $totalRegistrations >= $event->quota ? 'bg-rose-600' : 'bg-blue-950' }} rounded-full" style="width: {{ $event->quota > 0 ? min(100, round(($totalRegistrations / $event->quota) * 100)) : 0 }}%"></div>
             </div>
           </div>
 
@@ -306,22 +323,22 @@
                   <div class="size-10 rounded-lg bg-blue-50 border border-blue-100 text-blue-950 font-bold text-xs flex items-center justify-center shrink-0">
                     {{ strtoupper(substr($spk->name, 0, 2)) }}
                   </div>
-                  <div class="flex flex-col min-w-0">
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                      <span class="text-xs font-semibold text-slate-900 truncate">{{ $spk->name }}</span>
+                  <div class="flex flex-col min-w-0 flex-1">
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-xs font-semibold text-slate-900 truncate" title="{{ $spk->name }}">{{ $spk->name }}</span>
                       @php
                         $spkRole = $spk->pivot->role ?? 'Pemateri';
                         $roleBadgeColor = match(true) {
-                          str_starts_with($spkRole, 'Moderator') => 'bg-amber-100 text-amber-800 border-amber-200',
-                          str_starts_with($spkRole, 'MC') => 'bg-purple-100 text-purple-800 border-purple-200',
-                          default => 'bg-blue-100 text-blue-900 border-blue-200',
+                          str_starts_with($spkRole, 'Moderator') => 'bg-amber-50 text-amber-700 border-amber-200',
+                          str_starts_with($spkRole, 'MC') => 'bg-purple-50 text-purple-700 border-purple-200',
+                          default => 'bg-blue-50 text-blue-950 border-blue-100',
                         };
                       @endphp
-                      <span class="px-1.5 py-0.5 rounded text-[9px] font-medium border {{ $roleBadgeColor }}">
+                      <span class="px-1.5 py-0.5 rounded text-[9px] font-medium border shrink-0 {{ $roleBadgeColor }}">
                         {{ $spkRole }}
                       </span>
                     </div>
-                    <span class="text-[11px] text-slate-500 truncate">{{ $spk->pivot->topic ?? $spk->institution }}</span>
+                    <span class="text-[11px] text-slate-500 truncate mt-0.5" title="{{ $spk->pivot->topic ?? $spk->institution }}">{{ $spk->pivot->topic ?? $spk->institution }}</span>
                   </div>
                 </div>
               @endforeach
@@ -531,13 +548,13 @@
               @foreach($event->speakers as $spk)
                 <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between gap-3">
                   <div class="flex items-start justify-between gap-3">
-                    <div class="flex items-center gap-3 min-w-0">
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
                       <div class="size-11 rounded-xl bg-blue-50 border border-blue-100 text-blue-950 font-bold text-xs flex items-center justify-center shrink-0">
                         {{ strtoupper(substr($spk->name, 0, 2)) }}
                       </div>
-                      <div class="flex flex-col min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap">
-                          <span class="text-xs font-bold text-slate-900 truncate">{{ $spk->name }}</span>
+                      <div class="flex flex-col min-w-0 flex-1">
+                        <div class="flex items-center justify-between gap-2">
+                          <span class="text-xs font-bold text-slate-900 truncate" title="{{ $spk->name }}">{{ $spk->name }}</span>
                           @php
                             $spkRole = $spk->pivot->role ?? 'Pemateri';
                             $roleBadgeColor = match(true) {
@@ -546,11 +563,11 @@
                               default => 'bg-blue-100 text-blue-900 border-blue-200',
                             };
                           @endphp
-                          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border {{ $roleBadgeColor }}">
+                          <span class="px-2 py-0.5 rounded text-[10px] font-semibold border shrink-0 {{ $roleBadgeColor }}">
                             {{ $spkRole }}
                           </span>
                         </div>
-                        <span class="text-[11px] text-slate-500 truncate">{{ $spk->institution }}</span>
+                        <span class="text-[11px] text-slate-500 truncate mt-0.5" title="{{ $spk->institution }}">{{ $spk->institution }}</span>
                       </div>
                     </div>
 
@@ -631,7 +648,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="flex flex-col gap-1.5">
                 <label class="font-semibold text-slate-700">Format Pelaksanaan</label>
-                <select name="format" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+                <select name="format" onchange="toggleVirtualMeetingUrl(this.value)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
                   <option value="offline" {{ $event->format === 'offline' ? 'selected' : '' }}>Offline</option>
                   <option value="online" {{ $event->format === 'online' ? 'selected' : '' }}>Online</option>
                   <option value="hybrid" {{ $event->format === 'hybrid' ? 'selected' : '' }}>Hybrid</option>
@@ -647,6 +664,20 @@
               </div>
             </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="font-semibold text-slate-700">Penyelenggara Kegiatan</label>
+                <select name="organizer_type" onchange="toggleEditPartnerName(this.value)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+                  <option value="internal" {{ ($event->organizer_type ?? 'internal') === 'internal' ? 'selected' : '' }}>Internal (Laboratorium ICT)</option>
+                  <option value="partner" {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'selected' : '' }}>Media Partner (Himpunan / BEM / Eksternal)</option>
+                </select>
+              </div>
+              <div id="edit-partner-name-container" class="{{ ($event->organizer_type ?? 'internal') === 'partner' ? '' : 'hidden' }} flex flex-col gap-1.5">
+                <label class="font-semibold text-slate-700">Nama Media Partner / Penyelenggara</label>
+                <input type="text" name="organizer_name" value="{{ $event->organizer_name }}" placeholder="Misal: Himpunan Mahasiswa Sistem Informasi" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+              </div>
+            </div>
+
             <div class="flex flex-col gap-1.5">
               <label class="font-semibold text-slate-700">Lokasi / Ruang Lab</label>
               <input type="text" name="location" value="{{ $event->location }}" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
@@ -655,11 +686,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="flex flex-col gap-1.5">
                 <label class="font-semibold text-slate-700">Tanggal Mulai</label>
-                <input type="date" name="start_date" value="{{ \Carbon\Carbon::parse($event->start_date)->format('Y-m-d') }}" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+                <input type="date" name="start_date" min="{{ date('Y-m-d') }}" value="{{ \Carbon\Carbon::parse($event->start_date)->format('Y-m-d') }}" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
               </div>
               <div class="flex flex-col gap-1.5">
                 <label class="font-semibold text-slate-700">Tanggal Selesai</label>
-                <input type="date" name="end_date" value="{{ \Carbon\Carbon::parse($event->end_date)->format('Y-m-d') }}" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+                <input type="date" name="end_date" min="{{ date('Y-m-d') }}" value="{{ \Carbon\Carbon::parse($event->end_date)->format('Y-m-d') }}" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
               </div>
             </div>
 
@@ -685,8 +716,8 @@
               </div>
             </div>
 
-            <div class="flex flex-col gap-1.5">
-              <label class="font-semibold text-slate-700">Tautan Pertemuan Virtual (Jika Online/Hybrid)</label>
+            <div id="virtual-meeting-container" class="flex flex-col gap-1.5 {{ in_array($event->format, ['online', 'hybrid']) ? '' : 'hidden' }}">
+              <label class="font-semibold text-slate-700">Tautan Pertemuan Virtual</label>
               <input type="url" name="virtual_meeting_url" value="{{ $event->virtual_meeting_url }}" placeholder="https://meet.google.com/..." class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
             </div>
 
@@ -738,17 +769,26 @@
           @php
             $assignedSpeakerIds = $event->speakers->pluck('id')->toArray();
           @endphp
-          <select name="speaker_id" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-            <option value="">-- Pilih Pengisi Acara --</option>
+          <select id="assign-speaker-select" name="speaker_id" onchange="onAssignSpeakerChange(this)" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer transition">
+            <option value="" disabled selected>-- Pilih Pengisi Acara --</option>
             @foreach($allMasterSpeakers as $mspk)
               @php
                 $alreadyAssigned = in_array($mspk->id, $assignedSpeakerIds);
               @endphp
-              <option value="{{ $mspk->id }}" {{ $alreadyAssigned ? 'disabled class=text-slate-400' : '' }}>
-                {{ $mspk->name }} ({{ Str::limit($mspk->institution ?? 'Lab ICT', 35) }}) {{ $alreadyAssigned ? '— [Sudah Ditugaskan]' : '' }}
+              <option value="{{ $mspk->id }}" data-institution="{{ $mspk->institution ?? 'Lab ICT' }}" {{ $alreadyAssigned ? 'disabled class=text-slate-400' : '' }}>
+                {{ $mspk->name }}{{ $alreadyAssigned ? ' — (Sudah Ditugaskan)' : '' }}
               </option>
             @endforeach
           </select>
+          <div id="assign-speaker-inst-badge" class="hidden text-[11px] text-slate-500 font-normal truncate px-1 items-center gap-1.5 mt-0.5">
+            <svg class="size-3 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
+              <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/>
+              <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>
+              <path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+            </svg>
+            <span id="assign-speaker-inst-text" class="truncate font-medium text-slate-600"></span>
+          </div>
         </div>
 
         <div class="flex flex-col gap-1.5">
@@ -779,6 +819,42 @@
 </div>
 
 <script>
+function onAssignSpeakerChange(selectEl) {
+  const badge = document.getElementById('assign-speaker-inst-badge');
+  const textEl = document.getElementById('assign-speaker-inst-text');
+  if (!badge || !textEl) return;
+  const opt = selectEl.options[selectEl.selectedIndex];
+  const inst = opt ? opt.getAttribute('data-institution') : '';
+  if (inst) {
+    textEl.textContent = inst;
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
+  } else {
+    badge.classList.add('hidden');
+    badge.classList.remove('flex');
+  }
+}
+
+function toggleEditPartnerName(val) {
+  const container = document.getElementById('edit-partner-name-container');
+  if (!container) return;
+  if (val === 'partner') {
+    container.classList.remove('hidden');
+  } else {
+    container.classList.add('hidden');
+  }
+}
+
+function toggleVirtualMeetingUrl(format) {
+  const container = document.getElementById('virtual-meeting-container');
+  if (!container) return;
+  if (format === 'online' || format === 'hybrid') {
+    container.classList.remove('hidden');
+  } else {
+    container.classList.add('hidden');
+  }
+}
+
 function openAssignSpeakerModal() {
   const m = document.getElementById('modal-assign-speaker');
   m.classList.remove('hidden');
@@ -789,6 +865,11 @@ function closeAssignSpeakerModal() {
   const m = document.getElementById('modal-assign-speaker');
   m.classList.add('hidden');
   m.classList.remove('flex');
+  const selectEl = document.getElementById('assign-speaker-select');
+  if (selectEl) {
+    selectEl.selectedIndex = 0;
+    onAssignSpeakerChange(selectEl);
+  }
 }
 </script>
 @endsection

@@ -34,12 +34,33 @@
           </svg>
           <span>Sertifikat Resmi</span>
         </span>
+        @php
+          $remaining = max(0, $event->quota - $registeredCount);
+        @endphp
+        @if($isFull)
+          <span class="px-3 py-1 bg-rose-500/30 text-rose-200 border border-rose-400/40 text-xs font-semibold rounded-md shadow-xs">
+            Kuota Penuh
+          </span>
+        @elseif($remaining <= 5 && $remaining > 0)
+          <span class="px-3 py-1 bg-amber-500/30 text-amber-200 border border-amber-400/40 text-xs font-semibold rounded-md shadow-xs">
+            Tersisa {{ $remaining }} Tempat Lagi
+          </span>
+        @endif
         <span class="px-3 py-1 bg-white/10 text-white/90 text-xs font-medium rounded-md uppercase tracking-wider">
           {{ $event->category }}
         </span>
         <span class="px-3 py-1 bg-white/10 text-white/90 text-xs font-medium rounded-md capitalize">
           Format {{ $event->format }}
         </span>
+        @if(($event->organizer_type ?? 'internal') === 'partner')
+          <span class="px-3 py-1 bg-white/20 text-white text-xs font-semibold rounded-md">
+            Media Partner: {{ $event->organizer_name }}
+          </span>
+        @else
+          <span class="px-3 py-1 bg-white/10 text-white/90 text-xs font-medium rounded-md">
+            Laboratorium ICT
+          </span>
+        @endif
         @if($event->sk_number)
           <span class="px-3 py-1 bg-white/10 text-slate-300 text-xs font-mono rounded-md">
             No. SK: {{ $event->sk_number }}
@@ -51,7 +72,17 @@
         {{ $event->title }}
       </h1>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-white/10 text-xs text-slate-300">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-white/10 text-xs text-slate-300">
+        <div class="flex items-center gap-2.5">
+          <svg class="size-4 text-blue-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <div class="min-w-0">
+            <div class="text-[11px] text-slate-400">Penyelenggara</div>
+            <div class="text-white font-medium truncate">{{ ($event->organizer_type ?? 'internal') === 'partner' ? $event->organizer_name : 'Laboratorium ICT' }}</div>
+          </div>
+        </div>
+
         <div class="flex items-center gap-2.5">
           <svg class="size-4 text-blue-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
@@ -178,26 +209,51 @@
             </div>
           </div>
 
-          <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-2">
-            <div class="flex justify-between text-xs font-medium text-slate-700">
-              <span>Status Ketersediaan</span>
-              <span>{{ $registeredCount }} / {{ $event->quota }} Kursi</span>
+          @if($isFull)
+            <div class="p-3.5 bg-rose-50 rounded-xl border border-rose-200 flex flex-col gap-1.5">
+              <div class="flex justify-between items-center text-xs font-medium text-rose-900">
+                <span>Status Pendaftaran</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700">Penuh</span>
+              </div>
+              <div class="text-[11px] text-rose-700 font-medium">
+                Kuota kegiatan telah terpenuhi. Pendaftaran telah ditutup.
+              </div>
             </div>
-            <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-              <div class="bg-blue-950 h-1.5 rounded-full" style="width: {{ min(100, round(($registeredCount / max(1, $event->quota)) * 100)) }}%"></div>
+          @elseif($remaining <= 5 && $remaining > 0)
+            <div class="p-3.5 bg-amber-50 rounded-xl border border-amber-200 flex flex-col gap-1.5">
+              <div class="flex justify-between items-center text-xs font-medium text-amber-900">
+                <span>Status Pendaftaran</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Segera Habis</span>
+              </div>
+              <div class="text-[11px] text-amber-800 font-medium">
+                Hampir penuh! Hanya tersisa {{ $remaining }} tempat lagi untuk sesi ini.
+              </div>
             </div>
-            <div class="text-[11px] text-slate-500">
-              {{ max(0, $event->quota - $registeredCount) }} kursi tersisa
+          @else
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-1.5">
+              <div class="flex justify-between items-center text-xs font-medium text-slate-700">
+                <span>Status Pendaftaran</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Terbuka</span>
+              </div>
+              <div class="text-[11px] text-slate-500">
+                Pendaftaran masih dibuka untuk peserta umum dan profesional.
+              </div>
             </div>
-          </div>
+          @endif
 
           @guest
-            <a href="{{ route('login') }}" class="w-full py-3 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold font-['Poppins'] transition text-center shadow-xs">
-              Masuk untuk Mendaftar Sesi
-            </a>
-            <div class="text-center text-[11px] text-slate-500">
-              Belum punya akun? <a href="{{ route('register') }}" class="text-blue-950 font-semibold hover:underline">Daftar Peserta</a>
-            </div>
+            @if($isFull)
+              <button disabled class="w-full py-3 bg-slate-200 text-slate-500 rounded-xl text-xs font-semibold font-['Poppins'] cursor-not-allowed text-center">
+                Pendaftaran Ditutup (Kuota Penuh)
+              </button>
+            @else
+              <a href="{{ route('login') }}" class="w-full py-3 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold font-['Poppins'] transition text-center shadow-xs">
+                Masuk untuk Mendaftar Sesi
+              </a>
+              <div class="text-center text-[11px] text-slate-500">
+                Belum punya akun? <a href="{{ route('register') }}" class="text-blue-950 font-semibold hover:underline">Daftar Peserta</a>
+              </div>
+            @endif
           @else
             @if(Auth::user()->role === 'penyelenggara')
               <a href="{{ route('organizer.dashboard') }}" class="w-full py-3 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold font-['Poppins'] transition text-center shadow-xs">

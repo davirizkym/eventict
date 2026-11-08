@@ -327,9 +327,16 @@
             </div>
           </div>
 
+          @php
+            $regRemaining = max(0, $event->quota - $registeredCount);
+          @endphp
           <div class="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between text-xs">
-            <span class="text-slate-300">Sisa Kuota Kursi</span>
-            <span class="font-bold text-white">{{ max(0, $event->quota - $registeredCount) }} / {{ $event->quota }} Kursi</span>
+            <span class="text-slate-300">Ketersediaan</span>
+            @if($regRemaining <= 5 && $regRemaining > 0)
+              <span class="font-semibold text-amber-300">Slot Terbatas: Sisa {{ $regRemaining }} pendaftar lagi</span>
+            @else
+              <span class="font-medium text-emerald-300">Pendaftaran Dibuka</span>
+            @endif
           </div>
         </div>
 

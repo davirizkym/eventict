@@ -76,12 +76,31 @@
                       <span class="px-3 py-1 bg-blue-500/20 text-blue-200 border border-blue-400/30 rounded-full text-xs font-semibold font-['Poppins']">
                         Acara Terdekat Laboratorium ICT
                       </span>
+                      @php
+                        $landRegCount = $event->registrations_count ?? $event->registrations()->count();
+                        $landRemaining = max(0, $event->quota - $landRegCount);
+                        $isEventFull = $event->quota > 0 && $landRegCount >= $event->quota;
+                      @endphp
+                      @if($isEventFull)
+                        <span class="px-2.5 py-1 bg-rose-500/30 text-rose-200 border border-rose-400/40 rounded-full text-xs font-semibold font-['Poppins'] shadow-xs">
+                          Kuota Penuh
+                        </span>
+                      @elseif($landRemaining <= 5 && $landRemaining > 0)
+                        <span class="px-2.5 py-1 bg-amber-500/30 text-amber-200 border border-amber-400/30 rounded-full text-xs font-semibold font-['Poppins'] shadow-xs">
+                          Sisa {{ $landRemaining }} Slot Pendaftaran
+                        </span>
+                      @endif
                       <span class="px-2.5 py-1 bg-white/10 text-white/90 rounded-full text-xs font-medium font-['Poppins'] uppercase tracking-wider">
                         {{ $event->format }} Event
                       </span>
                       <span class="px-2.5 py-1 bg-white/10 text-white/90 rounded-full text-xs font-medium font-['Poppins']">
                         {{ $event->category }}
                       </span>
+                      @if(($event->organizer_type ?? 'internal') === 'partner')
+                        <span class="px-2.5 py-1 bg-white/20 text-white rounded-full text-xs font-semibold font-['Poppins']">
+                          Media Partner: {{ $event->organizer_name }}
+                        </span>
+                      @endif
                     </div>
 
                     <h2 class="text-white text-2xl sm:text-3xl lg:text-4xl font-bold font-['Poppins'] leading-tight tracking-tight mt-1">
@@ -179,7 +198,7 @@
                         </svg>
                       </div>
                       <span class="text-white text-xs font-semibold font-['Poppins']">Poster Kegiatan</span>
-                      <span class="text-slate-400 text-[11px] font-normal font-['Poppins'] mt-1">Laboratorium ICT</span>
+                      <span class="text-slate-400 text-[11px] font-normal font-['Poppins'] mt-1">{{ ($event->organizer_type ?? 'internal') === 'partner' ? $event->organizer_name : 'Laboratorium ICT' }}</span>
                       <div class="mt-4 px-3 py-1 rounded-full bg-white/10 text-slate-300 text-[10px] font-medium font-['Poppins'] uppercase tracking-wider">
                         {{ $event->format }} Event
                       </div>

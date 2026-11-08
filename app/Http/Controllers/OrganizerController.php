@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\Registration;
 use App\Models\Speaker;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -87,6 +88,8 @@ class OrganizerController extends Controller
             'end_time' => 'required',
             'quota' => 'required|integer|min:1',
             'price' => 'required|integer|min:0',
+            'organizer_type' => 'nullable|in:internal,partner',
+            'organizer_name' => 'nullable|string|max:255',
             'description' => 'required|string',
             'speaker_ids' => 'required_without:speaker_id|array|min:1',
             'speaker_ids.*' => 'required|distinct|exists:speakers,id',
@@ -97,12 +100,36 @@ class OrganizerController extends Controller
             'speaker_id' => 'nullable|exists:speakers,id',
             'speaker_topic' => 'nullable|string|max:255',
         ], [
+            'title.required' => 'Judul kegiatan wajib diisi.',
+            'format.required' => 'Format kegiatan (online/offline/hybrid) wajib dipilih.',
+            'location.required' => 'Lokasi atau link platform kegiatan wajib diisi.',
+            'start_date.required' => 'Tanggal mulai kegiatan wajib diisi.',
+            'start_date.date' => 'Format tanggal mulai kegiatan tidak valid.',
+            'end_date.required' => 'Tanggal selesai kegiatan wajib diisi.',
+            'end_date.date' => 'Format tanggal selesai kegiatan tidak valid.',
+            'end_date.after_or_equal' => 'Tanggal selesai kegiatan harus sama dengan atau setelah tanggal mulai.',
+            'start_time.required' => 'Jam mulai kegiatan wajib diisi.',
+            'end_time.required' => 'Jam selesai kegiatan wajib diisi.',
+            'quota.required' => 'Target kuota peserta wajib diisi.',
+            'quota.integer' => 'Target kuota peserta harus berupa angka bulat.',
+            'quota.min' => 'Target kuota peserta minimal 1 orang.',
+            'price.required' => 'Biaya investasi / harga tiket wajib diisi.',
+            'price.integer' => 'Biaya investasi harus berupa angka.',
+            'price.min' => 'Biaya investasi tidak boleh bernilai negatif.',
+            'description.required' => 'Deskripsi rincian kegiatan wajib diisi.',
             'speaker_ids.required_without' => 'Pengisi acara kegiatan wajib dipilih minimal 1 orang.',
             'speaker_ids.min' => 'Pengisi acara kegiatan wajib dipilih minimal 1 orang.',
             'speaker_ids.*.required' => 'Pengisi acara kegiatan wajib dipilih minimal 1 orang.',
             'speaker_ids.*.distinct' => 'Satu orang pengisi acara hanya boleh memiliki 1 peran dalam 1 acara (tidak boleh dipilih lebih dari 1 kali).',
             'speaker_ids.*.exists' => 'Pengisi acara yang dipilih tidak valid.',
         ]);
+
+        $startDateTime = Carbon::parse($validated['start_date'] . ' ' . $validated['start_time']);
+        if ($startDateTime->isPast()) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['start_date' => 'Jadwal pelaksanaan kegiatan tidak boleh sebelum waktu saat ini.']);
+        }
 
         $speakerIds = $request->input('speaker_ids', []);
         $filteredSpeakerIds = array_values(array_filter($speakerIds, fn($id) => !empty($id)));
@@ -139,6 +166,8 @@ class OrganizerController extends Controller
         }
 
         $eventType = !empty($validated['type']) ? $validated['type'] : 'Workshop';
+        $organizerType = $validated['organizer_type'] ?? 'internal';
+        $organizerName = $organizerType === 'partner' ? ($validated['organizer_name'] ?: 'Media Partner') : 'Laboratorium ICT';
 
         $event = Event::create([
             'title' => $validated['title'],
@@ -154,6 +183,8 @@ class OrganizerController extends Controller
             'end_time' => $validated['end_time'],
             'quota' => $validated['quota'],
             'price' => $validated['price'],
+            'organizer_type' => $organizerType,
+            'organizer_name' => $organizerName,
             'description' => $validated['description'],
             'status' => 'published',
             'skp_points' => 0,
@@ -292,15 +323,51 @@ class OrganizerController extends Controller
             'end_time' => 'required',
             'quota' => 'required|integer|min:1',
             'price' => 'required|integer|min:0',
+            'organizer_type' => 'nullable|in:internal,partner',
+            'organizer_name' => 'nullable|string|max:255',
             'description' => 'required|string',
             'status' => 'required|in:published,draft,completed',
             'virtual_meeting_url' => 'nullable|url|max:255',
+        ], [
+            'title.required' => 'Judul kegiatan wajib diisi.',
+            'format.required' => 'Format kegiatan (online/offline/hybrid) wajib dipilih.',
+            'location.required' => 'Lokasi atau link platform kegiatan wajib diisi.',
+            'start_date.required' => 'Tanggal mulai kegiatan wajib diisi.',
+            'start_date.date' => 'Format tanggal mulai kegiatan tidak valid.',
+            'end_date.required' => 'Tanggal selesai kegiatan wajib diisi.',
+            'end_date.date' => 'Format tanggal selesai kegiatan tidak valid.',
+            'end_date.after_or_equal' => 'Tanggal selesai kegiatan harus sama dengan atau setelah tanggal mulai.',
+            'start_time.required' => 'Jam mulai kegiatan wajib diisi.',
+            'end_time.required' => 'Jam selesai kegiatan wajib diisi.',
+            'quota.required' => 'Target kuota peserta wajib diisi.',
+            'quota.integer' => 'Target kuota peserta harus berupa angka bulat.',
+            'quota.min' => 'Target kuota peserta minimal 1 orang.',
+            'price.required' => 'Biaya investasi / harga tiket wajib diisi.',
+            'price.integer' => 'Biaya investasi harus berupa angka.',
+            'price.min' => 'Biaya investasi tidak boleh bernilai negatif.',
+            'description.required' => 'Deskripsi rincian kegiatan wajib diisi.',
+            'status.required' => 'Status kegiatan wajib dipilih.',
         ]);
+
+        $startDateTime = Carbon::parse($validated['start_date'] . ' ' . $validated['start_time']);
+        if ($startDateTime->isPast() && $event->status !== 'completed') {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['start_date' => 'Jadwal pelaksanaan kegiatan tidak boleh sebelum waktu saat ini.']);
+        }
 
         if (!empty($validated['category_id'])) {
             $cat = Category::find($validated['category_id']);
             if ($cat) {
                 $validated['category'] = $cat->name;
+            }
+        }
+
+        if (isset($validated['organizer_type'])) {
+            if ($validated['organizer_type'] === 'internal') {
+                $validated['organizer_name'] = 'Laboratorium ICT';
+            } elseif (empty($validated['organizer_name'])) {
+                $validated['organizer_name'] = 'Media Partner';
             }
         }
 

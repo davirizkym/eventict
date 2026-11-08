@@ -13,7 +13,7 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Event::with('speakers')->where('status', '!=', 'draft');
+        $query = Event::with('speakers')->withCount('registrations')->where('status', '!=', 'draft');
 
         if ($request->filled('q')) {
             $keyword = $request->query('q');
@@ -58,7 +58,7 @@ class EventController extends Controller
 
     public function catalog(Request $request)
     {
-        $query = Event::with('speakers')->where('status', '!=', 'draft');
+        $query = Event::with('speakers')->withCount('registrations')->where('status', '!=', 'draft');
 
         if ($request->filled('q')) {
             $keyword = $request->query('q');
