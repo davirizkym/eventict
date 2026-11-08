@@ -32,8 +32,6 @@
 
     <div class="flex flex-col gap-3">
       <span class="text-white text-sm font-semibold font-['Poppins']">Pusat Bantuan & Kontak</span>
-      <a href="{{ route('peserta.dashboard') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Portal Peserta & Mahasiswa</a>
-      <a href="{{ route('login') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Akses Panitia / Asisten Lab</a>
       <span class="text-slate-300 text-xs font-normal font-['Poppins']">help@eventict.id</span>
       <span class="text-slate-400 text-xs font-normal font-['Poppins']">Senin–Jumat, 08:00–17:00 WIB</span>
     </div>
