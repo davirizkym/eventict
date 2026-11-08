@@ -81,6 +81,11 @@
 
         <div class="self-stretch grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           @forelse($events as $event)
+            @php
+              $regCount = $event->registrations_count ?? $event->registrations()->count();
+              $remaining = max(0, $event->quota - $regCount);
+              $isFull = $event->quota > 0 && $regCount >= $event->quota;
+            @endphp
             <div class="bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col justify-between overflow-hidden hover:shadow-lg hover:-translate-y-1 transition duration-200 group">
               <div>
                 <div class="self-stretch h-52 relative bg-gradient-to-br from-[#142D4E] to-[#0A192F] p-6 flex flex-col justify-between overflow-hidden">
@@ -88,10 +93,26 @@
                     <div class="px-2.5 py-1 bg-blue-500/20 backdrop-blur-md rounded-md border border-blue-400/30 flex items-center gap-1.5">
                       <span class="text-blue-100 text-xs font-semibold font-['Poppins']">Sertifikat Resmi</span>
                     </div>
-                    <span class="px-2 py-0.5 bg-white/10 backdrop-blur-md text-white/90 text-[10px] font-medium rounded uppercase tracking-wider">{{ $event->category }}</span>
+                    <div class="flex items-center gap-1.5">
+                      @if($isFull)
+                        <span class="px-2 py-0.5 bg-rose-600 text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs">
+                          Penuh
+                        </span>
+                      @elseif($remaining <= 5 && $remaining > 0)
+                        <span class="px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs">
+                          Sisa {{ $remaining }} Tempat
+                        </span>
+                      @endif
+                      <span class="px-2 py-0.5 bg-white/10 backdrop-blur-md text-white/90 text-[10px] font-medium rounded uppercase tracking-wider">{{ $event->category }}</span>
+                    </div>
                   </div>
-                  <div class="relative z-10">
+                  <div class="relative z-10 flex items-center justify-between">
                     <span class="text-white/60 text-xs font-medium uppercase tracking-wider capitalize">{{ $event->format }} Event</span>
+                    @if(($event->organizer_type ?? 'internal') === 'partner')
+                      <span class="px-2 py-0.5 bg-white/20 backdrop-blur-md text-white text-[10px] font-semibold rounded">
+                        Media Partner
+                      </span>
+                    @endif
                   </div>
                 </div>
 
@@ -115,9 +136,14 @@
                     </div>
                   </div>
 
-                  <h3 class="text-slate-900 text-base font-semibold font-['Poppins'] leading-snug line-clamp-2 group-hover:text-blue-900 transition">
-                    {{ $event->title }}
-                  </h3>
+                  <div>
+                    <span class="text-[11px] font-medium text-slate-500 font-['Poppins']">
+                      {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'Media Partner: ' . $event->organizer_name : 'Laboratorium ICT' }}
+                    </span>
+                    <h3 class="text-slate-900 text-base font-semibold font-['Poppins'] leading-snug line-clamp-2 group-hover:text-blue-900 transition mt-0.5">
+                      {{ $event->title }}
+                    </h3>
+                  </div>
 
                   @if($event->speakers->isNotEmpty())
                     <div class="flex items-center gap-2.5 pt-1">
@@ -140,10 +166,20 @@
                   <span class="text-slate-900 font-semibold text-sm font-['Poppins']">
                     {{ $event->price == 0 ? 'Gratis' : 'Rp ' . number_format($event->price, 0, ',', '.') }}
                   </span>
-                  <span class="text-slate-500 text-[10px] font-normal font-['Poppins']">Kuota {{ $event->quota }} Kursi</span>
+                  @if($isFull)
+                    <span class="text-rose-600 font-semibold text-[11px] font-['Poppins']">
+                      Kuota Penuh
+                    </span>
+                  @elseif($remaining <= 5 && $remaining > 0)
+                    <span class="text-amber-700 font-semibold text-[11px] font-['Poppins']">
+                      Tersisa {{ $remaining }} slot lagi
+                    </span>
+                  @else
+                    <span class="text-slate-500 text-[10px] font-normal font-['Poppins']">Pendaftaran Terbuka</span>
+                  @endif
                 </div>
                 <div class="flex items-center gap-2">
-                  <a href="{{ route('events.show', $event->slug) }}" class="px-3.5 py-2 bg-blue-950 text-white rounded-lg flex items-center gap-1.5 text-xs font-semibold font-['Poppins'] hover:bg-blue-900 transition">
+                  <a href="{{ route('events.show', $event->slug) }}" class="px-3.5 py-2 {{ $isFull ? 'bg-slate-700 hover:bg-slate-800' : 'bg-blue-950 hover:bg-blue-900' }} text-white rounded-lg flex items-center gap-1.5 text-xs font-semibold font-['Poppins'] transition">
                     <span>Lihat Sesi</span>
                     <span>&rarr;</span>
                   </a>

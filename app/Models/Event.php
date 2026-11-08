@@ -29,6 +29,8 @@ class Event extends Model
         'sk_number',
         'description',
         'status',
+        'organizer_type',
+        'organizer_name',
         'banner_url',
         'virtual_meeting_url',
     ];

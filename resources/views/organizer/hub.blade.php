@@ -195,6 +195,7 @@
           @php
             $isPast = \Carbon\Carbon::parse($evt->end_date)->isPast();
             $quotaPct = $evt->quota > 0 ? min(100, round(($evt->registrations_count / $evt->quota) * 100)) : 0;
+            $isFull = $evt->quota > 0 && $evt->registrations_count >= $evt->quota;
           @endphp
           <div class="bg-white rounded-2xl border border-slate-200 hover:border-blue-900 hover:shadow-md transition duration-200 flex flex-col justify-between overflow-hidden group">
             <div class="p-6 flex flex-col gap-4">
@@ -206,11 +207,20 @@
                   <span class="px-2 py-0.5 rounded-md text-[10px] font-medium uppercase bg-slate-100 text-slate-700">
                     {{ $evt->format }}
                   </span>
+                  @if(($evt->organizer_type ?? 'internal') === 'partner')
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                      Partner: {{ $evt->organizer_name }}
+                    </span>
+                  @endif
                 </div>
 
                 @if($isPast)
                   <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
                     Selesai
+                  </span>
+                @elseif($isFull)
+                  <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                    Penuh
                   </span>
                 @else
                   <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -244,10 +254,15 @@
               <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
                 <div class="flex items-center justify-between text-xs">
                   <span class="text-slate-500">Kuota Terisi</span>
-                  <span class="font-semibold text-slate-900">{{ $evt->registrations_count }} / {{ $evt->quota }} Peserta ({{ $quotaPct }}%)</span>
+                  <div class="flex items-center gap-1.5">
+                    @if($isFull)
+                      <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-rose-100 text-rose-700">Penuh</span>
+                    @endif
+                    <span class="font-semibold text-slate-900">{{ $evt->registrations_count }} / {{ $evt->quota }} Peserta ({{ $quotaPct }}%)</span>
+                  </div>
                 </div>
                 <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div class="h-full bg-blue-950 rounded-full transition-all" style="width: {{ $quotaPct }}%"></div>
+                  <div class="h-full {{ $isFull ? 'bg-rose-600' : 'bg-blue-950' }} rounded-full transition-all" style="width: {{ $quotaPct }}%"></div>
                 </div>
               </div>
 
@@ -331,6 +346,20 @@
           </div>
         </div>
 
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-semibold text-slate-700">Penyelenggara Kegiatan <span class="text-rose-500">*</span></label>
+            <select name="organizer_type" onchange="toggleCreatePartnerName(this.value)" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+              <option value="internal" selected>Internal (Laboratorium ICT)</option>
+              <option value="partner">Media Partner (Himpunan / BEM / Eksternal)</option>
+            </select>
+          </div>
+          <div id="create-partner-name-container" class="hidden flex flex-col gap-1.5">
+            <label class="font-semibold text-slate-700">Nama Media Partner / Penyelenggara</label>
+            <input type="text" name="organizer_name" placeholder="Misal: Himpunan Mahasiswa Sistem Informasi" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+          </div>
+        </div>
+
         <div class="flex flex-col gap-1.5">
           <label class="font-semibold text-slate-700">Lokasi / Ruang Lab</label>
           <input type="text" name="location" required value="Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
@@ -339,11 +368,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="flex flex-col gap-1.5">
             <label class="font-semibold text-slate-700">Tanggal Mulai</label>
-            <input type="date" name="start_date" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+            <input type="date" name="start_date" min="{{ date('Y-m-d') }}" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="font-semibold text-slate-700">Tanggal Selesai</label>
-            <input type="date" name="end_date" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+            <input type="date" name="end_date" min="{{ date('Y-m-d') }}" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
           </div>
         </div>
 
@@ -384,13 +413,24 @@
 
           <div id="speaker-rows-container" class="flex flex-col gap-2.5">
             <!-- Row -->
-            <div class="speaker-row flex items-center gap-2">
-              <select name="speaker_ids[]" onchange="onSpeakerSelectChange(this)" required class="flex-1 min-w-0 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
-                <option value="" disabled selected>-- Pilih Pengisi Acara --</option>
-                @foreach($masterSpeakers as $spk)
-                  <option value="{{ $spk->id }}">{{ $spk->name }} ({{ $spk->institution ?? 'Lab ICT' }})</option>
-                @endforeach
-              </select>
+            <div class="speaker-row flex items-start gap-2">
+              <div class="flex-1 min-w-0 flex flex-col gap-1">
+                <select name="speaker_ids[]" onchange="onSpeakerSelectChange(this)" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
+                  <option value="" disabled selected>-- Pilih Pengisi Acara --</option>
+                  @foreach($masterSpeakers as $spk)
+                    <option value="{{ $spk->id }}" data-institution="{{ $spk->institution ?? 'Lab ICT' }}">{{ $spk->name }}</option>
+                  @endforeach
+                </select>
+                <div class="speaker-institution-badge hidden text-[11px] text-slate-500 font-normal truncate px-1 items-center gap-1.5">
+                  <svg class="size-3 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
+                    <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/>
+                    <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>
+                    <path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+                  </svg>
+                  <span class="institution-text truncate"></span>
+                </div>
+              </div>
 
               <select name="speaker_roles[]" onchange="updateSpeakerRoleLabels()" class="role-select w-36 shrink-0 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
                 <option value="Pemateri" selected>Pemateri</option>
@@ -398,7 +438,7 @@
                 <option value="MC">MC</option>
               </select>
 
-              <button type="button" onclick="removeSpeakerRow(this)" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer shrink-0" title="Hapus">
+              <button type="button" onclick="removeSpeakerRow(this)" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer shrink-0 mt-0.5" title="Hapus">
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="18" y1="6" x2="6" y2="18"/>
                   <line x1="6" y1="6" x2="18" y2="18"/>
@@ -427,7 +467,7 @@
 </div>
 
 <script>
-const speakerMasterOptions = `@foreach($masterSpeakers as $spk)<option value="{{ $spk->id }}">{{ addslashes($spk->name) }} ({{ addslashes($spk->institution ?? 'Lab ICT') }})</option>@endforeach`;
+const speakerMasterOptions = `@foreach($masterSpeakers as $spk)<option value="{{ $spk->id }}" data-institution="{{ addslashes($spk->institution ?? 'Lab ICT') }}">{{ addslashes($spk->name) }}</option>@endforeach`;
 
 function updateSpeakerRoleLabels() {
   const container = document.getElementById('speaker-rows-container');
@@ -495,6 +535,10 @@ function onSpeakerSelectChange(selectElem) {
   if (!container) return;
   const currentVal = selectElem.value;
 
+  const row = selectElem.closest('.speaker-row');
+  const badge = row ? row.querySelector('.speaker-institution-badge') : null;
+  const instText = row ? row.querySelector('.institution-text') : null;
+
   if (currentVal) {
     const allSelects = container.querySelectorAll('select[name="speaker_ids[]"]');
     let duplicateCount = 0;
@@ -507,7 +551,25 @@ function onSpeakerSelectChange(selectElem) {
     if (duplicateCount > 1) {
       alert('Pengisi acara ini sudah dipilih untuk peran lain di kegiatan ini. Satu orang hanya boleh memiliki 1 peran.');
       selectElem.value = '';
+      if (badge) {
+        badge.classList.add('hidden');
+        badge.classList.remove('flex');
+      }
+    } else {
+      const selectedOpt = selectElem.options[selectElem.selectedIndex];
+      const inst = selectedOpt ? selectedOpt.getAttribute('data-institution') : '';
+      if (inst && badge && instText) {
+        instText.textContent = inst;
+        badge.classList.remove('hidden');
+        badge.classList.add('flex');
+      } else if (badge) {
+        badge.classList.add('hidden');
+        badge.classList.remove('flex');
+      }
     }
+  } else if (badge) {
+    badge.classList.add('hidden');
+    badge.classList.remove('flex');
   }
 
   syncSpeakerOptionsState();
@@ -548,12 +610,23 @@ function addSpeakerRow() {
   if (!container) return;
 
   const div = document.createElement('div');
-  div.className = 'speaker-row flex items-center gap-2';
+  div.className = 'speaker-row flex items-start gap-2';
   div.innerHTML = `
-    <select name="speaker_ids[]" onchange="onSpeakerSelectChange(this)" required class="flex-1 min-w-0 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
-      <option value="" disabled selected>-- Pilih Pengisi Acara --</option>
-      ${speakerMasterOptions}
-    </select>
+    <div class="flex-1 min-w-0 flex flex-col gap-1">
+      <select name="speaker_ids[]" onchange="onSpeakerSelectChange(this)" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
+        <option value="" disabled selected>-- Pilih Pengisi Acara --</option>
+        ${speakerMasterOptions}
+      </select>
+      <div class="speaker-institution-badge hidden text-[11px] text-slate-500 font-normal truncate px-1 items-center gap-1.5">
+        <svg class="size-3 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
+          <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/>
+          <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>
+          <path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+        </svg>
+        <span class="institution-text truncate"></span>
+      </div>
+    </div>
 
     <select name="speaker_roles[]" onchange="updateSpeakerRoleLabels()" class="role-select w-36 shrink-0 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-blue-950 focus:bg-white cursor-pointer">
       <option value="Pemateri" selected>Pemateri</option>
@@ -561,7 +634,7 @@ function addSpeakerRow() {
       <option value="MC">MC</option>
     </select>
 
-    <button type="button" onclick="removeSpeakerRow(this)" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer shrink-0" title="Hapus">
+    <button type="button" onclick="removeSpeakerRow(this)" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer shrink-0 mt-0.5" title="Hapus">
       <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="18" y1="6" x2="6" y2="18"/>
         <line x1="6" y1="6" x2="18" y2="18"/>
@@ -583,6 +656,11 @@ function removeSpeakerRow(btn) {
     } else {
       const sel = row.querySelector('select[name="speaker_ids[]"]');
       if (sel) sel.value = '';
+      const badge = row.querySelector('.speaker-institution-badge');
+      if (badge) {
+        badge.classList.add('hidden');
+        badge.classList.remove('flex');
+      }
       const roleSel = row.querySelector('.role-select');
       if (roleSel) roleSel.value = 'Pemateri';
     }
@@ -612,6 +690,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+function toggleCreatePartnerName(val) {
+  const container = document.getElementById('create-partner-name-container');
+  if (!container) return;
+  if (val === 'partner') {
+    container.classList.remove('hidden');
+  } else {
+    container.classList.add('hidden');
+  }
+}
 
 function openCreateEventModal() {
   const m = document.getElementById('modal-create-event');
