@@ -378,6 +378,38 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        $regAmanda3 = Registration::updateOrCreate(
+            [
+                'user_id' => $amanda->id,
+                'event_id' => $event3->id,
+            ],
+            [
+                'registration_code' => 'REG-2026-0301',
+                'qr_pass' => 'PASS-0301-AMANDA',
+                'payment_status' => 'free',
+                'attendance_status' => 'attended',
+                'checked_in_at' => $today->copy()->setTime(9, 10, 0),
+                'check_in_gate' => 'Pintu Gerbang Utama RME',
+                'evaluation_status' => 'completed',
+            ]
+        );
+
+        $regBudi3 = Registration::updateOrCreate(
+            [
+                'user_id' => $budi->id,
+                'event_id' => $event3->id,
+            ],
+            [
+                'registration_code' => 'REG-2026-0302',
+                'qr_pass' => 'PASS-0302-BUDI',
+                'payment_status' => 'free',
+                'attendance_status' => 'attended',
+                'checked_in_at' => $today->copy()->setTime(9, 15, 0),
+                'check_in_gate' => 'Pintu Gerbang Utama RME',
+                'evaluation_status' => 'completed',
+            ]
+        );
+
         $regBudi = Registration::updateOrCreate(
             [
                 'user_id' => $budi->id,

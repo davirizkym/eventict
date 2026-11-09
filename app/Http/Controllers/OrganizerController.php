@@ -485,6 +485,11 @@ class OrganizerController extends Controller
                 ->with('error', "Peserta dengan kode atau email '{$token}' tidak ditemukan pada event ini.");
         }
 
+        if ($registration->payment_status === 'pending') {
+            return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
+                ->with('error', "Peserta {$registration->user->name} ({$registration->registration_code}) belum menyelesaikan pembayaran tiket.");
+        }
+
         if ($registration->attendance_status === 'attended') {
             $time = $registration->checked_in_at ? $registration->checked_in_at->format('H:i') . ' WIB' : 'sebelumnya';
             return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
@@ -1008,6 +1013,10 @@ class OrganizerController extends Controller
             return back()->with('error', "Peserta dengan kode atau email '{$token}' tidak ditemukan.");
         }
 
+        if ($registration->payment_status === 'pending') {
+            return back()->with('error', "Peserta {$registration->user->name} ({$registration->registration_code}) belum menyelesaikan pembayaran tiket.");
+        }
+
         if ($registration->attendance_status === 'attended') {
             $time = $registration->checked_in_at ? $registration->checked_in_at->format('H:i') . ' WIB' : 'sebelumnya';
             return back()->with('warning', "Peserta {$registration->user->name} ({$registration->registration_code}) sudah presensi pada {$time}.");
@@ -1050,7 +1059,8 @@ class OrganizerController extends Controller
             ]
         );
 
-        return back()->with('success', "Sertifikat untuk {$registration->user->name} ({$registration->registration_code}) berhasil diunggah.");
+        return redirect()->route('organizer.workspace', ['event' => $registration->event_id, 'tab' => 'sertifikat'])
+            ->with('success', "Sertifikat untuk {$registration->user->name} ({$registration->registration_code}) berhasil diunggah.");
     }
 
     public function uploadBatch(Request $request)
@@ -1119,6 +1129,10 @@ class OrganizerController extends Controller
 
     public function toggleAttendance(Registration $registration)
     {
+        if ($registration->attendance_status !== 'attended' && $registration->payment_status === 'pending') {
+            return back()->with('error', "Peserta {$registration->user->name} belum menyelesaikan pembayaran tiket.");
+        }
+
         $newStatus = $registration->attendance_status === 'attended' ? 'unattended' : 'attended';
         $registration->update([
             'attendance_status' => $newStatus,
@@ -1139,10 +1153,12 @@ class OrganizerController extends Controller
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($relativePath);
             }
             $cert->delete();
-            return back()->with('success', "Sertifikat untuk {$registration->user->name} berhasil dihapus.");
+            return redirect()->route('organizer.workspace', ['event' => $registration->event_id, 'tab' => 'sertifikat'])
+                ->with('success', "Sertifikat untuk {$registration->user->name} berhasil dihapus.");
         }
 
-        return back()->with('error', 'Sertifikat tidak ditemukan.');
+        return redirect()->route('organizer.workspace', ['event' => $registration->event_id, 'tab' => 'sertifikat'])
+            ->with('error', 'Sertifikat tidak ditemukan.');
     }
 
     public function categoriesIndex(Request $request)

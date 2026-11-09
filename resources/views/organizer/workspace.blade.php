@@ -618,6 +618,22 @@
           </div>
         </div>
 
+        @if($totalRegistrations === 0)
+          <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 text-xs text-amber-900 shadow-2xs">
+            <svg class="size-5 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div class="flex flex-col gap-1">
+              <span class="font-bold text-amber-950">Kegiatan ini belum memiliki peserta terdaftar</span>
+              <p class="text-amber-800 leading-relaxed">
+                Penerbitan e-sertifikat ditujukan untuk peserta yang terdaftar pada kegiatan ini. Karena belum ada peserta yang terdaftar, berkas PDF yang diunggah belum dapat dicocokkan ke siapa pun. Anda dapat mendaftarkan peserta terlebih dahulu, atau mencoba fitur sertifikat pada kegiatan yang sudah memiliki peserta (seperti <a href="{{ route('organizer.workspace', ['event' => 1, 'tab' => 'sertifikat']) }}" class="underline font-bold text-amber-950 hover:text-blue-950">Kegiatan ID 1</a>).
+              </p>
+            </div>
+          </div>
+        @endif
+
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-6 shadow-2xs">
           <div class="flex flex-col gap-1">
             <h3 class="text-sm font-bold text-slate-900">Upload Sertifikat Massal untuk Kegiatan Ini</h3>
@@ -628,23 +644,23 @@
 
           <form action="{{ route('organizer.workspace.certificate.batch', ['event' => $event->id]) }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
             @csrf
-            <div class="p-6 border-2 border-dashed border-slate-200 hover:border-blue-950 rounded-2xl bg-slate-50 flex flex-col items-center justify-center gap-2 text-center transition">
+            <div id="batch-dropzone-box" onclick="document.getElementById('batch-cert-input').click()" class="p-6 border-2 border-dashed border-slate-300 hover:border-blue-950 rounded-2xl bg-slate-50 flex flex-col items-center justify-center gap-2 text-center transition cursor-pointer">
               <svg class="size-8 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="8" r="6"/>
                 <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
               </svg>
-              <label class="text-xs font-semibold text-blue-950 cursor-pointer hover:underline">
-                Pilih Berkas PDF Sertifikat
-                <input type="file" id="batch-cert-input" name="certificate_files[]" multiple required accept=".pdf,image/*" onchange="handleBatchFileChange(this)" class="hidden">
-              </label>
-              <span class="text-[11px] text-slate-400">Format PDF, JPG, PNG maksimal 10MB per berkas</span>
+              <div class="text-xs font-semibold text-blue-950 hover:underline">
+                Pilih atau Tarik Berkas PDF Sertifikat ke Sini
+              </div>
+              <input type="file" id="batch-cert-input" name="certificate_files[]" multiple required accept=".pdf,image/*" onchange="handleBatchFileChange(this)" class="hidden">
+              <span class="text-[11px] text-slate-400">Format PDF, JPG, PNG maksimal 10MB per berkas (Bisa pilih banyak sekaligus)</span>
 
-              <div id="batch-file-feedback" class="w-full max-w-lg mt-3 p-3 bg-white border border-blue-200 rounded-xl flex items-center justify-between text-left hidden shadow-2xs">
+              <div id="batch-file-feedback" class="w-full max-w-lg mt-3 p-3 bg-white border border-blue-200 rounded-xl flex items-center justify-between text-left hidden shadow-2xs" onclick="event.stopPropagation()">
                 <div class="min-w-0 pr-2">
                   <div id="batch-file-count" class="text-xs font-bold text-blue-950 truncate"></div>
                   <div id="batch-file-list" class="text-[10px] text-slate-500 truncate mt-0.5"></div>
                 </div>
-                <button type="button" onclick="resetBatchFileInput()" class="px-2.5 py-1 text-[11px] text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-lg shrink-0 cursor-pointer transition">
+                <button type="button" onclick="event.stopPropagation(); resetBatchFileInput()" class="px-2.5 py-1 text-[11px] text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-lg shrink-0 cursor-pointer transition">
                   Ganti
                 </button>
               </div>
@@ -677,6 +693,15 @@
               <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700">
                 Total {{ $registrations->count() }} Peserta
               </span>
+              @if($registrations->isNotEmpty())
+                <button type="button" onclick="openSingleCertModal('', '', '')" class="px-3 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                  <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  <span>Unggah Satuan Manual</span>
+                </button>
+              @endif
             </div>
           </div>
 
@@ -1160,10 +1185,20 @@
 
       <form id="form-upload-single-cert" method="POST" action="" enctype="multipart/form-data" class="flex flex-col gap-4 text-xs">
         @csrf
-        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-1">
+        <div id="single-cert-specific-block" class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-1">
           <span class="text-slate-500 text-[11px]">Nama Peserta:</span>
           <span id="single-cert-user-name" class="font-bold text-slate-900 text-sm"></span>
           <span id="single-cert-reg-code" class="font-mono text-xs text-blue-950 font-semibold mt-0.5"></span>
+        </div>
+
+        <div id="single-cert-select-block" class="flex flex-col gap-1.5 hidden">
+          <label class="font-semibold text-slate-700">Pilih Peserta Penerima Sertifikat <span class="text-rose-500">*</span></label>
+          <select id="single-cert-select-reg" onchange="onSingleCertSelectChange(this)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 text-xs font-medium text-slate-800 cursor-pointer">
+            <option value="">-- Pilih Peserta --</option>
+            @foreach($registrations as $r)
+              <option value="{{ $r->id }}">{{ $r->user->name }} ({{ $r->registration_code }}) - {{ $r->attendance_status === 'attended' ? 'Hadir' : 'Belum Hadir' }}</option>
+            @endforeach
+          </select>
         </div>
 
         <div class="flex flex-col gap-1.5">
@@ -1277,17 +1312,81 @@ function closeAssignSpeakerModal() {
 function openSingleCertModal(regId, userName, regCode) {
   const m = document.getElementById('modal-upload-single-cert');
   const form = document.getElementById('form-upload-single-cert');
+  const specificBlock = document.getElementById('single-cert-specific-block');
+  const selectBlock = document.getElementById('single-cert-select-block');
   const nameEl = document.getElementById('single-cert-user-name');
   const codeEl = document.getElementById('single-cert-reg-code');
+  const selectEl = document.getElementById('single-cert-select-reg');
   if (!m || !form) return;
 
-  form.action = '/penyelenggara/registrasi/' + regId + '/upload-sertifikat';
-  if (nameEl) nameEl.textContent = userName;
-  if (codeEl) codeEl.textContent = 'Kode: ' + regCode;
+  if (regId) {
+    form.action = '/penyelenggara/registrasi/' + regId + '/upload-sertifikat';
+    if (specificBlock) specificBlock.classList.remove('hidden');
+    if (selectBlock) selectBlock.classList.add('hidden');
+    if (nameEl) nameEl.textContent = userName;
+    if (codeEl) codeEl.textContent = 'Kode: ' + regCode;
+  } else {
+    form.action = '';
+    if (specificBlock) specificBlock.classList.add('hidden');
+    if (selectBlock) selectBlock.classList.remove('hidden');
+    if (selectEl) {
+      selectEl.selectedIndex = 0;
+      onSingleCertSelectChange(selectEl);
+    }
+  }
 
   m.classList.remove('hidden');
   m.classList.add('flex');
 }
+
+function onSingleCertSelectChange(selectEl) {
+  const form = document.getElementById('form-upload-single-cert');
+  if (!form) return;
+  if (selectEl.value) {
+    form.action = '/penyelenggara/registrasi/' + selectEl.value + '/upload-sertifikat';
+  } else {
+    form.action = '';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const formSingle = document.getElementById('form-upload-single-cert');
+  if (formSingle) {
+    formSingle.addEventListener('submit', (e) => {
+      if (!formSingle.action || formSingle.action.endsWith('/upload-sertifikat') && formSingle.action.includes('//upload-sertifikat')) {
+        e.preventDefault();
+        alert('Silakan pilih peserta penerima sertifikat terlebih dahulu.');
+      }
+    });
+  }
+
+  const dropzone = document.getElementById('batch-dropzone-box');
+  if (dropzone) {
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add('border-blue-950', 'bg-blue-50/60');
+      });
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove('border-blue-950', 'bg-blue-50/60');
+      });
+    });
+    dropzone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      const input = document.getElementById('batch-cert-input');
+      if (input && files.length > 0) {
+        input.files = files;
+        handleBatchFileChange(input);
+      }
+    });
+  }
+});
 
 function closeSingleCertModal() {
   const m = document.getElementById('modal-upload-single-cert');

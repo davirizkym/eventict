@@ -99,4 +99,23 @@ class PesertaController extends Controller
         return redirect()->route('peserta.dashboard', ['tab' => 'profil'])
             ->with('success', 'Profil Anda berhasil diperbarui.');
     }
+
+    public function cancelRegistration(Registration $registration)
+    {
+        $user = Auth::user();
+
+        if ($registration->user_id !== $user->id) {
+            abort(403);
+        }
+
+        if ($registration->payment_status !== 'pending') {
+            return back()->with('error', 'Hanya pendaftaran yang berstatus belum dibayar yang dapat dibatalkan.');
+        }
+
+        $eventTitle = $registration->event->title ?? 'kegiatan';
+        $registration->delete();
+
+        return redirect()->route('peserta.dashboard', ['tab' => 'tiket'])
+            ->with('success', "Pendaftaran untuk {$eventTitle} berhasil dibatalkan.");
+    }
 }

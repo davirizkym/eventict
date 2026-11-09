@@ -71,7 +71,7 @@
             <h1 class="text-2xl font-bold text-slate-900 font-['Poppins'] mt-1">Formulir Pendaftaran Peserta</h1>
           </div>
 
-          <form method="POST" action="{{ route('events.register', $event->slug) }}" class="flex flex-col gap-6 font-['Poppins']">
+          <form id="form-register" method="POST" action="{{ route('events.register', $event->slug) }}" class="flex flex-col gap-6 font-['Poppins']">
             @csrf
 
             <!-- Section 1: Data Identitas Peserta -->
@@ -200,11 +200,11 @@
               @endif
             </div>
 
-            <!-- Section 3: Rincian Pembayaran / Tiket -->
+            <!-- Section 3: Rincian Biaya -->
             <div class="flex flex-col gap-3">
               <div class="flex items-center gap-2 text-sm font-semibold text-slate-800">
                 <span class="size-6 rounded-full bg-blue-950 text-white text-xs flex items-center justify-center font-bold">3</span>
-                <span>Rincian Biaya & Status Tiket</span>
+                <span>Rincian Biaya</span>
               </div>
 
               @if($event->price == 0)
@@ -221,28 +221,14 @@
                   <span class="px-2.5 py-1 bg-emerald-200 text-emerald-950 text-xs font-bold rounded-md">FREE PASS</span>
                 </div>
               @else
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-3">
-                  <div class="flex justify-between items-center pb-2">
-                    <div>
-                      <div class="text-xs font-semibold text-slate-900">Total Biaya Pendaftaran</div>
-                    </div>
-                    <div class="text-xl font-bold text-blue-950">
-                      Rp {{ number_format($event->price, 0, ',', '.') }}
-                    </div>
+                <div class="p-4.5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col gap-2.5">
+                  <div class="flex justify-between items-center text-xs text-slate-600">
+                    <span>Harga Tiket Kegiatan (1 Peserta)</span>
+                    <span class="font-semibold text-slate-900">Rp {{ number_format($event->price, 0, ',', '.') }}</span>
                   </div>
-
-                  <div class="flex flex-col gap-2 pt-1">
-                    <span class="text-xs font-semibold text-slate-700">Pilih Metode Pembayaran:</span>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                      <label class="p-3 border border-slate-300 rounded-lg bg-white flex items-center gap-2.5 cursor-pointer has-checked:border-blue-950 has-checked:bg-blue-50/30">
-                        <input type="radio" name="payment_method" value="qris" checked class="text-blue-950 focus:ring-blue-950">
-                        <span class="font-medium text-slate-800">QRIS Instan (BCA/Mandiri/GoPay/OVO)</span>
-                      </label>
-                      <label class="p-3 border border-slate-300 rounded-lg bg-white flex items-center gap-2.5 cursor-pointer has-checked:border-blue-950 has-checked:bg-blue-50/30">
-                        <input type="radio" name="payment_method" value="bank_transfer" class="text-blue-950 focus:ring-blue-950">
-                        <span class="font-medium text-slate-800">Transfer Virtual Account (VA) Bank</span>
-                      </label>
-                    </div>
+                  <div class="pt-2.5 border-t border-slate-200 flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-900">Total Tagihan Pembayaran</span>
+                    <span class="text-lg font-bold text-blue-950">Rp {{ number_format($event->price, 0, ',', '.') }}</span>
                   </div>
                 </div>
               @endif
@@ -274,9 +260,9 @@
                 type="submit"
                 class="px-6 py-2.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition shadow-xs cursor-pointer flex items-center gap-2"
               >
-                <span>Konfirmasi & Selesaikan Pendaftaran</span>
+                <span>Konfirmasi Pendaftaran</span>
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="9 18 15 12 9 6"/>
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
               </button>
             </div>
