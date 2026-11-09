@@ -37,7 +37,7 @@
     </div>
   </div>
 
-  <div class="self-stretch pt-6 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-normal font-['Poppins'] text-slate-400">
+  <div class="self-stretch pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-normal font-['Poppins'] text-slate-400">
     <div>© 2026 Eventict — Laboratorium ICT. Seluruh hak dilindungi.</div>
     <div>Sistem Informasi Manajemen Event Laboratorium Komputer & Teknologi Informasi.</div>
   </div>

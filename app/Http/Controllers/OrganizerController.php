@@ -1155,14 +1155,19 @@ class OrganizerController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:150|unique:media_partners,name',
             'institution' => 'nullable|string|max:200',
-            'contact_email' => 'nullable|email|max:150',
+            'contact_email' => 'required|email|max:150',
+        ], [
+            'name.required' => 'Nama media partner wajib diisi.',
+            'name.unique' => 'Nama media partner sudah terdaftar.',
+            'contact_email.required' => 'Kontak email wajib diisi.',
+            'contact_email.email' => 'Format kontak email tidak valid.',
         ]);
 
         $mediaPartner = MediaPartner::create([
             'name' => trim($validated['name']),
             'slug' => Str::slug($validated['name']),
             'institution' => $validated['institution'] ?? null,
-            'contact_email' => $validated['contact_email'] ?? null,
+            'contact_email' => trim($validated['contact_email']),
         ]);
 
         return redirect()->route('organizer.media_partners.index')
@@ -1174,14 +1179,19 @@ class OrganizerController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:150|unique:media_partners,name,' . $mediaPartner->id,
             'institution' => 'nullable|string|max:200',
-            'contact_email' => 'nullable|email|max:150',
+            'contact_email' => 'required|email|max:150',
+        ], [
+            'name.required' => 'Nama media partner wajib diisi.',
+            'name.unique' => 'Nama media partner sudah terdaftar.',
+            'contact_email.required' => 'Kontak email wajib diisi.',
+            'contact_email.email' => 'Format kontak email tidak valid.',
         ]);
 
         $mediaPartner->update([
             'name' => trim($validated['name']),
             'slug' => Str::slug($validated['name']),
             'institution' => $validated['institution'] ?? null,
-            'contact_email' => $validated['contact_email'] ?? null,
+            'contact_email' => trim($validated['contact_email']),
         ]);
 
         Event::where('media_partner_id', $mediaPartner->id)->update(['organizer_name' => $mediaPartner->name]);

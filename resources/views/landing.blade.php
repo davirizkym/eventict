@@ -308,15 +308,15 @@
         </div>
       </section>
 
-      <section class="self-stretch px-6 lg:px-20 py-16 bg-slate-50 border-y border-slate-200 flex flex-col justify-start items-start gap-10">
+      <section class="self-stretch px-6 lg:px-20 py-16 flex flex-col justify-start items-start gap-10">
         <div class="self-stretch flex flex-col justify-start items-start gap-2">
           <h2 class="text-slate-900 text-2xl lg:text-3xl font-semibold font-['Poppins'] leading-tight">Kenapa Mengikuti Seminar & Workshop di Eventict?</h2>
           <p class="text-slate-600 text-sm font-normal font-['Poppins'] leading-5">Temukan beragam seminar, workshop, dan event kolaborasi untuk tingkatkan wawasan serta keahlian kamu.</p>
         </div>
 
-        <div class="self-stretch grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="p-6 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col gap-4 shadow-xs hover:border-blue-950 transition">
-            <div class="size-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-950">
+        <div class="self-stretch grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+          <div class="flex flex-col items-start gap-4 group">
+            <div class="size-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-950 group-hover:bg-blue-950 group-hover:text-white transition duration-200">
               <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect width="20" height="14" x="2" y="3" rx="2"/>
                 <line x1="8" x2="16" y1="21" y2="21"/>
@@ -329,8 +329,8 @@
             </div>
           </div>
 
-          <div class="p-6 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col gap-4 shadow-xs hover:border-blue-950 transition">
-            <div class="size-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-950">
+          <div class="flex flex-col items-start gap-4 group">
+            <div class="size-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-950 group-hover:bg-blue-950 group-hover:text-white transition duration-200">
               <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>
@@ -344,8 +344,8 @@
             </div>
           </div>
 
-          <div class="p-6 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col gap-4 shadow-xs hover:border-blue-950 transition">
-            <div class="size-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-950">
+          <div class="flex flex-col items-start gap-4 group">
+            <div class="size-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-950 group-hover:bg-blue-950 group-hover:text-white transition duration-200">
               <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="8" r="6"/>
                 <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
