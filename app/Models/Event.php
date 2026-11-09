@@ -34,6 +34,8 @@ class Event extends Model
         'organizer_name',
         'banner_url',
         'virtual_meeting_url',
+        'is_presence_open',
+        'presence_token',
     ];
 
     protected function casts(): array
@@ -44,6 +46,7 @@ class Event extends Model
             'quota' => 'integer',
             'price' => 'integer',
             'skp_points' => 'integer',
+            'is_presence_open' => 'boolean',
         ];
     }
 

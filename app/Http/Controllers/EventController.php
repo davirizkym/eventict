@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Event;
 use App\Models\Registration;
 use Illuminate\Http\Request;
@@ -37,21 +38,21 @@ class EventController extends Controller
 
         $events = $query->orderBy('start_date', 'asc')->get();
 
-        // Kategori dinamis dengan total kegiatan aktif
-        $allCategories = Event::where('status', '!=', 'draft')
-            ->select('category')
-            ->distinct()
-            ->pluck('category')
-            ->merge(['Kedokteran & Kesehatan', 'Teknologi & Rekayasa', 'Hukum & Kebijakan', 'Ekonomi & Bisnis'])
-            ->unique()
-            ->values();
+        $allCategories = Category::orderBy('name', 'asc')->pluck('name');
+        if ($allCategories->isEmpty()) {
+            $allCategories = Event::where('status', '!=', 'draft')
+                ->whereNotNull('category')
+                ->where('category', '!=', '')
+                ->distinct()
+                ->pluck('category');
+        }
 
-        $categoryCounts = Event::where('status', '!=', 'draft')
-            ->select('category', DB::raw('count(*) as total'))
-            ->groupBy('category')
-            ->pluck('total', 'category');
-
-        $categories = $this->getPopularCategories($categoryCounts);
+        $categories = Category::withCount(['events' => function ($q) {
+            $q->where('status', '!=', 'draft');
+        }])
+        ->orderBy('events_count', 'desc')
+        ->orderBy('name', 'asc')
+        ->get();
 
         return view('landing', compact('events', 'categories', 'allCategories'));
     }
@@ -82,82 +83,16 @@ class EventController extends Controller
 
         $events = $query->orderBy('start_date', 'asc')->get();
 
-        $allCategories = Event::where('status', '!=', 'draft')
-            ->select('category')
-            ->distinct()
-            ->pluck('category')
-            ->merge(['Kedokteran & Kesehatan', 'Teknologi & Rekayasa', 'Hukum & Kebijakan', 'Ekonomi & Bisnis'])
-            ->unique()
-            ->values();
-
-        return view('events.catalog', compact('events', 'allCategories'));
-    }
-
-    private function getPopularCategories($categoryCounts)
-    {
-        $definitions = [
-            [
-                'name' => 'Pemrograman & Web/Mobile',
-                'category' => 'Teknologi & Rekayasa',
-                'description' => 'Frontend, Backend API, Framework Modern, Aplikasi Mobile',
-                'icon' => 'code',
-            ],
-            [
-                'name' => 'Kecerdasan Buatan & Data',
-                'category' => 'Teknologi & Rekayasa',
-                'description' => 'Machine Learning, Deep Learning, Python Data Science, Analitika',
-                'icon' => 'ai',
-            ],
-            [
-                'name' => 'Keamanan Siber & Jaringan',
-                'category' => 'Teknologi & Rekayasa',
-                'description' => 'Cyber Security, Jaringan Komputer, Infrastruktur Server, Ethical Hacking',
-                'icon' => 'security',
-            ],
-            [
-                'name' => 'Teknologi Medis & Telemedicine',
-                'category' => 'Kedokteran & Kesehatan',
-                'description' => 'Sistem Rekam Medis Elektronik, Interoperabilitas Data Klinis',
-                'icon' => 'health',
-            ],
-            [
-                'name' => 'Hukum Siber & Privasi Data',
-                'category' => 'Hukum & Kebijakan',
-                'description' => 'UU Pelindungan Data Pribadi (UU PDP), Kepatuhan Tata Kelola Digital',
-                'icon' => 'law',
-            ],
-            [
-                'name' => 'Bisnis Digital & Manajemen Produk',
-                'category' => 'Ekonomi & Bisnis',
-                'description' => 'Kewirausahaan Teknologi, Manajemen Produk Digital, Inovasi Startup',
-                'icon' => 'business',
-            ],
-        ];
-
-        $items = collect($definitions)->map(function ($item) use ($categoryCounts) {
-            $item['count'] = $categoryCounts[$item['category']] ?? 0;
-            return $item;
-        });
-
-        // Jika ada kategori lain di database yang belum terdaftar di predefined, sertakan juga secara dinamis
-        $covered = collect($definitions)->pluck('category')->unique()->all();
-        $extras = Event::where('status', '!=', 'draft')
-            ->whereNotIn('category', $covered)
-            ->select('category', DB::raw('count(*) as total'))
-            ->groupBy('category')
-            ->get();
-
-        foreach ($extras as $extra) {
-            $items->push([
-                'name' => $extra->category,
-                'category' => $extra->category,
-                'description' => 'Kumpulan seminar dan workshop bidang ' . $extra->category,
-                'icon' => 'default',
-                'count' => $extra->total,
-            ]);
+        $allCategories = Category::orderBy('name', 'asc')->pluck('name');
+        if ($allCategories->isEmpty()) {
+            $allCategories = Event::where('status', '!=', 'draft')
+                ->whereNotNull('category')
+                ->where('category', '!=', '')
+                ->distinct()
+                ->pluck('category');
         }
 
-        return $items;
+        return view('events.catalog', compact('events', 'allCategories'));
     }
 
     public function about()
@@ -250,11 +185,17 @@ class EventController extends Controller
             $user->update($userUpdates);
         }
 
-        $nextNumber = Registration::where('event_id', $event->id)->count() + 1;
-        $regCode = 'REG-' . date('Y') . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-        $cleanName = strtoupper(preg_replace('/[^A-Z]/', '', $user->name));
-        $cleanName = substr($cleanName, 0, 8) ?: 'USER';
-        $qrPass = 'PASS-' . rand(1000, 9999) . '-' . $cleanName;
+        $latestId = (Registration::max('id') ?? 0) + 1;
+        do {
+            $regCode = 'REG-' . date('Y') . '-' . str_pad($latestId, 4, '0', STR_PAD_LEFT);
+            $latestId++;
+        } while (Registration::where('registration_code', $regCode)->exists());
+
+        do {
+            $cleanName = strtoupper(preg_replace('/[^A-Z]/', '', $user->name));
+            $cleanName = substr($cleanName, 0, 8) ?: 'USER';
+            $qrPass = 'PASS-' . rand(1000, 9999) . '-' . $cleanName;
+        } while (Registration::where('qr_pass', $qrPass)->exists());
 
         Registration::create([
             'user_id' => $user->id,
@@ -267,5 +208,59 @@ class EventController extends Controller
         ]);
 
         return redirect()->route('peserta.dashboard')->with('success', 'Pendaftaran berhasil! E-Tiket Anda (' . $regCode . ') telah terbit.');
+    }
+
+    public function presence(Request $request, string $slug)
+    {
+        $event = Event::with('speakers')->where('slug', $slug)->firstOrFail();
+
+        $registration = null;
+        if (Auth::check()) {
+            $registration = Registration::where('user_id', Auth::id())
+                ->where('event_id', $event->id)
+                ->first();
+        }
+
+        return view('events.presence', compact('event', 'registration'));
+    }
+
+    public function presenceSubmit(Request $request, string $slug)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('warning', 'Silakan masuk terlebih dahulu untuk melakukan presensi.');
+        }
+
+        $event = Event::where('slug', $slug)->firstOrFail();
+
+        if (!$event->is_presence_open) {
+            return back()->with('error', 'Gerbang presensi mandiri saat ini sedang ditutup oleh panitia.');
+        }
+
+        $registration = Registration::where('user_id', Auth::id())
+            ->where('event_id', $event->id)
+            ->first();
+
+        if (!$registration) {
+            return back()->with('error', 'Anda belum terdaftar dalam kegiatan ini. Silakan mendaftar terlebih dahulu.');
+        }
+
+        if ($registration->attendance_status === 'attended') {
+            return back()->with('info', 'Kehadiran Anda sudah terkonfirmasi sebelumnya pada ' . ($registration->checked_in_at ? $registration->checked_in_at->format('H:i') . ' WIB' : 'hari ini') . '.');
+        }
+
+        $gateMethod = match ($event->format) {
+            'online' => 'Presensi Mandiri Online',
+            'hybrid' => 'Presensi Mandiri Sesi',
+            default => 'Self Check-in Sesi',
+        };
+
+        $registration->update([
+            'attendance_status' => 'attended',
+            'checked_in_at' => now(),
+            'check_in_gate' => $gateMethod,
+        ]);
+
+        return redirect()->route('events.presence', $event->slug)
+            ->with('success', 'Presensi kehadiran Anda berhasil dikonfirmasi! Terima kasih atas partisipasi Anda.');
     }
 }

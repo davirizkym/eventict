@@ -37,7 +37,7 @@
               <label class="text-slate-500 text-[10px] uppercase tracking-wider font-semibold font-['Poppins']">Rumpun Ilmu</label>
               <select name="category" class="w-full bg-transparent border-none outline-none text-slate-900 text-xs font-medium font-['Poppins'] cursor-pointer">
                 <option value="">Semua Rumpun</option>
-                @foreach($allCategories ?? ['Kedokteran & Kesehatan', 'Teknologi & Rekayasa', 'Hukum & Kebijakan', 'Ekonomi & Bisnis'] as $catOption)
+                @foreach($allCategories ?? [] as $catOption)
                 <option value="{{ $catOption }}" {{ request('category') === $catOption ? 'selected' : '' }}>{{ $catOption }}</option>
                 @endforeach
               </select>
@@ -232,6 +232,7 @@
       </section>
       @endif
 
+      @if(isset($categories) && $categories->isNotEmpty())
       <section id="kategori" class="self-stretch px-6 lg:px-20 py-16 flex flex-col justify-start items-start gap-8">
         <div class="self-stretch flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -245,68 +246,28 @@
         </div>
 
         <div class="self-stretch grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          @forelse($categories ?? [] as $category)
-          <a href="{{ route('events.index_public', ['category' => $category['category']]) }}" class="p-5 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between gap-4 group">
+          @foreach($categories as $category)
+          <a href="{{ route('events.index_public', ['category' => $category->name]) }}" class="p-5 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between gap-4 group">
             <div class="flex items-start justify-between">
               <div class="size-11 rounded-lg bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center transition-colors duration-200">
-                @if(($category['icon'] ?? '') === 'code')
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="16 18 22 12 16 6"/>
-                  <polyline points="8 6 2 12 8 18"/>
-                </svg>
-                @elseif(($category['icon'] ?? '') === 'ai')
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2a8 8 0 0 0-8 8c0 3.36 2.06 6.24 5 7.42V20a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2.58c2.94-1.18 5-4.06 5-7.42a8 8 0 0 0-8-8z"/>
-                  <line x1="9.5" y1="9" x2="9.5" y2="9.01"/>
-                  <line x1="14.5" y1="9" x2="14.5" y2="9.01"/>
-                </svg>
-                @elseif(($category['icon'] ?? '') === 'security')
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-                @elseif(($category['icon'] ?? '') === 'health')
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                </svg>
-                @elseif(($category['icon'] ?? '') === 'law')
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
-                  <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
-                  <path d="M7 21h10"/>
-                  <path d="M12 3v18"/>
-                  <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
-                </svg>
-                @elseif(($category['icon'] ?? '') === 'business')
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 3v18h18"/>
-                  <path d="m19 9-5 5-4-4-3 3"/>
-                </svg>
-                @else
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="m10 15 5-3-5-3v6Z"/>
-                </svg>
-                @endif
+                @include('partials.category-icon', ['icon' => $category->icon, 'class' => 'size-5'])
               </div>
               <div class="flex items-center gap-2">
                 <span class="text-[11px] font-medium text-slate-500 group-hover:text-blue-900 bg-slate-100 group-hover:bg-blue-50 px-2.5 py-1 rounded-full transition">
-                  {{ $category['count'] ?? 0 }} Kegiatan
+                  {{ $category->events_count ?? 0 }} Kegiatan
                 </span>
                 <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
               </div>
             </div>
             <div>
-              <h3 class="text-slate-900 group-hover:text-blue-950 font-semibold text-sm font-['Poppins'] transition">{{ $category['name'] }}</h3>
-              <p class="text-slate-500 text-xs font-normal font-['Poppins'] mt-1">{{ $category['description'] }}</p>
+              <h3 class="text-slate-900 group-hover:text-blue-950 font-semibold text-sm font-['Poppins'] transition">{{ $category->name }}</h3>
+              <p class="text-slate-500 text-xs font-normal font-['Poppins'] mt-1">{{ $category->description ?: 'Kumpulan seminar dan workshop bidang ' . $category->name }}</p>
             </div>
           </a>
-          @empty
-          <div class="col-span-full text-center py-8 text-slate-500 text-xs font-['Poppins']">
-            Belum ada kategori kegiatan yang tersedia.
-          </div>
-          @endforelse
+          @endforeach
         </div>
       </section>
+      @endif
 
       <section class="self-stretch px-6 lg:px-20 py-16 bg-slate-50 border-y border-slate-200 flex flex-col justify-start items-start gap-10">
         <div class="self-stretch flex flex-col justify-start items-start gap-2">

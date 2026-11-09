@@ -69,7 +69,6 @@
           <div>
             <span class="text-xs font-bold text-blue-950 uppercase tracking-wider font-['Poppins']">Langkah Konfirmasi</span>
             <h1 class="text-2xl font-bold text-slate-900 font-['Poppins'] mt-1">Formulir Pendaftaran Peserta</h1>
-            <p class="text-xs text-slate-500 font-['Poppins'] mt-1">Lengkapi data berikut untuk penerbitan E-Tiket dan pengesahan portofolio sertifikat SKP Anda.</p>
           </div>
 
           <form method="POST" action="{{ route('events.register', $event->slug) }}" class="flex flex-col gap-6 font-['Poppins']">
@@ -138,13 +137,13 @@
               </div>
 
               <div class="flex flex-col gap-1.5">
-                <label for="institution" class="text-xs font-semibold text-slate-700">Asal Instansi / Institusi / Perusahaan</label>
+                <label for="institution" class="text-xs font-semibold text-slate-700">Asal Instansi</label>
                 <input
                   type="text"
                   id="institution"
                   name="institution"
                   value="{{ old('institution', $user->institution) }}"
-                  placeholder="RSUP Dr. Cipto Mangunkusumo / Universitas Indonesia"
+                  placeholder="Contoh: Universitas Budi Luhur"
                   class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950"
                 >
               </div>
@@ -226,7 +225,6 @@
                   <div class="flex justify-between items-center pb-2">
                     <div>
                       <div class="text-xs font-semibold text-slate-900">Total Biaya Pendaftaran</div>
-                      <div class="text-[11px] text-slate-500">Termasuk materi simposium, konsumsi (offline), dan sertifikat SKP resmi.</div>
                     </div>
                     <div class="text-xl font-bold text-blue-950">
                       Rp {{ number_format($event->price, 0, ',', '.') }}
@@ -244,9 +242,6 @@
                         <input type="radio" name="payment_method" value="bank_transfer" class="text-blue-950 focus:ring-blue-950">
                         <span class="font-medium text-slate-800">Transfer Virtual Account (VA) Bank</span>
                       </label>
-                    </div>
-                    <div class="text-[10px] text-slate-500 mt-1">
-                      * Pembayaran otomatis terverifikasi secara instan saat pendaftaran diselesaikan.
                     </div>
                   </div>
                 </div>
@@ -266,7 +261,7 @@
                 >
                 <div class="text-xs text-slate-700 leading-relaxed">
                   <span class="font-semibold text-slate-900">Pernyataan & Persetujuan Peserta:</span>
-                  Saya menyatakan bahwa data identitas di atas adalah benar. Saya memahami bahwa presensi scan QR Pass pada hari kegiatan dan pengisian kuesioner evaluasi merupakan syarat mutlak untuk penerbitan E-Sertifikat dan perolehan angka kredit SKP resmi.
+                  Saya menyatakan bahwa data identitas di atas adalah benar. Saya memahami bahwa presensi scan QR Pass pada hari kegiatan dan pengisian kuesioner evaluasi merupakan syarat mutlak untuk penerbitan E-Sertifikat.
                 </div>
               </label>
             </div>
@@ -328,7 +323,7 @@
           </div>
 
           @php
-            $regRemaining = max(0, $event->quota - $registeredCount);
+            $regRemaining = max(0, $event->quota - ($registeredCount ?? 0));
           @endphp
           <div class="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between text-xs">
             <span class="text-slate-300">Ketersediaan</span>

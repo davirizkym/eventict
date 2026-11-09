@@ -11,6 +11,7 @@ use App\Models\Speaker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -498,6 +499,71 @@ class OrganizerController extends Controller
 
         return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
             ->with('success', "Presensi berhasil! {$registration->user->name} ({$registration->registration_code}) ditandai Hadir.");
+    }
+
+    public function togglePresence(Request $request, Event $event)
+    {
+        $newStatus = !$event->is_presence_open;
+        $token = $newStatus ? Str::random(16) : null;
+
+        $event->update([
+            'is_presence_open' => $newStatus,
+            'presence_token' => $token,
+        ]);
+
+        $message = $newStatus
+            ? 'Presensi sesi berhasil dibuka.'
+            : 'Presensi sesi berhasil ditutup.';
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'is_presence_open' => $newStatus,
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    public function stage(Event $event)
+    {
+        if (!$event->is_presence_open) {
+            return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
+                ->with('warning', 'Buka presensi sesi terlebih dahulu sebelum menampilkan QR presensi.');
+        }
+
+        $event->load(['speakers', 'registrations.user']);
+        $attendedCount = $event->registrations->where('attendance_status', 'attended')->count();
+        $totalRegistrations = $event->registrations->count();
+
+        return view('organizer.stage', compact('event', 'attendedCount', 'totalRegistrations'));
+    }
+
+    public function stageStatus(Event $event)
+    {
+        $attendedCount = $event->registrations()->where('attendance_status', 'attended')->count();
+        $totalRegistrations = $event->registrations()->count();
+        $latestAttendees = $event->registrations()
+            ->where('attendance_status', 'attended')
+            ->with('user')
+            ->latest('updated_at')
+            ->take(5)
+            ->get()
+            ->map(function ($reg) {
+                return [
+                    'name' => $reg->user->name ?? 'Peserta',
+                    'time' => $reg->updated_at ? $reg->updated_at->format('H:i') : '',
+                ];
+            });
+
+        return response()->json([
+            'is_presence_open' => (bool) $event->is_presence_open,
+            'attended_count' => $attendedCount,
+            'total_registrations' => $totalRegistrations,
+            'percentage' => $totalRegistrations > 0 ? round(($attendedCount / $totalRegistrations) * 100) : 0,
+            'latest_attendees' => $latestAttendees,
+        ]);
     }
 
     public function exportEventPeserta(Event $event)
@@ -1087,15 +1153,28 @@ class OrganizerController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100|unique:categories,name',
             'description' => 'nullable|string|max:500',
+            'icon' => 'nullable|string|max:100',
+            'icon_file' => 'nullable|file|mimes:svg,png,jpg,jpeg,webp|max:2048',
             'color' => 'nullable|string|max:30',
         ]);
+
+        $icon = $validated['icon'] ?? 'sparkles';
+        if ($request->hasFile('icon_file')) {
+            $file = $request->file('icon_file');
+            $filename = 'cat_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('categories', $filename, 'public');
+            $icon = 'storage/' . $path;
+        }
 
         $category = Category::create([
             'name' => trim($validated['name']),
             'slug' => Str::slug($validated['name']),
             'description' => $validated['description'] ?? null,
+            'icon' => $icon,
             'color' => $validated['color'] ?? null,
         ]);
+
+        Event::whereNull('category_id')->where('category', $category->name)->update(['category_id' => $category->id]);
 
         return redirect()->route('organizer.categories.index')
             ->with('success', "Kategori '{$category->name}' berhasil ditambahkan ke katalog master.");
@@ -1106,17 +1185,39 @@ class OrganizerController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100|unique:categories,name,' . $category->id,
             'description' => 'nullable|string|max:500',
+            'icon' => 'nullable|string|max:100',
+            'icon_file' => 'nullable|file|mimes:svg,png,jpg,jpeg,webp|max:2048',
             'color' => 'nullable|string|max:30',
         ]);
+
+        $icon = $category->icon;
+        if ($request->hasFile('icon_file')) {
+            if ($category->icon && str_starts_with($category->icon, 'storage/categories/')) {
+                $oldPath = str_replace('storage/', '', $category->icon);
+                Storage::disk('public')->delete($oldPath);
+            }
+            $file = $request->file('icon_file');
+            $filename = 'cat_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('categories', $filename, 'public');
+            $icon = 'storage/' . $path;
+        } elseif ($request->filled('icon')) {
+            if ($category->icon && str_starts_with($category->icon, 'storage/categories/') && $request->input('icon') !== $category->icon) {
+                $oldPath = str_replace('storage/', '', $category->icon);
+                Storage::disk('public')->delete($oldPath);
+            }
+            $icon = $request->input('icon');
+        }
 
         $category->update([
             'name' => trim($validated['name']),
             'slug' => Str::slug($validated['name']),
             'description' => $validated['description'] ?? null,
+            'icon' => $icon,
             'color' => $validated['color'] ?? null,
         ]);
 
         Event::where('category_id', $category->id)->update(['category' => $category->name]);
+        Event::whereNull('category_id')->where('category', $category->name)->update(['category_id' => $category->id]);
 
         return redirect()->route('organizer.categories.index')
             ->with('success', "Kategori '{$category->name}' berhasil diperbarui.");
@@ -1125,6 +1226,10 @@ class OrganizerController extends Controller
     public function categoriesDestroy(Category $category)
     {
         $name = $category->name;
+        if ($category->icon && str_starts_with($category->icon, 'storage/categories/')) {
+            $oldPath = str_replace('storage/', '', $category->icon);
+            Storage::disk('public')->delete($oldPath);
+        }
         Event::where('category_id', $category->id)->update(['category_id' => null]);
         $category->delete();
 

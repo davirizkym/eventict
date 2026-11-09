@@ -28,15 +28,7 @@
       </div>
 
       <div class="flex items-center gap-3 shrink-0">
-        <a href="{{ route('events.index_public') }}" class="px-3 py-1.5 rounded-lg border border-white/20 text-xs font-medium text-slate-200 hover:bg-white/10 hover:text-white transition hidden md:inline-flex items-center gap-1.5">
-          <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.35-4.35"/>
-          </svg>
-          <span>Katalog Kegiatan</span>
-        </a>
-
-        <div class="flex items-center gap-2.5 pl-2 sm:border-l sm:border-white/15">
+        <div class="flex items-center gap-2.5">
           <div class="size-8 rounded-lg bg-blue-900 text-white font-semibold text-xs flex items-center justify-center shrink-0">
             {{ strtoupper(substr($user->name ?? 'P', 0, 2)) }}
           </div>
@@ -67,7 +59,7 @@
           </span>
           @if($user->nik)
             <span class="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-blue-50 text-blue-900 border border-blue-100">
-              NIK: {{ $user->nik }}
+              NIM/NIP: {{ $user->nik }}
             </span>
           @endif
         </div>
@@ -83,6 +75,19 @@
             </svg>
             <span>Dashboard</span>
           </div>
+        </a>
+
+        <a href="{{ route('peserta.dashboard', ['tab' => 'acara']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between shrink-0 {{ $tab === 'acara' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
+          <div class="flex items-center gap-2.5">
+            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+              <line x1="16" x2="16" y1="2" y2="6"/>
+              <line x1="8" x2="8" y1="2" y2="6"/>
+              <line x1="3" x2="21" y1="10" y2="10"/>
+            </svg>
+            <span>Acara Saya</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-md text-[10px] {{ $tab === 'acara' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $registrations->count() }}</span>
         </a>
 
         <a href="{{ route('peserta.dashboard', ['tab' => 'tiket']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between shrink-0 {{ $tab === 'tiket' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
@@ -115,9 +120,19 @@
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.35-4.35"/>
             </svg>
-            <span>Katalog Kegiatan</span>
+            <span>Jelajahi Kegiatan</span>
           </div>
           <span class="px-2 py-0.5 rounded-md text-[10px] {{ $tab === 'kegiatan' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $availableEvents->count() }}</span>
+        </a>
+
+        <a href="{{ route('peserta.dashboard', ['tab' => 'profil']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between shrink-0 {{ $tab === 'profil' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
+          <div class="flex items-center gap-2.5">
+            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>Profil Saya</span>
+          </div>
         </a>
       </nav>
 
@@ -164,6 +179,24 @@
             <line x1="12" y1="8" x2="12.01" y2="8"/>
           </svg>
           <div class="font-medium">{{ session('info') }}</div>
+        </div>
+      @endif
+
+      @if (isset($errors) && $errors->any())
+        <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-xs text-rose-800">
+          <svg class="size-4 text-rose-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <div>
+            <div class="font-semibold mb-1">Periksa kembali data Anda:</div>
+            <ul class="list-disc pl-4 space-y-0.5">
+              @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
         </div>
       @endif
 
@@ -258,31 +291,84 @@
                     <span>Masuk Ruang Virtual</span>
                   </a>
                 @endif
+                @if($todayRegistration->attendance_status !== 'attended' && $todayRegistration->event->is_presence_open)
+                  <a href="{{ route('events.presence', $todayRegistration->event->slug) }}" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      <polyline points="9 12 11 14 15 10"/>
+                    </svg>
+                    <span>Isi Presensi Sesi</span>
+                  </a>
+                @endif
                 <a href="{{ route('events.show', $todayRegistration->event->slug) }}" class="px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-medium transition flex items-center gap-1.5 shadow-2xs">
                   <span>Lihat Detail Sesi</span>
                 </a>
               </div>
             </div>
 
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center gap-2 text-center shrink-0 w-full sm:w-auto">
-              <div class="size-24 bg-white p-2 rounded-lg border border-slate-300 flex items-center justify-center shadow-2xs">
-                <svg class="size-full text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <rect width="6" height="6" x="2" y="2" rx="1"/>
-                  <rect width="6" height="6" x="16" y="2" rx="1"/>
-                  <rect width="6" height="6" x="2" y="16" rx="1"/>
-                  <path d="M10 2h4"/>
-                  <path d="M2 10v4"/>
-                  <path d="M10 6h4"/>
-                  <path d="M14 10h4"/>
-                  <path d="M10 14h4"/>
-                  <path d="M16 14v4"/>
-                  <path d="M16 20h4"/>
-                  <path d="M20 16v4"/>
-                </svg>
+            @if($todayRegistration->attendance_status === 'attended')
+              <div class="p-4 bg-emerald-50/70 rounded-xl border border-emerald-200 flex flex-col items-center justify-center gap-2 text-center shrink-0 w-full sm:w-52">
+                <div class="size-11 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                  <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-emerald-900">Kehadiran Terverifikasi</div>
+                  <div class="text-[11px] text-emerald-700 mt-0.5">
+                    {{ $todayRegistration->checked_in_at ? $todayRegistration->checked_in_at->format('H:i') . ' WIB' : 'Tercatat' }}
+                    @if($todayRegistration->check_in_gate)
+                      &bull; {{ $todayRegistration->check_in_gate }}
+                    @endif
+                  </div>
+                </div>
               </div>
-              <div class="text-[11px] text-slate-500 font-medium">QR Pass Presensi</div>
-              <div class="text-blue-950 font-bold text-xs tracking-wider font-mono">#{{ $todayRegistration->qr_pass }}</div>
-            </div>
+            @elseif($todayRegistration->event->format === 'online')
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center justify-center gap-2.5 text-center shrink-0 w-full sm:w-56">
+                <div class="size-11 rounded-full bg-blue-100 text-blue-950 flex items-center justify-center">
+                  <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="20" height="14" x="2" y="3" rx="2"/>
+                    <line x1="8" x2="16" y1="21" y2="21"/>
+                    <line x1="12" x2="12" y1="17" y2="21"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="text-xs font-semibold text-slate-800">Sesi Daring / Online</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                    @if($todayRegistration->event->is_presence_open)
+                      <span class="text-emerald-700 font-semibold">Gerbang presensi dibuka.</span>
+                    @else
+                      Presensi dibuka saat sesi berlangsung.
+                    @endif
+                  </div>
+                </div>
+                @if($todayRegistration->event->is_presence_open)
+                  <a href="{{ route('events.presence', $todayRegistration->event->slug) }}" class="w-full px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold transition text-center shadow-2xs">
+                    Konfirmasi Hadir
+                  </a>
+                @endif
+              </div>
+            @else
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center gap-2 text-center shrink-0 w-full sm:w-auto">
+                <div class="size-24 bg-white p-2 rounded-lg border border-slate-300 flex items-center justify-center shadow-2xs">
+                  <svg class="size-full text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect width="6" height="6" x="2" y="2" rx="1"/>
+                    <rect width="6" height="6" x="16" y="2" rx="1"/>
+                    <rect width="6" height="6" x="2" y="16" rx="1"/>
+                    <path d="M10 2h4"/>
+                    <path d="M2 10v4"/>
+                    <path d="M10 6h4"/>
+                    <path d="M14 10h4"/>
+                    <path d="M10 14h4"/>
+                    <path d="M16 14v4"/>
+                    <path d="M16 20h4"/>
+                    <path d="M20 16v4"/>
+                  </svg>
+                </div>
+                <div class="text-[11px] text-slate-500 font-medium">Tunjukkan ke Panitia</div>
+                <div class="text-blue-950 font-bold text-xs tracking-wider font-mono">#{{ $todayRegistration->qr_pass }}</div>
+              </div>
+            @endif
           </div>
         @else
           <div class="bg-white rounded-2xl border border-slate-200 p-6 text-center flex flex-col items-center gap-3 shadow-2xs">
@@ -364,21 +450,22 @@
 
           <div class="flex flex-col gap-3">
             @forelse($certificates->take(2) as $cert)
-              <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="p-3.5 bg-white rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                 <div class="flex items-center gap-3 min-w-0">
-                  <div class="w-16 h-12 bg-white border border-slate-300 rounded flex flex-col items-center justify-center p-1 text-center shrink-0 shadow-2xs">
-                    <div class="text-[7px] font-bold text-slate-700 uppercase">SERTIFIKAT</div>
-                    <div class="px-1 bg-blue-950 text-white text-[6px] font-bold rounded mt-0.5">VERIFIED</div>
+                  <div class="size-10 rounded-lg bg-blue-50 border border-blue-100 text-blue-950 flex items-center justify-center shrink-0">
+                    <svg class="size-5 text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                      <circle cx="12" cy="8" r="6"/>
+                      <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                    </svg>
                   </div>
                   <div class="min-w-0">
-                    <div class="text-slate-900 text-xs sm:text-sm font-semibold truncate">{{ $cert->event->title ?? 'Kegiatan Ilmiah' }}</div>
-                    <div class="text-slate-500 text-[11px]">No: {{ $cert->certificate_number }}</div>
-                    <div class="text-slate-400 text-[10px] font-mono truncate">Hash: {{ $cert->verify_hash }}</div>
+                    <div class="text-slate-900 text-xs sm:text-sm font-semibold truncate">{{ $cert->event->title ?? 'Kegiatan Laboratorium ICT' }}</div>
+                    <div class="text-slate-500 text-[11px] mt-0.5">No: <span class="font-mono font-medium text-slate-700">{{ $cert->certificate_number }}</span> &bull; <span class="text-slate-400 font-mono text-[10px]">ID: {{ $cert->verify_hash }}</span></div>
                   </div>
                 </div>
 
                 <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                  <a href="{{ $cert->download_url ? asset($cert->download_url) : '#' }}" target="_blank" download class="px-3 py-1.5 bg-blue-950 hover:bg-blue-900 text-white text-xs font-medium rounded-lg transition flex items-center gap-1.5 shadow-2xs">
+                  <a href="{{ $cert->download_url ? asset($cert->download_url) : '#' }}" target="_blank" download class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white text-xs font-semibold rounded-lg transition flex items-center gap-1.5 shadow-2xs">
                     <svg class="size-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                       <polyline points="7 10 12 15 17 10"/>
@@ -391,6 +478,125 @@
             @empty
               <div class="p-6 bg-slate-50 rounded-xl text-center text-xs text-slate-500">
                 Belum ada e-sertifikat yang diterbitkan. Sertifikat diterbitkan otomatis setelah kehadiran tervalidasi.
+              </div>
+            @endforelse
+          </div>
+        </div>
+      @endif
+
+      @if($tab === 'acara')
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-6 shadow-2xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">Acara Saya</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Daftar kegiatan seminar, workshop, dan pelatihan yang telah Anda ikuti dan terdaftar resmi.</p>
+            </div>
+            <div class="flex items-center gap-2 self-start sm:self-auto">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-900 border border-blue-100">
+                {{ $registrations->count() }} Acara Terdaftar
+              </span>
+              <a href="{{ route('peserta.dashboard', ['tab' => 'kegiatan']) }}" class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+                <span>+ Cari Acara Baru</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @forelse($registrations as $reg)
+              @php
+                $todayDate = \Carbon\Carbon::today()->toDateString();
+                $eventDate = $reg->event->start_date ? $reg->event->start_date->toDateString() : null;
+                $isToday = $eventDate === $todayDate;
+                $isPassed = $reg->event->status === 'completed' || ($reg->event->end_date ? $reg->event->end_date->toDateString() < $todayDate : ($eventDate ? $eventDate < $todayDate : false));
+              @endphp
+              <div class="p-4.5 rounded-xl border border-slate-200 bg-white hover:border-blue-950 hover:shadow-xs transition flex flex-col justify-between gap-4">
+                <div class="flex flex-col gap-2.5">
+                  <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      @if($reg->attendance_status === 'attended')
+                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">
+                          Hadir &bull; {{ $reg->checked_in_at ? $reg->checked_in_at->format('H:i') . ' WIB' : 'Tercatat' }}
+                        </span>
+                      @elseif($isToday)
+                        <span class="px-2 py-0.5 bg-blue-100 text-blue-950 text-[10px] font-bold rounded">
+                          Hari Ini
+                        </span>
+                      @elseif(!$isPassed)
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-semibold rounded">
+                          Mendatang
+                        </span>
+                      @else
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-medium rounded">
+                          Selesai
+                        </span>
+                      @endif
+
+                      <span class="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-medium rounded uppercase">
+                        {{ $reg->event->format }}
+                      </span>
+
+                      @if($reg->event->category)
+                        <span class="px-2 py-0.5 bg-blue-50 text-blue-900 text-[10px] font-medium rounded">
+                          {{ $reg->event->category }}
+                        </span>
+                      @endif
+                    </div>
+
+                    <span class="text-[11px] font-mono text-slate-400">
+                      {{ $reg->registration_code }}
+                    </span>
+                  </div>
+
+                  <a href="{{ route('events.show', $reg->event->slug) }}" class="text-slate-900 text-sm font-semibold hover:text-blue-950 transition line-clamp-2">
+                    {{ $reg->event->title }}
+                  </a>
+
+                  <div class="flex flex-col gap-1 text-[11px] text-slate-500">
+                    <div class="flex items-center gap-2">
+                      <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                        <line x1="16" x2="16" y1="2" y2="6"/>
+                        <line x1="8" x2="8" y1="2" y2="6"/>
+                        <line x1="3" x2="21" y1="10" y2="10"/>
+                      </svg>
+                      <span>{{ $reg->event->start_date ? $reg->event->start_date->format('d M Y') : 'Segera' }} &bull; {{ substr($reg->event->start_time ?? '', 0, 5) }} WIB</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                      <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                      </svg>
+                      <span class="truncate">{{ $reg->event->location ?? 'Online via Eventict Platform' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+                  <div class="text-[11px] text-slate-500 font-mono">
+                    Pass: <strong class="text-blue-950">#{{ $reg->qr_pass }}</strong>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    @if($reg->event->virtual_meeting_url)
+                      <a href="{{ $reg->event->virtual_meeting_url }}" target="_blank" class="px-3 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+                        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="12" cy="12" r="10"/>
+                          <polygon points="10 8 16 12 10 16 10 8"/>
+                        </svg>
+                        <span>Ruang Virtual</span>
+                      </a>
+                    @endif
+                    <a href="{{ route('events.show', $reg->event->slug) }}" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                      <span>Detail Sesi</span>
+                      <span class="text-sm">&rarr;</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            @empty
+              <div class="col-span-full p-8 bg-slate-50 rounded-xl text-center text-xs text-slate-500">
+                Anda belum terdaftar pada acara apa pun. Silakan buka menu <strong>Jelajahi Kegiatan</strong> untuk menemukan workshop dan seminar menarik.
               </div>
             @endforelse
           </div>
@@ -474,32 +680,44 @@
 
           <div class="flex flex-col gap-4">
             @forelse($certificates as $cert)
-              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="flex items-center gap-4 min-w-0">
-                  <div class="w-20 h-14 bg-white border border-slate-300 rounded-lg flex flex-col items-center justify-center p-1 text-center shrink-0 shadow-2xs">
-                    <div class="text-[8px] font-bold text-slate-700 uppercase tracking-widest">SERTIFIKAT</div>
-                    <div class="text-[7px] text-slate-500 truncate max-w-[70px]">{{ $user->name }}</div>
-                    <div class="px-1 bg-blue-950 text-white text-[7px] font-bold rounded mt-0.5">VERIFIED</div>
+              <div class="p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-900 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+                <div class="flex items-start sm:items-center gap-3.5 min-w-0">
+                  <div class="size-12 rounded-xl bg-blue-50 border border-blue-100 text-blue-950 flex items-center justify-center shrink-0">
+                    <svg class="size-6 text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                      <circle cx="12" cy="8" r="6"/>
+                      <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                    </svg>
                   </div>
-                  <div class="min-w-0">
-                    <div class="text-slate-900 text-sm font-semibold truncate">{{ $cert->event->title ?? 'Kegiatan Ilmiah' }}</div>
-                    <div class="text-slate-500 text-xs">No. Sertifikat: <span class="font-mono">{{ $cert->certificate_number }}</span></div>
-                    <div class="text-slate-400 text-[11px] font-mono truncate mt-0.5">Hash Verifikasi: {{ $cert->verify_hash }}</div>
-                    <span class="inline-block px-2 py-0.5 bg-blue-100 text-blue-950 font-semibold text-[10px] rounded mt-1">
-                      Sertifikat Resmi Terbit
->>>>>>> origin/main
-                    </span>
+                  <div class="min-w-0 flex flex-col gap-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold rounded-md">
+                        Terverifikasi Sah
+                      </span>
+                      @if($cert->event && $cert->event->start_date)
+                        <span class="text-[11px] text-slate-400">
+                          {{ $cert->event->start_date->format('d M Y') }}
+                        </span>
+                      @endif
+                    </div>
+                    <h4 class="text-slate-900 text-sm font-semibold truncate">
+                      {{ $cert->event->title ?? 'Kegiatan Laboratorium ICT' }}
+                    </h4>
+                    <div class="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
+                      <span>No. Sertifikat: <strong class="font-mono text-slate-800 font-semibold">{{ $cert->certificate_number }}</strong></span>
+                      <span class="text-slate-300 hidden sm:inline">&bull;</span>
+                      <span class="text-slate-400 text-[11px] font-mono" title="ID unik untuk verifikasi keabsahan dokumen">ID Keabsahan: {{ $cert->verify_hash }}</span>
+                    </div>
                   </div>
                 </div>
 
                 <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                  <a href="{{ $cert->download_url ? asset($cert->download_url) : '#' }}" target="_blank" download class="px-3.5 py-2 bg-blue-950 hover:bg-blue-900 text-white text-xs font-medium rounded-xl transition flex items-center gap-1.5 shadow-2xs">
-                    <svg class="size-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <a href="{{ $cert->download_url ? asset($cert->download_url) : '#' }}" target="_blank" download class="px-4 py-2 bg-blue-950 hover:bg-blue-900 text-white text-xs font-semibold rounded-xl transition flex items-center gap-2 shadow-2xs">
+                    <svg class="size-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                       <polyline points="7 10 12 15 17 10"/>
                       <line x1="12" y1="15" x2="12" y2="3"/>
                     </svg>
-                    <span>Unduh Dokumen PDF</span>
+                    <span>Unduh PDF</span>
                   </a>
                 </div>
               </div>
@@ -513,56 +731,93 @@
       @endif
 
       @if($tab === 'kegiatan')
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-5 shadow-2xs">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h3 class="text-sm sm:text-base font-bold text-slate-900">Katalog Kegiatan Tersedia ({{ $availableEvents->count() }})</h3>
-              <p class="text-xs text-slate-500">Pilih seminar, workshop teknologi, atau pelatihan praktikum untuk mengasah keahlian Anda.</p>
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-6 shadow-2xs">
+          <div class="flex flex-col gap-4 pb-4 border-b border-slate-100">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-base font-bold text-slate-900">Jelajahi Kegiatan</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Daftar seminar, workshop teknologi, dan pelatihan praktikum Laboratorium ICT yang belum Anda ikuti.</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-900 border border-blue-100 self-start sm:self-auto">
+                {{ $availableEvents->count() }} Kegiatan Tersedia
+              </span>
             </div>
-            <a href="{{ route('events.index_public') }}" class="text-xs font-semibold text-blue-950 hover:underline self-start sm:self-auto">
-              Katalog Lengkap Website →
-            </a>
+
+            <form action="{{ route('peserta.dashboard') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-2 pt-1">
+              <input type="hidden" name="tab" value="kegiatan">
+              <div class="relative flex-1 w-full">
+                <input
+                  type="text"
+                  name="q"
+                  value="{{ request('q') }}"
+                  placeholder="Cari topik kegiatan atau rumpun ilmu..."
+                  class="w-full pl-9 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:bg-white transition"
+                >
+                <svg class="size-4 text-slate-400 absolute left-3 top-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.35-4.35"/>
+                </svg>
+              </div>
+              <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition cursor-pointer shadow-2xs shrink-0">
+                Cari
+              </button>
+              @if(request('q'))
+                <a href="{{ route('peserta.dashboard', ['tab' => 'kegiatan']) }}" class="px-3 py-2 text-xs font-semibold text-rose-600 hover:underline shrink-0">
+                  Reset
+                </a>
+              @endif
+            </form>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @forelse($availableEvents as $avEvent)
               @php
+                $todayDate = \Carbon\Carbon::today()->toDateString();
+                $isPassed = $avEvent->status === 'completed' || ($avEvent->end_date ? $avEvent->end_date->toDateString() < $todayDate : ($avEvent->start_date ? $avEvent->start_date->toDateString() < $todayDate : false));
                 $avRemaining = max(0, $avEvent->quota - ($avEvent->registrations_count ?? 0));
                 $isAvFull = $avEvent->quota > 0 && ($avEvent->registrations_count ?? 0) >= $avEvent->quota;
               @endphp
-              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between gap-4 hover:border-blue-950 transition">
-                <div class="flex flex-col gap-2">
-                  <div class="flex items-center justify-between gap-2">
+              <div class="p-4.5 rounded-xl border flex flex-col justify-between gap-4 transition {{ $isPassed ? 'bg-slate-50/70 border-slate-200 opacity-80 hover:opacity-100' : 'bg-white border-slate-200 hover:border-blue-950 hover:shadow-xs' }}">
+                <div class="flex flex-col gap-2.5">
+                  <div class="flex items-center justify-between gap-2 flex-wrap">
                     <div class="flex items-center gap-1.5 flex-wrap">
-                      @if($isAvFull)
+                      @if($isPassed)
+                        <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-bold rounded">
+                          Kegiatan Telah Terlewat
+                        </span>
+                      @elseif($isAvFull)
                         <span class="px-2 py-0.5 bg-rose-50 text-rose-700 text-[10px] font-bold rounded border border-rose-200">
                           Penuh
                         </span>
                       @elseif($avRemaining <= 5 && $avRemaining > 0)
                         <span class="px-2 py-0.5 bg-amber-50 text-amber-800 text-[10px] font-bold rounded border border-amber-200">
-                          Segera Penuh
+                          Sisa {{ $avRemaining }} Kuota
+                        </span>
+                      @else
+                        <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded border border-emerald-200">
+                          Dibuka
                         </span>
                       @endif
-                      @if($avEvent->skp_points > 0)
-                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">
-                          {{ $avEvent->skp_points }} SKP
-                        </span>
-                      @endif
-                      <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-medium rounded uppercase">
+                      <span class="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-medium rounded uppercase">
                         {{ $avEvent->format }}
                       </span>
+                      @if($avEvent->category)
+                        <span class="px-2 py-0.5 bg-blue-50 text-blue-900 text-[10px] font-medium rounded">
+                          {{ $avEvent->category }}
+                        </span>
+                      @endif
                       @if(($avEvent->organizer_type ?? 'internal') === 'partner')
                         <span class="px-2 py-0.5 bg-purple-50 text-purple-700 text-[10px] font-semibold rounded">
                           Partner: {{ $avEvent->organizer_name }}
                         </span>
                       @endif
                     </div>
-                    <span class="text-xs font-bold text-blue-950">
+                    <span class="text-xs font-bold {{ $isPassed ? 'text-slate-400' : 'text-blue-950' }}">
                       {{ $avEvent->price == 0 ? 'Gratis' : 'Rp ' . number_format($avEvent->price, 0, ',', '.') }}
                     </span>
                   </div>
 
-                  <a href="{{ route('events.show', $avEvent->slug) }}" class="text-slate-900 text-sm font-semibold hover:text-blue-950 transition line-clamp-2">
+                  <a href="{{ route('events.show', $avEvent->slug) }}" class="text-sm font-semibold transition line-clamp-2 {{ $isPassed ? 'text-slate-600 hover:text-slate-900' : 'text-slate-900 hover:text-blue-950' }}">
                     {{ $avEvent->title }}
                   </a>
 
@@ -577,8 +832,16 @@
                   </div>
                 </div>
 
-                <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
-                  @if($isAvFull)
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                  @if($isPassed)
+                    <span class="text-[11px] text-slate-400 font-medium">
+                      Pendaftaran Ditutup
+                    </span>
+                    <a href="{{ route('events.show', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
+                      <span>Lihat Detail Sesi</span>
+                      <span class="text-sm">&rarr;</span>
+                    </a>
+                  @elseif($isAvFull)
                     <span class="text-[11px] font-semibold text-rose-700">
                       Kuota Penuh
                     </span>
@@ -588,7 +851,7 @@
                     </a>
                   @elseif($avRemaining <= 5 && $avRemaining > 0)
                     <span class="text-[11px] font-semibold text-amber-700">
-                      Sisa {{ $avRemaining }} kuota lagi
+                      Sisa {{ $avRemaining }} kuota
                     </span>
                     <a href="{{ route('events.register.form', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
                       <span>Daftar Sesi</span>
@@ -607,10 +870,150 @@
               </div>
             @empty
               <div class="col-span-full p-8 bg-slate-50 rounded-xl text-center text-xs text-slate-500">
-                Anda telah terdaftar pada seluruh kegiatan yang sedang aktif saat ini.
+                @if(request('q'))
+                  Tidak ada kegiatan yang sesuai dengan pencarian "{{ request('q') }}". Silakan gunakan kata kunci lain.
+                @else
+                  Anda telah terdaftar pada seluruh kegiatan yang sedang aktif saat ini.
+                @endif
               </div>
             @endforelse
           </div>
+        </div>
+      @endif
+
+      @if($tab === 'profil')
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-6 shadow-2xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">Profil Peserta</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Kelola data profil, NIM/NIP, asal instansi, dan keamanan kata sandi akun Anda.</p>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-900 border border-blue-100">
+                Role: Peserta
+              </span>
+            </div>
+          </div>
+
+          <form action="{{ route('peserta.profile.update') }}" method="POST" class="flex flex-col gap-6">
+            @csrf
+            @method('PUT')
+
+            <div class="flex flex-col gap-4">
+              <h4 class="text-xs font-semibold text-slate-900 uppercase tracking-wider">Informasi Pribadi & Kontak</h4>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                  <label for="name" class="text-xs font-semibold text-slate-700">Nama Lengkap <span class="text-rose-500">*</span></label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value="{{ old('name', $user->name) }}"
+                    required
+                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950"
+                  >
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <label for="nik" class="text-xs font-semibold text-slate-700">NIM / NIP</label>
+                  <input
+                    type="text"
+                    id="nik"
+                    name="nik"
+                    value="{{ old('nik', $user->nik) }}"
+                    maxlength="20"
+                    placeholder="Contoh: 2210511001"
+                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950 font-mono"
+                  >
+                  <span class="text-[10px] text-slate-400">Nomor Induk Mahasiswa atau Pegawai untuk kebutuhan sertifikat resmi.</span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                  <label for="email" class="text-xs font-semibold text-slate-700">Alamat Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    value="{{ $user->email }}"
+                    disabled
+                    class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-500 cursor-not-allowed font-mono"
+                  >
+                  <span class="text-[10px] text-slate-400">Alamat email terdaftar tidak dapat diubah secara mandiri.</span>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <label for="phone" class="text-xs font-semibold text-slate-700">Nomor WhatsApp / HP</label>
+                  <input
+                    type="text"
+                    id="phone"
+                    name="phone"
+                    value="{{ old('phone', $user->phone) }}"
+                    placeholder="Contoh: 081234567890"
+                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950 font-mono"
+                  >
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="institution" class="text-xs font-semibold text-slate-700">Asal Instansi</label>
+                <input
+                  type="text"
+                  id="institution"
+                  name="institution"
+                  value="{{ old('institution', $user->institution) }}"
+                  placeholder="Contoh: Universitas Budi Luhur"
+                  class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950"
+                >
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-200 flex flex-col gap-4">
+              <div>
+                <h4 class="text-xs font-semibold text-slate-900 uppercase tracking-wider">Keamanan & Ubah Kata Sandi</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">Biarkan kosong jika Anda tidak ingin mengganti kata sandi akun.</p>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                  <label for="password" class="text-xs font-semibold text-slate-700">Kata Sandi Baru</label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    autocomplete="new-password"
+                    placeholder="Minimal 8 karakter"
+                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950"
+                  >
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <label for="password_confirmation" class="text-xs font-semibold text-slate-700">Ulangi Kata Sandi Baru</label>
+                  <input
+                    type="password"
+                    id="password_confirmation"
+                    name="password_confirmation"
+                    autocomplete="new-password"
+                    placeholder="Konfirmasi kata sandi baru"
+                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950"
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-200 flex items-center justify-end gap-3">
+              <a href="{{ route('peserta.dashboard', ['tab' => 'dashboard']) }}" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
+                Batal
+              </a>
+              <button
+                type="submit"
+                class="px-5 py-2.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition cursor-pointer shadow-2xs"
+              >
+                Simpan Perubahan Profil
+              </button>
+            </div>
+          </form>
         </div>
       @endif
     </main>
