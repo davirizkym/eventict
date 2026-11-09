@@ -61,11 +61,6 @@
             Laboratorium ICT
           </span>
         @endif
-        @if($event->sk_number)
-          <span class="px-3 py-1 bg-white/10 text-slate-300 text-xs font-mono rounded-md">
-            No. SK: {{ $event->sk_number }}
-          </span>
-        @endif
       </div>
 
       <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold font-['Poppins'] leading-tight">

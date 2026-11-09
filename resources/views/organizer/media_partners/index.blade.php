@@ -262,8 +262,8 @@
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label class="font-semibold text-slate-700">Kontak Email</label>
-        <input type="email" name="contact_email" placeholder="Contoh: hmsi@kampus.ac.id" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition">
+        <label class="font-semibold text-slate-700">Kontak Email <span class="text-rose-500">*</span></label>
+        <input type="email" name="contact_email" required placeholder="Contoh: hmsi@kampus.ac.id" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition">
       </div>
 
       <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
@@ -305,8 +305,8 @@
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label class="font-semibold text-slate-700">Kontak Email</label>
-        <input type="email" id="edit-contact-email" name="contact_email" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition">
+        <label class="font-semibold text-slate-700">Kontak Email <span class="text-rose-500">*</span></label>
+        <input type="email" id="edit-contact-email" name="contact_email" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition">
       </div>
 
       <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
