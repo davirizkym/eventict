@@ -11,6 +11,8 @@ Route::get('/kegiatan', [EventController::class, 'catalog'])->name('events.index
 Route::redirect('/jadwal', '/kegiatan');
 Route::get('/tentang', [EventController::class, 'about'])->name('about');
 Route::get('/kegiatan/{slug}', [EventController::class, 'show'])->name('events.show');
+Route::get('/kegiatan/{slug}/presensi', [EventController::class, 'presence'])->name('events.presence');
+Route::post('/kegiatan/{slug}/presensi', [EventController::class, 'presenceSubmit'])->name('events.presence_submit');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -23,6 +25,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 Route::middleware(['auth', 'role:peserta'])->group(function () {
     Route::get('/peserta', [PesertaController::class, 'dashboard'])->name('peserta.dashboard');
+    Route::put('/peserta/profil', [PesertaController::class, 'updateProfile'])->name('peserta.profile.update');
     Route::get('/kegiatan/{slug}/daftar', [EventController::class, 'showRegistrationForm'])->name('events.register.form');
     Route::post('/kegiatan/{slug}/daftar', [EventController::class, 'registerEvent'])->name('events.register');
 });
@@ -49,10 +52,13 @@ Route::middleware(['auth', 'role:penyelenggara'])->group(function () {
     Route::delete('/penyelenggara/media-partner/{mediaPartner}', [OrganizerController::class, 'mediaPartnersDestroy'])->name('organizer.media_partners.destroy');
 
     Route::get('/penyelenggara/event/{event}', [OrganizerController::class, 'workspace'])->name('organizer.workspace');
+    Route::get('/penyelenggara/event/{event}/layar-proyektor', [OrganizerController::class, 'stage'])->name('organizer.workspace.stage');
+    Route::get('/penyelenggara/event/{event}/stage-status', [OrganizerController::class, 'stageStatus'])->name('organizer.workspace.stage_status');
     Route::put('/penyelenggara/event/{event}', [OrganizerController::class, 'updateEvent'])->name('organizer.event.update');
     Route::post('/penyelenggara/event/{event}/narasumber', [OrganizerController::class, 'assignSpeaker'])->name('organizer.event.speaker.assign');
     Route::delete('/penyelenggara/event/{event}/narasumber/{speaker}', [OrganizerController::class, 'removeSpeaker'])->name('organizer.event.speaker.remove');
     Route::post('/penyelenggara/event/{event}/quick-checkin', [OrganizerController::class, 'quickCheckinWorkspace'])->name('organizer.workspace.quick_checkin');
+    Route::post('/penyelenggara/event/{event}/presence/toggle', [OrganizerController::class, 'togglePresence'])->name('organizer.workspace.presence.toggle');
     Route::get('/penyelenggara/event/{event}/ekspor-peserta', [OrganizerController::class, 'exportEventPeserta'])->name('organizer.workspace.export');
     Route::post('/penyelenggara/event/{event}/upload-sertifikat-massal', [OrganizerController::class, 'uploadBatchWorkspace'])->name('organizer.workspace.certificate.batch');
 

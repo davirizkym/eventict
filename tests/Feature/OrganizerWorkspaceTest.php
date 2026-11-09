@@ -166,4 +166,128 @@ class OrganizerWorkspaceTest extends TestCase
         $res2->assertSessionHasErrors(['speaker_id']);
         $this->assertEquals(1, $event->speakers()->count());
     }
+
+    public function test_organizer_can_view_stage_projector_screen(): void
+    {
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+        $event = Event::create([
+            'title' => 'Simposium AI Healthcare',
+            'slug' => 'simposium-ai-healthcare',
+            'category' => 'Simposium',
+            'format' => 'offline',
+            'location' => 'Auditorium ICT',
+            'start_date' => now()->addDays(1),
+            'end_date' => now()->addDays(1),
+            'start_time' => '08:00:00',
+            'end_time' => '12:00:00',
+            'quota' => 100,
+            'price' => 0,
+            'status' => 'published',
+            'is_presence_open' => true,
+        ]);
+
+        $response = $this->actingAs($panitia)->get(route('organizer.workspace.stage', ['event' => $event->id]));
+
+        $response->assertStatus(200);
+        $response->assertSee('Simposium AI Healthcare');
+        $response->assertSee('create-qr-code');
+    }
+
+    public function test_stage_screen_is_inaccessible_when_presence_gate_is_closed(): void
+    {
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+        $event = Event::create([
+            'title' => 'Simposium AI Healthcare Closed',
+            'slug' => 'simposium-ai-healthcare-closed',
+            'category' => 'Simposium',
+            'format' => 'offline',
+            'location' => 'Auditorium ICT',
+            'start_date' => now()->addDays(1),
+            'end_date' => now()->addDays(1),
+            'start_time' => '08:00:00',
+            'end_time' => '12:00:00',
+            'quota' => 100,
+            'price' => 0,
+            'status' => 'published',
+            'is_presence_open' => false,
+        ]);
+
+        $response = $this->actingAs($panitia)->get(route('organizer.workspace.stage', ['event' => $event->id]));
+
+        $response->assertRedirect(route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta']));
+        $response->assertSessionHas('warning', 'Buka presensi sesi terlebih dahulu sebelum menampilkan QR presensi.');
+    }
+
+    public function test_stage_status_endpoint_returns_realtime_metrics(): void
+    {
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+        $event = Event::create([
+            'title' => 'Simposium Big Data Klinis',
+            'slug' => 'simposium-big-data-klinis',
+            'category' => 'Simposium',
+            'format' => 'online',
+            'location' => 'Zoom Live Stream',
+            'start_date' => now()->addDays(1),
+            'end_date' => now()->addDays(1),
+            'start_time' => '10:00:00',
+            'end_time' => '12:00:00',
+            'quota' => 50,
+            'price' => 0,
+            'status' => 'published',
+            'is_presence_open' => false,
+        ]);
+
+        $peserta = User::factory()->create(['role' => 'peserta', 'name' => 'dr. Budi Santoso']);
+        Registration::create([
+            'user_id' => $peserta->id,
+            'event_id' => $event->id,
+            'registration_code' => 'REG-STAGE-001',
+            'qr_pass' => 'PASS-STAGE-001',
+            'payment_status' => 'free',
+            'attendance_status' => 'attended',
+        ]);
+
+        $response = $this->actingAs($panitia)->getJson(route('organizer.workspace.stage_status', ['event' => $event->id]));
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'is_presence_open' => false,
+            'attended_count' => 1,
+            'total_registrations' => 1,
+            'percentage' => 100,
+        ]);
+        $response->assertJsonFragment([
+            'name' => 'dr. Budi Santoso',
+        ]);
+    }
+
+    public function test_organizer_can_toggle_presence_gate_via_json(): void
+    {
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+        $event = Event::create([
+            'title' => 'Workshop Telemedisin',
+            'slug' => 'workshop-telemedisin',
+            'category' => 'Workshop',
+            'format' => 'offline',
+            'location' => 'Ruang Lab 2',
+            'start_date' => now()->addDays(1),
+            'end_date' => now()->addDays(1),
+            'start_time' => '09:00:00',
+            'end_time' => '11:00:00',
+            'quota' => 30,
+            'price' => 0,
+            'status' => 'published',
+            'is_presence_open' => false,
+        ]);
+
+        $response = $this->actingAs($panitia)->postJson(route('organizer.workspace.presence.toggle', ['event' => $event->id]));
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'is_presence_open' => true,
+        ]);
+
+        $this->assertTrue((bool) $event->fresh()->is_presence_open);
+    }
 }

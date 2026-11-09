@@ -198,33 +198,57 @@
 
     <main class="flex-1 flex flex-col gap-6 min-w-0">
       @if (session('success'))
-        <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3 text-xs text-emerald-800">
-          <svg class="size-4 text-emerald-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-          <div class="font-medium">{{ session('success') }}</div>
+        <div class="px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between gap-3 text-xs text-emerald-800 shadow-2xs">
+          <div class="flex items-center gap-2.5">
+            <svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span class="font-medium">{{ session('success') }}</span>
+          </div>
+          <button type="button" onclick="this.closest('div').remove()" class="text-emerald-600 hover:text-emerald-900 cursor-pointer p-0.5">
+            <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
       @endif
 
       @if (session('warning'))
-        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-xs text-amber-800">
-          <svg class="size-4 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <div class="font-medium">{{ session('warning') }}</div>
+        <div class="px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between gap-3 text-xs text-amber-800 shadow-2xs">
+          <div class="flex items-center gap-2.5">
+            <svg class="size-4 text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span class="font-medium">{{ session('warning') }}</span>
+          </div>
+          <button type="button" onclick="this.closest('div').remove()" class="text-amber-600 hover:text-amber-900 cursor-pointer p-0.5">
+            <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
       @endif
 
       @if (session('error'))
-        <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-xs text-rose-800">
-          <svg class="size-4 text-rose-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
-          </svg>
-          <div class="font-medium">{{ session('error') }}</div>
+        <div class="px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl flex items-center justify-between gap-3 text-xs text-rose-800 shadow-2xs">
+          <div class="flex items-center gap-2.5">
+            <svg class="size-4 text-rose-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            <span class="font-medium">{{ session('error') }}</span>
+          </div>
+          <button type="button" onclick="this.closest('div').remove()" class="text-rose-600 hover:text-rose-900 cursor-pointer p-0.5">
+            <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
       @endif
 
@@ -354,6 +378,77 @@
         </div>
 
       @elseif($tab === 'peserta')
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs flex flex-col gap-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-2.5">
+              <div class="size-9 rounded-xl {{ $event->is_presence_open ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600' }} flex items-center justify-center shrink-0">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="18" height="18" x="3" y="3" rx="2"/>
+                  <path d="M7 7h.01M17 7h.01M7 17h.01M17 17h.01"/>
+                  <path d="M10 10h4v4h-4z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Gerbang Presensi Sesi (Online & Self Check-in)</h3>
+                <p class="text-xs text-slate-500">Kendalikan absensi mandiri untuk peserta online (Zoom/Meet) dan peserta offline (standing banner).</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 shrink-0">
+              <form action="{{ route('organizer.workspace.presence.toggle', ['event' => $event->id]) }}" method="POST">
+                @csrf
+                @if($event->is_presence_open)
+                  <button type="submit" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect width="18" height="18" x="3" y="3" rx="2"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                    </svg>
+                    <span>Tutup Presensi Sesi</span>
+                  </button>
+                @else
+                  <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Buka Presensi Sesi</span>
+                  </button>
+                @endif
+              </form>
+
+              @if($event->is_presence_open)
+                <a href="{{ route('organizer.workspace.stage', ['event' => $event->id]) }}" target="_blank" class="px-4 py-2 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+                  <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>
+                  </svg>
+                  <span>Tampilkan QR Presensi</span>
+                </a>
+              @else
+                <button type="button" disabled title="Buka presensi sesi terlebih dahulu untuk menampilkan QR" class="px-4 py-2 bg-slate-200 text-slate-400 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-not-allowed">
+                  <svg class="size-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>
+                  </svg>
+                  <span>Tampilkan QR Presensi</span>
+                </button>
+              @endif
+            </div>
+          </div>
+
+          <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="text-slate-500 font-medium shrink-0">Tautan Presensi Peserta:</span>
+              <span id="session-presence-url" class="font-mono text-blue-950 font-semibold truncate">{{ route('events.presence', $event->slug) }}</span>
+            </div>
+            <button type="button" onclick="copySessionUrl()" id="btn-copy-url" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-medium transition flex items-center gap-1.5 shrink-0 cursor-pointer shadow-2xs">
+              <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+              </svg>
+              <span id="copy-text">Salin Tautan</span>
+            </button>
+          </div>
+        </div>
+
         <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <form action="{{ route('organizer.workspace.quick_checkin', ['event' => $event->id]) }}" method="POST" class="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
             @csrf
@@ -833,9 +928,87 @@
       </form>
     </div>
   </div>
+
+  <div id="modal-session-qr" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 flex flex-col items-center gap-5 shadow-2xl my-auto text-center">
+      <div class="w-full flex items-start justify-between pb-3 border-b border-slate-100">
+        <div class="text-left">
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-blue-50 text-blue-950 border border-blue-200">
+            QR Presensi Sesi Resmi
+          </span>
+          <h2 class="text-base font-bold text-slate-900 mt-1 truncate max-w-xs sm:max-w-sm">{{ $event->title }}</h2>
+        </div>
+        <button type="button" onclick="closeSessionQrModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-4 bg-white rounded-2xl border-2 border-slate-200 shadow-sm flex flex-col items-center justify-center">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data={{ urlencode(route('events.presence', $event->slug)) }}" alt="QR Presensi Sesi" class="size-64 object-contain" onerror="this.classList.add('hidden'); document.getElementById('qr-modal-fallback').classList.remove('hidden');">
+        <div id="qr-modal-fallback" class="hidden size-64 flex flex-col items-center justify-center p-4 bg-slate-50 text-slate-600 rounded-xl">
+          <svg class="size-16 text-blue-950 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect width="6" height="6" x="2" y="2" rx="1"/>
+            <rect width="6" height="6" x="16" y="2" rx="1"/>
+            <rect width="6" height="6" x="2" y="16" rx="1"/>
+            <path d="M10 2h4M2 10v4M10 6h4M14 10h4M10 14h4M16 14v4M16 20h4M20 16v4"/>
+          </svg>
+          <span class="text-xs font-semibold">Tautan Langsung Presensi</span>
+          <span class="text-[10px] text-slate-500 break-all mt-1">{{ route('events.presence', $event->slug) }}</span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1 text-center">
+        <span class="text-xs font-bold text-slate-900">Scan QR Code dengan Kamera Ponsel Anda</span>
+        <span class="text-[11px] text-slate-500 max-w-sm">
+          Atau gunakan tautan langsung di chat: <strong class="text-blue-950">{{ route('events.presence', $event->slug) }}</strong>
+        </span>
+      </div>
+
+      <div class="w-full flex items-center justify-center gap-3 pt-3 border-t border-slate-100">
+        <button type="button" onclick="window.print()" class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer">
+          Cetak Lembar QR
+        </button>
+        <button type="button" onclick="closeSessionQrModal()" class="px-5 py-2 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition cursor-pointer shadow-xs">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
+function openSessionQrModal() {
+  const m = document.getElementById('modal-session-qr');
+  if (m) {
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+  }
+}
+
+function closeSessionQrModal() {
+  const m = document.getElementById('modal-session-qr');
+  if (m) {
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+  }
+}
+
+function copySessionUrl() {
+  const urlEl = document.getElementById('session-presence-url');
+  if (!urlEl) return;
+  const url = urlEl.textContent || urlEl.innerText;
+  navigator.clipboard.writeText(url).then(() => {
+    const textEl = document.getElementById('copy-text');
+    if (textEl) {
+      const orig = textEl.textContent;
+      textEl.textContent = 'Tersalin!';
+      setTimeout(() => { textEl.textContent = orig; }, 2000);
+    }
+  });
+}
 function onAssignSpeakerChange(selectEl) {
   const badge = document.getElementById('assign-speaker-inst-badge');
   const textEl = document.getElementById('assign-speaker-inst-text');

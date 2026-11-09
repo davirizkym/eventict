@@ -3,8 +3,23 @@
 @section('title', 'Kategori Kegiatan — Eventict Lab ICT')
 
 @section('content')
+@php
+$presetIcons = [
+  'code' => 'Code / Web',
+  'cpu' => 'AI / Data',
+  'shield' => 'Security',
+  'globe' => 'Network',
+  'database' => 'Database',
+  'palette' => 'UI / Desain',
+  'terminal' => 'DevOps',
+  'briefcase' => 'Bisnis',
+  'book' => 'Akademik',
+  'smartphone' => 'Mobile',
+  'server' => 'Server',
+  'sparkles' => 'Umum',
+];
+@endphp
 <div class="min-h-screen bg-slate-50 text-slate-800 antialiased font-['Poppins'] flex flex-col">
-  <!-- Top Navigation Bar -->
   <header class="bg-blue-950 text-white border-b border-blue-900 sticky top-0 z-30 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
       <div class="flex items-center gap-6 sm:gap-8">
@@ -85,9 +100,7 @@
     </div>
   </header>
 
-  <!-- Main Content Container -->
   <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col gap-6">
-    <!-- Breadcrumb -->
     <div class="flex items-center gap-2 text-xs text-slate-500">
       <a href="{{ route('organizer.dashboard') }}" class="hover:text-blue-950 font-medium">Portal Pengelola</a>
       <span>/</span>
@@ -99,29 +112,28 @@
         <svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="20 6 9 17 4 12"/>
         </svg>
-        <span class="font-medium">{{ session('success') }}</span>
+        <span>{{ session('success') }}</span>
       </div>
     @endif
 
     @if ($errors->any())
-      <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-xs text-rose-800 shadow-2xs">
-        <svg class="size-4 text-rose-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="15" y1="9" x2="9" y2="15"/>
-          <line x1="9" y1="9" x2="15" y2="15"/>
-        </svg>
-        <div class="flex flex-col gap-1">
-          <div class="font-bold">Gagal Menyimpan Data Kategori:</div>
-          <ul class="list-disc list-inside">
-            @foreach ($errors->all() as $err)
-              <li>{{ $err }}</li>
-            @endforeach
-          </ul>
+      <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex flex-col gap-1 text-xs text-rose-800 shadow-2xs">
+        <div class="flex items-center gap-2 font-semibold">
+          <svg class="size-4 text-rose-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>Terjadi kendala validasi data:</span>
         </div>
+        <ul class="list-disc list-inside pl-6 text-rose-700 space-y-0.5">
+          @foreach ($errors->all() as $err)
+            <li>{{ $err }}</li>
+          @endforeach
+        </ul>
       </div>
     @endif
 
-    <!-- Top Action Header -->
     <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-2xs">
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-2.5">
@@ -131,7 +143,7 @@
           </span>
         </div>
         <p class="text-xs text-slate-500 leading-relaxed">
-          Daftar kategori kegiatan.
+          Daftar kategori kegiatan dengan pilihan preset icon atau unggahan icon kustom.
         </p>
       </div>
 
@@ -146,7 +158,6 @@
       </div>
     </div>
 
-    <!-- Search Bar -->
     <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-2xs">
       <form method="GET" action="{{ route('organizer.categories.index') }}" class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
         <div class="w-full sm:flex-1 relative">
@@ -170,14 +181,13 @@
       </form>
     </div>
 
-    <!-- Table Card -->
     <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse text-xs">
           <thead>
             <tr class="border-b border-slate-200 bg-slate-50/75 text-slate-500 font-semibold text-[11px] uppercase tracking-wider">
               <th class="py-3.5 px-4 w-14 text-center">No</th>
-              <th class="py-3.5 px-4 min-w-[200px]">Nama Kategori</th>
+              <th class="py-3.5 px-4 min-w-[220px]">Kategori & Icon</th>
               <th class="py-3.5 px-4 min-w-[150px]">Slug</th>
               <th class="py-3.5 px-4 min-w-[280px]">Deskripsi</th>
               <th class="py-3.5 px-4 w-28 text-center">Jumlah Kegiatan</th>
@@ -190,8 +200,15 @@
                 <td class="py-3.5 px-4 text-center text-slate-400 font-mono text-[11px]">
                   {{ $categories->firstItem() + $index }}
                 </td>
-                <td class="py-3.5 px-4 font-semibold text-slate-900">
-                  {{ $cat->name }}
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-3">
+                    <div class="size-9 rounded-xl bg-blue-50 border border-blue-200/60 flex items-center justify-center text-blue-900 shrink-0 overflow-hidden">
+                      @include('partials.category-icon', ['icon' => $cat->icon, 'class' => 'size-4'])
+                    </div>
+                    <div>
+                      <span class="font-semibold text-slate-900 block">{{ $cat->name }}</span>
+                    </div>
+                  </div>
                 </td>
                 <td class="py-3.5 px-4 text-slate-500 font-mono text-[11px]">
                   {{ $cat->slug }}
@@ -255,7 +272,6 @@
     </div>
   </main>
 
-  <!-- MODAL: TAMBAH KATEGORI -->
   <div id="modal-create-category" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-7 flex flex-col gap-5 shadow-2xl my-auto">
       <div class="flex items-start justify-between gap-4 pb-3 border-b border-slate-100">
@@ -271,7 +287,7 @@
         </button>
       </div>
 
-      <form action="{{ route('organizer.categories.store') }}" method="POST" class="flex flex-col gap-4 text-xs">
+      <form action="{{ route('organizer.categories.store') }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4 text-xs">
         @csrf
         <div class="flex flex-col gap-1.5">
           <label class="font-semibold text-slate-700">Nama Kategori <span class="text-rose-500">*</span></label>
@@ -280,7 +296,51 @@
 
         <div class="flex flex-col gap-1.5">
           <label class="font-semibold text-slate-700">Deskripsi Ringkas</label>
-          <textarea name="description" rows="3" placeholder="Tuliskan pokok bidang topik atau cakupan materi kategori ini..." class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition leading-relaxed"></textarea>
+          <textarea name="description" rows="2" placeholder="Tuliskan pokok bidang topik atau cakupan materi kategori ini..." class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition leading-relaxed"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-slate-700">Icon Kategori</label>
+          
+          <div class="flex items-center gap-2 p-1 bg-slate-100 rounded-xl w-fit">
+            <button type="button" onclick="switchIconTab('create', 'preset')" id="create-tab-preset" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-blue-950 shadow-2xs transition cursor-pointer">
+              Pilih Icon Preset
+            </button>
+            <button type="button" onclick="switchIconTab('create', 'upload')" id="create-tab-upload" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer">
+              Unggah Gambar Icon
+            </button>
+          </div>
+
+          <div id="create-panel-preset" class="flex flex-col gap-2">
+            <input type="hidden" name="icon" id="create-icon-val" value="code">
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1">
+              @foreach($presetIcons as $pIcon => $pLabel)
+                <button type="button" onclick="selectPresetIcon('create', '{{ $pIcon }}')" id="create-preset-{{ $pIcon }}" class="create-preset-btn p-2 rounded-xl border border-slate-200 hover:border-blue-950 flex flex-col items-center gap-1.5 transition text-center cursor-pointer">
+                  <div class="size-7 rounded-lg bg-blue-50 text-blue-950 flex items-center justify-center pointer-events-none">
+                    @include('partials.category-icon', ['icon' => $pIcon, 'class' => 'size-4'])
+                  </div>
+                  <span class="text-[10px] font-medium text-slate-700 leading-tight pointer-events-none">{{ $pLabel }}</span>
+                </button>
+              @endforeach
+            </div>
+          </div>
+
+          <div id="create-panel-upload" class="hidden flex-col gap-2">
+            <div class="border-2 border-dashed border-slate-200 hover:border-blue-950 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition bg-slate-50/50 cursor-pointer" onclick="document.getElementById('create-icon-file').click()">
+              <input type="file" name="icon_file" id="create-icon-file" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="hidden" onchange="previewUploadIcon('create', this)">
+              <div id="create-upload-preview" class="size-12 rounded-xl bg-blue-50 border border-blue-200/60 flex items-center justify-center text-blue-900 overflow-hidden">
+                <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+              <div class="text-center">
+                <span class="text-xs font-semibold text-blue-950 block">Klik untuk memilih file gambar</span>
+                <span class="text-[11px] text-slate-400">Format SVG, PNG, JPG, atau WebP (Maks. 2MB)</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
@@ -295,13 +355,12 @@
     </div>
   </div>
 
-  <!-- MODAL: EDIT KATEGORI -->
   <div id="modal-edit-category" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-7 flex flex-col gap-5 shadow-2xl my-auto">
       <div class="flex items-start justify-between gap-4 pb-3 border-b border-slate-100">
         <div>
           <h2 class="text-base sm:text-lg font-bold text-slate-900">Edit Kategori Acara</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Perbarui nama dan deskripsi kategori.</p>
+          <p class="text-xs text-slate-500 mt-0.5">Perbarui nama, deskripsi, atau icon kategori.</p>
         </div>
         <button type="button" onclick="closeEditCategoryModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -311,7 +370,7 @@
         </button>
       </div>
 
-      <form id="edit-category-form" method="POST" class="flex flex-col gap-4 text-xs">
+      <form id="edit-category-form" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4 text-xs">
         @csrf
         @method('PUT')
         <div class="flex flex-col gap-1.5">
@@ -321,7 +380,51 @@
 
         <div class="flex flex-col gap-1.5">
           <label class="font-semibold text-slate-700">Deskripsi Ringkas</label>
-          <textarea id="edit-description" name="description" rows="3" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition leading-relaxed"></textarea>
+          <textarea id="edit-description" name="description" rows="2" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition leading-relaxed"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-slate-700">Icon Kategori</label>
+          
+          <div class="flex items-center gap-2 p-1 bg-slate-100 rounded-xl w-fit">
+            <button type="button" onclick="switchIconTab('edit', 'preset')" id="edit-tab-preset" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-blue-950 shadow-2xs transition cursor-pointer">
+              Pilih Icon Preset
+            </button>
+            <button type="button" onclick="switchIconTab('edit', 'upload')" id="edit-tab-upload" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer">
+              Unggah Gambar Icon
+            </button>
+          </div>
+
+          <div id="edit-panel-preset" class="flex flex-col gap-2">
+            <input type="hidden" name="icon" id="edit-icon-val" value="code">
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1">
+              @foreach($presetIcons as $pIcon => $pLabel)
+                <button type="button" onclick="selectPresetIcon('edit', '{{ $pIcon }}')" id="edit-preset-{{ $pIcon }}" class="edit-preset-btn p-2 rounded-xl border border-slate-200 hover:border-blue-950 flex flex-col items-center gap-1.5 transition text-center cursor-pointer">
+                  <div class="size-7 rounded-lg bg-blue-50 text-blue-950 flex items-center justify-center pointer-events-none">
+                    @include('partials.category-icon', ['icon' => $pIcon, 'class' => 'size-4'])
+                  </div>
+                  <span class="text-[10px] font-medium text-slate-700 leading-tight pointer-events-none">{{ $pLabel }}</span>
+                </button>
+              @endforeach
+            </div>
+          </div>
+
+          <div id="edit-panel-upload" class="hidden flex-col gap-2">
+            <div class="border-2 border-dashed border-slate-200 hover:border-blue-950 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition bg-slate-50/50 cursor-pointer" onclick="document.getElementById('edit-icon-file').click()">
+              <input type="file" name="icon_file" id="edit-icon-file" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="hidden" onchange="previewUploadIcon('edit', this)">
+              <div id="edit-upload-preview" class="size-12 rounded-xl bg-blue-50 border border-blue-200/60 flex items-center justify-center text-blue-900 overflow-hidden">
+                <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+              <div class="text-center">
+                <span class="text-xs font-semibold text-blue-950 block">Klik untuk memilih file gambar baru</span>
+                <span class="text-[11px] text-slate-400">Biarkan kosong jika tidak ingin mengubah icon saat ini</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
@@ -342,6 +445,8 @@ function openCreateCategoryModal() {
   const m = document.getElementById('modal-create-category');
   m.classList.remove('hidden');
   m.classList.add('flex');
+  switchIconTab('create', 'preset');
+  selectPresetIcon('create', 'code');
 }
 
 function closeCreateCategoryModal() {
@@ -356,6 +461,17 @@ function openEditCategoryModal(cat) {
   document.getElementById('edit-name').value = cat.name || '';
   document.getElementById('edit-description').value = cat.description || '';
 
+  const isCustomImage = cat.icon && (cat.icon.startsWith('storage/') || cat.icon.startsWith('uploads/') || cat.icon.includes('/'));
+  if (isCustomImage) {
+    switchIconTab('edit', 'upload');
+    const preview = document.getElementById('edit-upload-preview');
+    preview.innerHTML = '<img src="/' + cat.icon.replace(/^\//, '') + '" class="size-full object-contain p-1" alt="">';
+    document.getElementById('edit-icon-val').value = cat.icon;
+  } else {
+    switchIconTab('edit', 'preset');
+    selectPresetIcon('edit', cat.icon || 'sparkles');
+  }
+
   const m = document.getElementById('modal-edit-category');
   m.classList.remove('hidden');
   m.classList.add('flex');
@@ -365,6 +481,54 @@ function closeEditCategoryModal() {
   const m = document.getElementById('modal-edit-category');
   m.classList.add('hidden');
   m.classList.remove('flex');
+}
+
+function switchIconTab(mode, tab) {
+  const tabPreset = document.getElementById(mode + '-tab-preset');
+  const tabUpload = document.getElementById(mode + '-tab-upload');
+  const panelPreset = document.getElementById(mode + '-panel-preset');
+  const panelUpload = document.getElementById(mode + '-panel-upload');
+
+  if (tab === 'preset') {
+    tabPreset.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-blue-950 shadow-2xs transition cursor-pointer';
+    tabUpload.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer';
+    panelPreset.classList.remove('hidden');
+    panelPreset.classList.add('flex');
+    panelUpload.classList.add('hidden');
+    panelUpload.classList.remove('flex');
+  } else {
+    tabUpload.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-blue-950 shadow-2xs transition cursor-pointer';
+    tabPreset.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer';
+    panelUpload.classList.remove('hidden');
+    panelUpload.classList.add('flex');
+    panelPreset.classList.add('hidden');
+    panelPreset.classList.remove('flex');
+  }
+}
+
+function selectPresetIcon(mode, iconName) {
+  document.getElementById(mode + '-icon-val').value = iconName;
+  const buttons = document.querySelectorAll('.' + mode + '-preset-btn');
+  buttons.forEach(btn => {
+    btn.classList.remove('border-blue-950', 'bg-blue-50/50', 'ring-2', 'ring-blue-950/20');
+    btn.classList.add('border-slate-200');
+  });
+  const selectedBtn = document.getElementById(mode + '-preset-' + iconName);
+  if (selectedBtn) {
+    selectedBtn.classList.remove('border-slate-200');
+    selectedBtn.classList.add('border-blue-950', 'bg-blue-50/50', 'ring-2', 'ring-blue-950/20');
+  }
+}
+
+function previewUploadIcon(mode, input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const preview = document.getElementById(mode + '-upload-preview');
+      preview.innerHTML = '<img src="' + e.target.result + '" class="size-full object-contain p-1" alt="Preview">';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
 }
 </script>
 @endsection
