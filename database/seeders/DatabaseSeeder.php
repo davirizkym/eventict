@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Certificate;
 use App\Models\Event;
+use App\Models\MediaPartner;
 use App\Models\Registration;
 use App\Models\Speaker;
 use App\Models\User;
@@ -140,6 +141,42 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        $partner1 = MediaPartner::updateOrCreate(
+            ['slug' => 'himpunan-mahasiswa-sistem-informasi'],
+            [
+                'name' => 'Himpunan Mahasiswa Sistem Informasi',
+                'institution' => 'Fakultas Teknologi Informasi',
+                'contact_email' => 'hmsi@eventict.id',
+            ]
+        );
+
+        $partner2 = MediaPartner::updateOrCreate(
+            ['slug' => 'bem-fakultas-ilmu-komputer'],
+            [
+                'name' => 'BEM Fakultas Ilmu Komputer',
+                'institution' => 'Universitas',
+                'contact_email' => 'bem.fasilkom@eventict.id',
+            ]
+        );
+
+        $partner3 = MediaPartner::updateOrCreate(
+            ['slug' => 'himatif'],
+            [
+                'name' => 'Himpunan Mahasiswa Teknik Informatika',
+                'institution' => 'Fakultas Teknologi Informasi',
+                'contact_email' => 'himatif@eventict.id',
+            ]
+        );
+
+        $partner4 = MediaPartner::updateOrCreate(
+            ['slug' => 'gdsc'],
+            [
+                'name' => 'Google Developer Student Clubs (GDSC)',
+                'institution' => 'Komunitas Teknologi Mahasiswa',
+                'contact_email' => 'gdsc@eventict.id',
+            ]
+        );
+
         $today = Carbon::today();
 
         $event1 = Event::updateOrCreate(
@@ -183,6 +220,7 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Pelatihan intensif 32 jam pembelajaran bersertifikasi kompetensi BNSP mengenai pembuatan model deep learning untuk analisis citra radiologi diagnostik dan pemetaan tabular rekam medis.',
                 'status' => 'published',
                 'organizer_type' => 'partner',
+                'media_partner_id' => $partner1->id,
                 'organizer_name' => 'Himpunan Mahasiswa Sistem Informasi',
                 'virtual_meeting_url' => 'https://meet.eventict.id/room-ml-32',
             ]
@@ -228,6 +266,7 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Kajian komprehensif undang-undang pelindungan data pribadi (UU PDP) dalam tata kelola basis data fasilitas kesehatan dan mitigasi risiko kebocoran data medis.',
                 'status' => 'published',
                 'organizer_type' => 'partner',
+                'media_partner_id' => $partner2->id,
                 'organizer_name' => 'BEM Fakultas Ilmu Komputer',
                 'virtual_meeting_url' => 'https://zoom.us/j/7721094432',
             ]

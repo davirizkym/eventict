@@ -45,6 +45,13 @@
             </svg>
             <span>Pengisi Acara</span>
           </a>
+          <a href="{{ route('organizer.media_partners.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m3 11 18-5v12L3 14v-3z"/>
+              <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
+            </svg>
+            <span>Media Partner</span>
+          </a>
         </nav>
       </div>
 
@@ -673,8 +680,18 @@
                 </select>
               </div>
               <div id="edit-partner-name-container" class="{{ ($event->organizer_type ?? 'internal') === 'partner' ? '' : 'hidden' }} flex flex-col gap-1.5">
-                <label class="font-semibold text-slate-700">Nama Media Partner / Penyelenggara</label>
-                <input type="text" name="organizer_name" value="{{ $event->organizer_name }}" placeholder="Misal: Himpunan Mahasiswa Sistem Informasi" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+                <div class="flex items-center justify-between">
+                  <label class="font-semibold text-slate-700">Pilih Media Partner</label>
+                  <a href="{{ route('organizer.media_partners.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola Data</a>
+                </div>
+                <select name="media_partner_id" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
+                  <option value="" disabled {{ empty($event->media_partner_id) ? 'selected' : '' }}>-- Pilih Media Partner --</option>
+                  @foreach($allMediaPartners as $mp)
+                    <option value="{{ $mp->id }}" {{ $event->media_partner_id == $mp->id || $event->organizer_name === $mp->name ? 'selected' : '' }}>
+                      {{ $mp->name }}
+                    </option>
+                  @endforeach
+                </select>
               </div>
             </div>
 
