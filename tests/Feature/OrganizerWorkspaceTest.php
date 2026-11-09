@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Certificate;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class OrganizerWorkspaceTest extends TestCase
@@ -289,5 +292,157 @@ class OrganizerWorkspaceTest extends TestCase
         ]);
 
         $this->assertTrue((bool) $event->fresh()->is_presence_open);
+    }
+
+    public function test_organizer_can_view_certificate_tab_with_metrics_and_participant_list(): void
+    {
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+        $event = Event::create([
+            'title' => 'Simposium Rekam Medis Elektronik',
+            'slug' => 'simposium-rekam-medis-elektronik',
+            'category' => 'Seminar',
+            'format' => 'offline',
+            'location' => 'Aula Utama',
+            'start_date' => now()->addDays(1),
+            'end_date' => now()->addDays(1),
+            'start_time' => '08:00:00',
+            'end_time' => '12:00:00',
+            'quota' => 50,
+            'price' => 0,
+            'status' => 'published',
+        ]);
+
+        $peserta = User::factory()->create(['role' => 'peserta', 'name' => 'dr. Siti Rahma']);
+        Registration::create([
+            'user_id' => $peserta->id,
+            'event_id' => $event->id,
+            'registration_code' => 'REG-CERT-001',
+            'qr_pass' => 'PASS-CERT-001',
+            'payment_status' => 'free',
+            'attendance_status' => 'attended',
+        ]);
+
+        $response = $this->actingAs($panitia)->get(route('organizer.workspace', ['event' => $event->id, 'tab' => 'sertifikat']));
+
+        $response->assertStatus(200);
+        $response->assertSee('Total Pendaftar');
+        $response->assertSee('Hadir (Berhak Sertifikat)');
+        $response->assertSee('Sertifikat Terbit');
+        $response->assertSee('Belum Diterbitkan');
+        $response->assertSee('dr. Siti Rahma');
+        $response->assertSee('REG-CERT-001');
+        $response->assertSee('Unggah Satuan');
+    }
+
+    public function test_organizer_can_upload_single_certificate_and_delete_it(): void
+    {
+        Storage::fake('public');
+
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+        $event = Event::create([
+            'title' => 'Webinar Telehealth',
+            'slug' => 'webinar-telehealth',
+            'category' => 'Webinar',
+            'format' => 'online',
+            'start_date' => now()->addDays(1),
+            'end_date' => now()->addDays(1),
+            'start_time' => '08:00:00',
+            'end_time' => '12:00:00',
+            'quota' => 50,
+            'price' => 0,
+            'status' => 'published',
+        ]);
+
+        $peserta = User::factory()->create(['role' => 'peserta', 'name' => 'dr. Ahmad']);
+        $reg = Registration::create([
+            'user_id' => $peserta->id,
+            'event_id' => $event->id,
+            'registration_code' => 'REG-AHMAD-01',
+            'qr_pass' => 'PASS-AHMAD-01',
+            'payment_status' => 'free',
+            'attendance_status' => 'attended',
+        ]);
+
+        $file = UploadedFile::fake()->create('sertifikat.pdf', 200, 'application/pdf');
+
+        $uploadResponse = $this->actingAs($panitia)->post(route('organizer.certificate.single', $reg->id), [
+            'certificate_file' => $file,
+            'certificate_number' => 'ICT-CERT/2026/99999',
+        ]);
+
+        $uploadResponse->assertSessionHas('success');
+
+        $this->assertDatabaseHas('certificates', [
+            'registration_id' => $reg->id,
+            'user_id' => $peserta->id,
+            'event_id' => $event->id,
+            'certificate_number' => 'ICT-CERT/2026/99999',
+        ]);
+
+        $cert = Certificate::where('registration_id', $reg->id)->first();
+        $this->assertNotNull($cert);
+        $this->assertNotNull($cert->verify_hash);
+        $this->assertNotNull($cert->download_url);
+
+        $storedPath = str_replace('storage/', '', $cert->download_url);
+        Storage::disk('public')->assertExists($storedPath);
+
+        $deleteResponse = $this->actingAs($panitia)->delete(route('organizer.certificate.delete', $reg->id));
+        $deleteResponse->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('certificates', [
+            'registration_id' => $reg->id,
+        ]);
+        Storage::disk('public')->assertMissing($storedPath);
+    }
+
+    public function test_organizer_can_batch_upload_certificates_in_workspace(): void
+    {
+        Storage::fake('public');
+
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+        $event = Event::create([
+            'title' => 'Pelatihan AI Medis',
+            'slug' => 'pelatihan-ai-medis',
+            'category' => 'Workshop',
+            'format' => 'offline',
+            'start_date' => now()->addDays(1),
+            'end_date' => now()->addDays(1),
+            'start_time' => '08:00:00',
+            'end_time' => '12:00:00',
+            'quota' => 50,
+            'price' => 0,
+            'status' => 'published',
+        ]);
+
+        $peserta = User::factory()->create(['role' => 'peserta']);
+        $reg = Registration::create([
+            'user_id' => $peserta->id,
+            'event_id' => $event->id,
+            'registration_code' => 'REG-BATCH-001',
+            'qr_pass' => 'PASS-BATCH-001',
+            'payment_status' => 'free',
+            'attendance_status' => 'attended',
+        ]);
+
+        $file = UploadedFile::fake()->create('REG-BATCH-001.pdf', 300, 'application/pdf');
+
+        $response = $this->actingAs($panitia)->post(route('organizer.workspace.certificate.batch', $event->id), [
+            'certificate_files' => [$file],
+        ]);
+
+        $response->assertRedirect(route('organizer.workspace', ['event' => $event->id, 'tab' => 'sertifikat']));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('certificates', [
+            'registration_id' => $reg->id,
+            'user_id' => $peserta->id,
+            'event_id' => $event->id,
+        ]);
+
+        $cert = Certificate::where('registration_id', $reg->id)->first();
+        $this->assertNotNull($cert);
+        $this->assertNotNull($cert->verify_hash);
+        $this->assertNotNull($cert->download_url);
     }
 }

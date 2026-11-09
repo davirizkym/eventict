@@ -666,8 +666,11 @@ class OrganizerController extends Controller
             Certificate::updateOrCreate(
                 ['registration_id' => $registration->id],
                 [
+                    'user_id' => $registration->user_id,
+                    'event_id' => $registration->event_id,
                     'certificate_number' => $certNumber,
-                    'file_url' => $downloadUrl,
+                    'verify_hash' => 'EVT-' . rand(1000, 9999) . '-' . strtoupper(Str::random(4)),
+                    'download_url' => $downloadUrl,
                     'issued_at' => now(),
                 ]
             );
@@ -1038,8 +1041,11 @@ class OrganizerController extends Controller
         Certificate::updateOrCreate(
             ['registration_id' => $registration->id],
             [
+                'user_id' => $registration->user_id,
+                'event_id' => $registration->event_id,
                 'certificate_number' => $certNumber,
-                'file_url' => $downloadUrl,
+                'verify_hash' => 'EVT-' . rand(1000, 9999) . '-' . strtoupper(Str::random(4)),
+                'download_url' => $downloadUrl,
                 'issued_at' => now(),
             ]
         );
@@ -1090,8 +1096,11 @@ class OrganizerController extends Controller
             Certificate::updateOrCreate(
                 ['registration_id' => $registration->id],
                 [
+                    'user_id' => $registration->user_id,
+                    'event_id' => $registration->event_id,
                     'certificate_number' => $certNumber,
-                    'file_url' => $downloadUrl,
+                    'verify_hash' => 'EVT-' . rand(1000, 9999) . '-' . strtoupper(Str::random(4)),
+                    'download_url' => $downloadUrl,
                     'issued_at' => now(),
                 ]
             );
@@ -1124,7 +1133,12 @@ class OrganizerController extends Controller
     public function deleteCertificate(Registration $registration)
     {
         if ($registration->certificate) {
-            $registration->certificate->delete();
+            $cert = $registration->certificate;
+            if (!empty($cert->download_url)) {
+                $relativePath = str_replace('storage/', '', ltrim($cert->download_url, '/'));
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($relativePath);
+            }
+            $cert->delete();
             return back()->with('success', "Sertifikat untuk {$registration->user->name} berhasil dihapus.");
         }
 
