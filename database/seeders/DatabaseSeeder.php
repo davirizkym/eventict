@@ -222,6 +222,8 @@ class DatabaseSeeder extends Seeder
                 'organizer_type' => 'partner',
                 'media_partner_id' => $partner1->id,
                 'organizer_name' => 'Himpunan Mahasiswa Sistem Informasi',
+                'registration_url' => 'https://forms.gle/ml-diagnostik-2026',
+                'banner_url' => '/storage/posters/poster_ml.svg',
                 'virtual_meeting_url' => 'https://meet.eventict.id/room-ml-32',
             ]
         );
@@ -268,6 +270,8 @@ class DatabaseSeeder extends Seeder
                 'organizer_type' => 'partner',
                 'media_partner_id' => $partner2->id,
                 'organizer_name' => 'BEM Fakultas Ilmu Komputer',
+                'registration_url' => 'https://forms.gle/etika-siber-fasilkom',
+                'banner_url' => '/storage/posters/poster_security.svg',
                 'virtual_meeting_url' => 'https://zoom.us/j/7721094432',
             ]
         );
