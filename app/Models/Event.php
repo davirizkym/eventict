@@ -32,11 +32,17 @@ class Event extends Model
         'organizer_type',
         'media_partner_id',
         'organizer_name',
+        'registration_url',
         'banner_url',
         'virtual_meeting_url',
         'is_presence_open',
         'presence_token',
     ];
+
+    public function isExternal(): bool
+    {
+        return ($this->organizer_type === 'partner') || !empty($this->registration_url);
+    }
 
     protected function casts(): array
     {

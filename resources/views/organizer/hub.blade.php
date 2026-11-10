@@ -312,7 +312,7 @@
         </button>
       </div>
 
-      <form action="{{ route('organizer.event.store') }}" method="POST" class="flex flex-col gap-4 text-xs">
+      <form action="{{ route('organizer.event.store') }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4 text-xs">
         @csrf
         <div class="flex flex-col gap-1.5">
           <label class="font-semibold text-slate-700">Judul Kegiatan</label>
@@ -375,6 +375,24 @@
           </div>
         </div>
 
+        <div id="create-partner-promo-fields" class="hidden flex flex-col gap-3.5 p-4 bg-blue-50/60 border border-blue-200/80 rounded-2xl">
+          <div class="flex flex-col gap-0.5">
+            <span class="text-xs font-bold text-blue-950">Informasi Promosi Media Partner</span>
+            <span class="text-[11px] text-slate-500">Media partner disini hanya untuk promosi. Masukkan tautan form pendaftaran mitra dan poster kegiatan.</span>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="font-semibold text-slate-700">Link Form Pendaftaran Mitra <span class="text-rose-500">*</span></label>
+            <input type="url" name="registration_url" id="create-registration-url" placeholder="https://forms.gle/... atau https://..." class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-blue-950 text-xs">
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="font-semibold text-slate-700">Unggah Poster Kegiatan</label>
+            <input type="file" name="poster" accept="image/*" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 cursor-pointer file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-950 hover:file:bg-blue-200">
+            <span class="text-[10px] text-slate-400">Format gambar JPG, PNG, atau WEBP</span>
+          </div>
+        </div>
+
         <div class="flex flex-col gap-1.5">
           <label class="font-semibold text-slate-700">Lokasi / Ruang Lab</label>
           <input type="text" name="location" required value="Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
@@ -414,7 +432,7 @@
         </div>
 
         <!-- Pengisi Acara Kegiatan -->
-        <div class="flex flex-col gap-2">
+        <div id="create-speakers-section" class="flex flex-col gap-2">
           <div class="flex items-center justify-between">
             <label class="font-semibold text-slate-700">Pengisi Acara <span class="text-rose-500">*</span></label>
             <button type="button" onclick="addSpeakerRow()" class="text-xs text-blue-950 font-bold hover:underline flex items-center gap-1 cursor-pointer">
@@ -708,11 +726,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function toggleCreatePartnerName(val) {
   const container = document.getElementById('create-partner-name-container');
-  if (!container) return;
+  const promoFields = document.getElementById('create-partner-promo-fields');
+  const speakerSection = document.getElementById('create-speakers-section');
+  const regUrlInput = document.getElementById('create-registration-url');
+  const speakerSelects = document.querySelectorAll('#speaker-rows-container select[name="speaker_ids[]"]');
+
   if (val === 'partner') {
-    container.classList.remove('hidden');
+    if (container) container.classList.remove('hidden');
+    if (promoFields) promoFields.classList.remove('hidden');
+    if (speakerSection) speakerSection.classList.add('hidden');
+    if (regUrlInput) regUrlInput.required = true;
+    speakerSelects.forEach(sel => sel.required = false);
   } else {
-    container.classList.add('hidden');
+    if (container) container.classList.add('hidden');
+    if (promoFields) promoFields.classList.add('hidden');
+    if (speakerSection) speakerSection.classList.remove('hidden');
+    if (regUrlInput) regUrlInput.required = false;
+    speakerSelects.forEach(sel => sel.required = true);
   }
 }
 
