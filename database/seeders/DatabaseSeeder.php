@@ -184,8 +184,8 @@ class DatabaseSeeder extends Seeder
             [
                 'title' => 'Simposium Nasional Telemedicine & Regulasi Medis 2026',
                 'category' => 'Kedokteran & Kesehatan',
-                'format' => 'hybrid',
-                'location' => 'Ruang Rinjani 2, Hotel Borobudur Jakarta / Akses Zoom Terhubung',
+                'format' => 'offline',
+                'location' => 'Ruang Rinjani 2, Hotel Borobudur Jakarta',
                 'start_date' => $today,
                 'end_date' => $today,
                 'start_time' => '08:30:00',
@@ -355,9 +355,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0104',
                 'qr_pass' => 'PASS-9982-AMANDA',
                 'payment_status' => 'paid',
-                'attendance_status' => 'attended',
+                'is_checked_in' => true,
                 'checked_in_at' => $today->copy()->setTime(8, 24, 12),
                 'check_in_gate' => 'Pintu Aula Utama',
+                'attendance_status' => 'attended',
+                'attended_at' => $today->copy()->setTime(9, 5, 0),
+                'attendance_gate' => 'Scan QR Sesi Aula',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -369,11 +372,14 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'registration_code' => 'REG-2026-0205',
-                'qr_pass' => 'PASS-3341-AMANDA',
+                'qr_pass' => null,
                 'payment_status' => 'free',
+                'is_checked_in' => false,
+                'checked_in_at' => null,
+                'check_in_gate' => null,
                 'attendance_status' => 'attended',
-                'checked_in_at' => $today->copy()->setTime(8, 50, 0),
-                'check_in_gate' => 'Gerbang Virtual Zoom',
+                'attended_at' => $today->copy()->setTime(9, 15, 0),
+                'attendance_gate' => 'Presensi Mandiri Online',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -387,9 +393,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0301',
                 'qr_pass' => 'PASS-0301-AMANDA',
                 'payment_status' => 'free',
-                'attendance_status' => 'attended',
+                'is_checked_in' => true,
                 'checked_in_at' => $today->copy()->setTime(9, 10, 0),
                 'check_in_gate' => 'Pintu Gerbang Utama RME',
+                'attendance_status' => 'attended',
+                'attended_at' => $today->copy()->setTime(9, 40, 0),
+                'attendance_gate' => 'Scan QR Sesi Aula',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -403,9 +412,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0302',
                 'qr_pass' => 'PASS-0302-BUDI',
                 'payment_status' => 'free',
-                'attendance_status' => 'attended',
+                'is_checked_in' => true,
                 'checked_in_at' => $today->copy()->setTime(9, 15, 0),
                 'check_in_gate' => 'Pintu Gerbang Utama RME',
+                'attendance_status' => 'attended',
+                'attended_at' => $today->copy()->setTime(9, 45, 0),
+                'attendance_gate' => 'Scan QR Sesi Aula',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -419,9 +431,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0105',
                 'qr_pass' => 'PASS-5512-BUDI',
                 'payment_status' => 'paid',
-                'attendance_status' => 'attended',
+                'is_checked_in' => true,
                 'checked_in_at' => $today->copy()->setTime(8, 26, 40),
                 'check_in_gate' => 'Pintu Aula Utama',
+                'attendance_status' => 'attended',
+                'attended_at' => $today->copy()->setTime(9, 8, 0),
+                'attendance_gate' => 'Scan QR Sesi Aula',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -435,9 +450,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0106',
                 'qr_pass' => 'PASS-7819-NUR',
                 'payment_status' => 'paid',
-                'attendance_status' => 'unattended',
+                'is_checked_in' => false,
                 'checked_in_at' => null,
                 'check_in_gate' => null,
+                'attendance_status' => 'unattended',
+                'attended_at' => null,
+                'attendance_gate' => null,
                 'evaluation_status' => 'pending',
             ]
         );
@@ -451,9 +469,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0107',
                 'qr_pass' => 'PASS-2290-RIZKY',
                 'payment_status' => 'paid',
-                'attendance_status' => 'attended',
+                'is_checked_in' => true,
                 'checked_in_at' => $today->copy()->setTime(8, 30, 18),
                 'check_in_gate' => 'Pintu Aula Utama',
+                'attendance_status' => 'attended',
+                'attended_at' => $today->copy()->setTime(9, 12, 0),
+                'attendance_gate' => 'Scan QR Sesi Aula',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -467,9 +488,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0108',
                 'qr_pass' => 'PASS-6614-DEWI',
                 'payment_status' => 'paid',
-                'attendance_status' => 'attended',
+                'is_checked_in' => true,
                 'checked_in_at' => $today->copy()->setTime(8, 32, 44),
                 'check_in_gate' => 'Pintu Aula Timur',
+                'attendance_status' => 'attended',
+                'attended_at' => $today->copy()->setTime(9, 14, 0),
+                'attendance_gate' => 'Scan QR Sesi Aula',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -483,9 +507,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0109',
                 'qr_pass' => 'PASS-9081-FAUZI',
                 'payment_status' => 'paid',
-                'attendance_status' => 'unattended',
+                'is_checked_in' => false,
                 'checked_in_at' => null,
                 'check_in_gate' => null,
+                'attendance_status' => 'unattended',
+                'attended_at' => null,
+                'attendance_gate' => null,
                 'evaluation_status' => 'pending',
             ]
         );

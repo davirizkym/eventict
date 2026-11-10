@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->string('category')->default('Teknologi & Rekayasa');
-            $table->enum('format', ['offline', 'online', 'hybrid'])->default('hybrid');
+            $table->enum('format', ['offline', 'online'])->default('offline');
             $table->string('location')->nullable();
             $table->date('start_date');
             $table->date('end_date')->nullable();

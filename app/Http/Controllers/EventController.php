@@ -164,7 +164,7 @@ class EventController extends Controller
             'nik' => ['nullable', 'string', 'max:20'],
             'phone' => ['nullable', 'string', 'max:25'],
             'institution' => ['nullable', 'string', 'max:255'],
-            'attendance_mode' => ['nullable', 'string', 'in:offline,online,hybrid'],
+            'attendance_mode' => ['nullable', 'string', 'in:offline,online'],
             'payment_method' => ['nullable', 'string', 'max:50'],
             'agree_terms' => ['required', 'accepted'],
         ], [
@@ -192,11 +192,14 @@ class EventController extends Controller
             $latestId++;
         } while (Registration::where('registration_code', $regCode)->exists());
 
-        do {
-            $cleanName = strtoupper(preg_replace('/[^A-Z]/', '', $user->name));
-            $cleanName = substr($cleanName, 0, 8) ?: 'USER';
-            $qrPass = 'PASS-' . rand(1000, 9999) . '-' . $cleanName;
-        } while (Registration::where('qr_pass', $qrPass)->exists());
+        $qrPass = null;
+        if ($event->format === 'offline') {
+            do {
+                $cleanName = strtoupper(preg_replace('/[^A-Z]/', '', $user->name));
+                $cleanName = substr($cleanName, 0, 8) ?: 'USER';
+                $qrPass = 'PASS-' . rand(1000, 9999) . '-' . $cleanName;
+            } while (Registration::where('qr_pass', $qrPass)->exists());
+        }
 
         $isFree = ((int) $event->price) === 0;
         $orderId = !$isFree ? ($regCode . '-' . time()) : null;
@@ -251,12 +254,18 @@ class EventController extends Controller
     public function presenceSubmit(Request $request, string $slug)
     {
         if (!Auth::check()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['status' => 'unauthenticated', 'message' => 'Silakan masuk terlebih dahulu untuk melakukan presensi.'], 401);
+            }
             return redirect()->route('login')->with('warning', 'Silakan masuk terlebih dahulu untuk melakukan presensi.');
         }
 
         $event = Event::where('slug', $slug)->firstOrFail();
 
         if (!$event->is_presence_open) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => 'Gerbang presensi mandiri saat ini sedang ditutup oleh panitia.'], 422);
+            }
             return back()->with('error', 'Gerbang presensi mandiri saat ini sedang ditutup oleh panitia.');
         }
 
@@ -265,28 +274,52 @@ class EventController extends Controller
             ->first();
 
         if (!$registration) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => 'Anda belum terdaftar dalam kegiatan ini. Silakan mendaftar terlebih dahulu.'], 422);
+            }
             return back()->with('error', 'Anda belum terdaftar dalam kegiatan ini. Silakan mendaftar terlebih dahulu.');
         }
 
         if ($registration->payment_status === 'pending') {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => 'Tiket Anda belum aktif karena pembayaran belum diselesaikan. Silakan selesaikan pembayaran terlebih dahulu.'], 422);
+            }
             return back()->with('error', 'Tiket Anda belum aktif karena pembayaran belum diselesaikan. Silakan selesaikan pembayaran terlebih dahulu.');
         }
 
         if ($registration->attendance_status === 'attended') {
-            return back()->with('info', 'Kehadiran Anda sudah terkonfirmasi sebelumnya pada ' . ($registration->checked_in_at ? $registration->checked_in_at->format('H:i') . ' WIB' : 'hari ini') . '.');
+            $msg = 'Presensi Anda sudah terkonfirmasi sebelumnya pada ' . ($registration->attended_at ? $registration->attended_at->format('H:i') . ' WIB' : 'hari ini') . '.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'already_attended',
+                    'message' => $msg,
+                    'event_title' => $event->title,
+                    'attended_at' => $registration->attended_at ? $registration->attended_at->format('H:i') . ' WIB' : null,
+                ], 200);
+            }
+            return back()->with('info', $msg);
         }
 
         $gateMethod = match ($event->format) {
             'online' => 'Presensi Mandiri Online',
-            'hybrid' => 'Presensi Mandiri Sesi',
-            default => 'Self Check-in Sesi',
+            default => 'Presensi Mandiri Sesi',
         };
 
+        $now = now();
         $registration->update([
             'attendance_status' => 'attended',
-            'checked_in_at' => now(),
-            'check_in_gate' => $gateMethod,
+            'attended_at' => $now,
+            'attendance_gate' => $gateMethod,
         ]);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Presensi kehadiran Anda berhasil dikonfirmasi! Terima kasih atas partisipasi Anda.',
+                'event_title' => $event->title,
+                'attended_at' => $now->format('H:i') . ' WIB',
+            ], 200);
+        }
 
         return redirect()->route('events.presence', $event->slug)
             ->with('success', 'Presensi kehadiran Anda berhasil dikonfirmasi! Terima kasih atas partisipasi Anda.');

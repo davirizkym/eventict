@@ -92,9 +92,15 @@
             </svg>
             <span>Pembayaran terverifikasi</span>
           </div>
-          <span class="font-mono font-semibold text-[11px] text-emerald-800">
-            PASS: #{{ $registration->qr_pass }}
-          </span>
+          @if($registration->event->format === 'offline' && $registration->qr_pass)
+            <span class="font-mono font-semibold text-[11px] text-emerald-800">
+              PASS: #{{ $registration->qr_pass }}
+            </span>
+          @else
+            <span class="font-semibold text-[11px] text-emerald-800">
+              Akses Online Aktif
+            </span>
+          @endif
         </div>
       @endif
 

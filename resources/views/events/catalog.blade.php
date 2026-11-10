@@ -40,7 +40,6 @@
                 <option value="">Semua Format</option>
                 <option value="offline" {{ request('format') === 'offline' ? 'selected' : '' }}>Offline / Tatap Muka</option>
                 <option value="online" {{ request('format') === 'online' ? 'selected' : '' }}>Online / Webinar</option>
-                <option value="hybrid" {{ request('format') === 'hybrid' ? 'selected' : '' }}>Hybrid</option>
               </select>
             </div>
             <div class="h-8 w-px bg-slate-200 hidden md:block"></div>

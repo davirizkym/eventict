@@ -118,4 +118,91 @@ class PesertaController extends Controller
         return redirect()->route('peserta.dashboard', ['tab' => 'tiket'])
             ->with('success', "Pendaftaran untuk {$eventTitle} berhasil dibatalkan.");
     }
+
+    public function scanPresence(Request $request)
+    {
+        $request->validate([
+            'qr_data' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $user = Auth::user();
+        $qrData = trim($request->input('qr_data'));
+
+        $event = null;
+
+        if (preg_match('#/kegiatan/([^/?\#]+)(?:/presensi)?#i', $qrData, $matches)) {
+            $slug = $matches[1];
+            $event = Event::where('slug', $slug)->first();
+        }
+
+        if (!$event) {
+            $event = Event::where('slug', $qrData)->first();
+        }
+
+        if (!$event) {
+            $event = Event::where('presence_token', $qrData)->first();
+        }
+
+        if (!$event) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'QR Code tidak dikenali sebagai QR Presensi kegiatan Eventict yang valid.',
+            ], 404);
+        }
+
+        if (!$event->is_presence_open) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gerbang presensi mandiri untuk "' . $event->title . '" saat ini sedang ditutup oleh panitia.',
+            ], 422);
+        }
+
+        $registration = Registration::where('user_id', $user->id)
+            ->where('event_id', $event->id)
+            ->first();
+
+        if (!$registration) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda belum terdaftar dalam kegiatan "' . $event->title . '". Silakan mendaftar terlebih dahulu.',
+            ], 422);
+        }
+
+        if ($registration->payment_status === 'pending') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tiket Anda untuk kegiatan "' . $event->title . '" belum aktif karena pembayaran belum diselesaikan.',
+            ], 422);
+        }
+
+        if ($registration->attendance_status === 'attended') {
+            $time = $registration->attended_at ? $registration->attended_at->format('H:i') . ' WIB' : ($registration->checked_in_at ? $registration->checked_in_at->format('H:i') . ' WIB' : 'hari ini');
+            return response()->json([
+                'status' => 'already_attended',
+                'message' => 'Presensi Anda pada "' . $event->title . '" sudah terkonfirmasi sebelumnya pada pukul ' . $time . '.',
+                'event_title' => $event->title,
+                'attended_at' => $time,
+            ], 200);
+        }
+
+        $gateMethod = match ($event->format) {
+            'online' => 'Presensi Mandiri Online',
+            default => 'Scan QR Sesi Aula',
+        };
+
+        $now = now();
+        $registration->update([
+            'attendance_status' => 'attended',
+            'attended_at' => $now,
+            'attendance_gate' => $gateMethod,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Presensi berhasil! Kehadiran Anda pada sesi "' . $event->title . '" telah diverifikasi dan status Anda kini Hadir.',
+            'event_title' => $event->title,
+            'attended_at' => $now->format('H:i') . ' WIB',
+            'registration_code' => $registration->registration_code,
+        ], 200);
+    }
 }

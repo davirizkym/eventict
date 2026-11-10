@@ -149,31 +149,13 @@
               </div>
             </div>
 
-            <!-- Section 2: Mode Kehadiran (khusus jika format hybrid) -->
             <div class="flex flex-col gap-3">
               <div class="flex items-center gap-2 text-sm font-semibold text-slate-800">
                 <span class="size-6 rounded-full bg-blue-950 text-white text-xs flex items-center justify-center font-bold">2</span>
                 <span>Pilihan Format Kehadiran</span>
               </div>
 
-              @if($event->format === 'hybrid')
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label class="p-3.5 rounded-xl border border-slate-200 hover:border-blue-950 bg-slate-50/50 has-checked:border-blue-950 has-checked:bg-blue-50/40 flex items-start gap-3 cursor-pointer transition">
-                    <input type="radio" name="attendance_mode" value="offline" checked class="mt-0.5 text-blue-950 focus:ring-blue-950">
-                    <div class="flex flex-col">
-                      <span class="text-xs font-semibold text-slate-900">Tatap Muka Langsung (Offline)</span>
-                      <span class="text-[11px] text-slate-500 mt-0.5">{{ $event->location }}</span>
-                    </div>
-                  </label>
-                  <label class="p-3.5 rounded-xl border border-slate-200 hover:border-blue-950 bg-slate-50/50 has-checked:border-blue-950 has-checked:bg-blue-50/40 flex items-start gap-3 cursor-pointer transition">
-                    <input type="radio" name="attendance_mode" value="online" class="mt-0.5 text-blue-950 focus:ring-blue-950">
-                    <div class="flex flex-col">
-                      <span class="text-xs font-semibold text-slate-900">Akses Virtual Terhubung (Online)</span>
-                      <span class="text-[11px] text-slate-500 mt-0.5">Live streaming interaktif via Zoom Eventict</span>
-                    </div>
-                  </label>
-                </div>
-              @elseif($event->format === 'online')
+              @if($event->format === 'online')
                 <div class="p-3.5 bg-blue-50/70 border border-blue-200/60 rounded-xl flex items-center gap-3 text-xs text-blue-950">
                   <svg class="size-5 text-blue-900 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
@@ -194,6 +176,7 @@
                   <div>
                     <span class="font-semibold block">Format Acara: Offline / Tatap Muka</span>
                     <span class="text-[11px] text-slate-600">Lokasi: {{ $event->location }}</span>
+                    <span class="text-[11px] text-slate-500 block mt-0.5">E-Tiket dengan QR Pass akan diterbitkan untuk registrasi ulang (check-in) di lokasi acara.</span>
                   </div>
                 </div>
                 <input type="hidden" name="attendance_mode" value="offline">

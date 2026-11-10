@@ -28,6 +28,16 @@
       </div>
 
       <div class="flex items-center gap-3 shrink-0">
+        <button type="button" onclick="openQrScannerModal()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs cursor-pointer" title="Scan QR Presensi Acara">
+          <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="6" height="6" x="2" y="2" rx="1"/>
+            <rect width="6" height="6" x="16" y="2" rx="1"/>
+            <rect width="6" height="6" x="2" y="16" rx="1"/>
+            <path d="M10 2h4M2 10v4M10 6h4M14 10h4M10 14h4M16 14v4M16 20h4M20 16v4"/>
+          </svg>
+          <span class="hidden sm:inline">Scan QR Presensi</span>
+        </button>
+
         <div class="flex items-center gap-2.5">
           <div class="size-8 rounded-lg bg-blue-900 text-white font-semibold text-xs flex items-center justify-center shrink-0">
             {{ strtoupper(substr($user->name ?? 'P', 0, 2)) }}
@@ -347,7 +357,11 @@
                 <div>
                   <div class="text-xs font-bold text-amber-900">Tiket Belum Aktif</div>
                   <div class="text-[11px] text-amber-700 mt-0.5 leading-tight">
-                    Selesaikan pembayaran untuk mengaktifkan tiket dan QR Pass.
+                    @if($todayRegistration->event->format === 'offline')
+                      Selesaikan pembayaran untuk mengaktifkan tiket dan QR Pass.
+                    @else
+                      Selesaikan pembayaran untuk mengaktifkan tiket kegiatan online.
+                    @endif
                   </div>
                 </div>
                 <button type="button" onclick="payWithSnap('{{ $todayRegistration->id }}', '{{ $todayRegistration->snap_token }}')" class="w-full px-3 py-1.5 bg-amber-800 hover:bg-amber-900 text-white rounded-lg text-xs font-semibold transition text-center shadow-2xs cursor-pointer">
@@ -362,11 +376,11 @@
                   </svg>
                 </div>
                 <div>
-                  <div class="text-xs font-bold text-emerald-900">Kehadiran Terverifikasi</div>
+                  <div class="text-xs font-bold text-emerald-900">Presensi Terverifikasi</div>
                   <div class="text-[11px] text-emerald-700 mt-0.5">
-                    {{ $todayRegistration->checked_in_at ? $todayRegistration->checked_in_at->format('H:i') . ' WIB' : 'Tercatat' }}
-                    @if($todayRegistration->check_in_gate)
-                      &bull; {{ $todayRegistration->check_in_gate }}
+                    {{ $todayRegistration->attended_at ? $todayRegistration->attended_at->format('H:i') . ' WIB' : 'Hadir' }}
+                    @if($todayRegistration->attendance_gate)
+                      &bull; {{ $todayRegistration->attendance_gate }}
                     @endif
                   </div>
                 </div>
@@ -396,25 +410,14 @@
                   </a>
                 @endif
               </div>
-            @else
+            @elseif($todayRegistration->event->format === 'offline' && $todayRegistration->qr_pass)
               <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center gap-2 text-center shrink-0 w-full sm:w-auto">
-                <div class="size-24 bg-white p-2 rounded-lg border border-slate-300 flex items-center justify-center shadow-2xs">
-                  <svg class="size-full text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect width="6" height="6" x="2" y="2" rx="1"/>
-                    <rect width="6" height="6" x="16" y="2" rx="1"/>
-                    <rect width="6" height="6" x="2" y="16" rx="1"/>
-                    <path d="M10 2h4"/>
-                    <path d="M2 10v4"/>
-                    <path d="M10 6h4"/>
-                    <path d="M14 10h4"/>
-                    <path d="M10 14h4"/>
-                    <path d="M16 14v4"/>
-                    <path d="M16 20h4"/>
-                    <path d="M20 16v4"/>
-                  </svg>
+                <div class="size-28 bg-white p-2 rounded-lg border border-slate-300 flex items-center justify-center shadow-2xs">
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&amp;margin=4&amp;data={{ urlencode($todayRegistration->qr_pass) }}" alt="QR Pass #{{ $todayRegistration->qr_pass }}" class="size-full object-contain rounded-md">
                 </div>
-                <div class="text-[11px] text-slate-500 font-medium">Tunjukkan ke Panitia</div>
+                <div class="text-[11px] text-slate-500 font-medium">QR Pass Registrasi Ulang</div>
                 <div class="text-blue-950 font-bold text-xs tracking-wider font-mono">#{{ $todayRegistration->qr_pass }}</div>
+                <span class="text-[10px] text-slate-400">Tunjukkan ke panitia saat tiba di lokasi</span>
               </div>
             @endif
           </div>
@@ -455,9 +458,17 @@
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                       </svg>
                     </div>
-                  @else
+                  @elseif($reg->event->format === 'offline')
                     <div class="size-9 rounded-lg bg-blue-100 text-blue-950 flex items-center justify-center shrink-0 font-mono font-bold text-[10px]">
                       PASS
+                    </div>
+                  @else
+                    <div class="size-9 rounded-lg bg-blue-50 text-blue-900 flex items-center justify-center shrink-0">
+                      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect width="20" height="14" x="2" y="3" rx="2"/>
+                        <line x1="8" x2="16" y1="21" y2="21"/>
+                        <line x1="12" x2="12" y1="17" y2="21"/>
+                      </svg>
                     </div>
                   @endif
                   <div class="min-w-0">
@@ -470,8 +481,10 @@
                     <div class="text-[10px] text-slate-500 font-mono">
                       @if($reg->payment_status === 'pending')
                         No: {{ $reg->registration_code }} &bull; Rp {{ number_format($reg->amount_paid > 0 ? $reg->amount_paid : $reg->event->price, 0, ',', '.') }} &bull; <span class="text-amber-700 font-medium">Tiket Terkunci</span>
-                      @else
+                      @elseif($reg->event->format === 'offline' && $reg->qr_pass)
                         No: {{ $reg->registration_code }} &bull; Pass: #{{ $reg->qr_pass }}
+                      @else
+                        No: {{ $reg->registration_code }} &bull; <span class="text-slate-600 font-sans">Akses Online</span>
                       @endif
                     </div>
                   </div>
@@ -502,13 +515,25 @@
                       </button>
                     </form>
                   @else
+                    @if($reg->event->format === 'offline')
+                      @if($reg->is_checked_in)
+                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-semibold rounded-md">
+                          Check-in: Masuk
+                        </span>
+                      @else
+                        <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-semibold rounded-md">
+                          Check-in: Belum
+                        </span>
+                      @endif
+                    @endif
+
                     @if($reg->attendance_status === 'attended')
-                      <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-semibold rounded-md">
-                        Hadir
+                      <span class="px-2 py-0.5 bg-blue-100 text-blue-900 text-[10px] font-semibold rounded-md">
+                        Presensi: Hadir
                       </span>
                     @else
-                      <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-semibold rounded-md">
-                        Belum Check-In
+                      <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-semibold rounded-md">
+                        Presensi: Belum
                       </span>
                     @endif
                   @endif
@@ -599,12 +624,18 @@
                 <div class="flex flex-col gap-2.5">
                   <div class="flex items-center justify-between gap-2 flex-wrap">
                     <div class="flex items-center gap-1.5 flex-wrap">
-                      @if($reg->attendance_status === 'attended')
+                      @if($reg->event->format === 'offline' && $reg->is_checked_in)
                         <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">
-                          Hadir &bull; {{ $reg->checked_in_at ? $reg->checked_in_at->format('H:i') . ' WIB' : 'Tercatat' }}
+                          Check-in Masuk
+                        </span>
+                      @endif
+
+                      @if($reg->attendance_status === 'attended')
+                        <span class="px-2 py-0.5 bg-blue-100 text-blue-950 text-[10px] font-bold rounded">
+                          Hadir Sesi
                         </span>
                       @elseif($isToday)
-                        <span class="px-2 py-0.5 bg-blue-100 text-blue-950 text-[10px] font-bold rounded">
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-800 text-[10px] font-bold rounded">
                           Hari Ini
                         </span>
                       @elseif(!$isPassed)
@@ -662,8 +693,10 @@
                   <div class="text-[11px] text-slate-500 font-mono">
                     @if($reg->payment_status === 'pending')
                       Status: <span class="text-amber-700 font-medium">Belum Bayar (Rp {{ number_format($reg->amount_paid > 0 ? $reg->amount_paid : $reg->event->price, 0, ',', '.') }})</span>
-                    @else
+                    @elseif($reg->event->format === 'offline' && $reg->qr_pass)
                       Pass: <strong class="text-blue-950">#{{ $reg->qr_pass }}</strong>
+                    @else
+                      Akses: <strong class="text-blue-950 font-sans">Webinar Online</strong>
                     @endif
                   </div>
 
@@ -722,9 +755,20 @@
               <h3 class="text-sm sm:text-base font-bold text-slate-900">Tiket & Pendaftaran Saya ({{ $registrations->count() }})</h3>
               <p class="text-xs text-slate-500">Kelola tiket kegiatan, status kehadiran sesi, dan kode pass presensi resmi.</p>
             </div>
-            <a href="{{ route('peserta.dashboard', ['tab' => 'kegiatan']) }}" class="px-4 py-2 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 self-start sm:self-auto shadow-2xs">
-              <span>+ Cari Kegiatan Baru</span>
-            </a>
+            <div class="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+              <button type="button" onclick="openQrScannerModal()" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="6" height="6" x="2" y="2" rx="1"/>
+                  <rect width="6" height="6" x="16" y="2" rx="1"/>
+                  <rect width="6" height="6" x="2" y="16" rx="1"/>
+                  <path d="M10 2h4M2 10v4M10 6h4M14 10h4M10 14h4M16 14v4M16 20h4M20 16v4"/>
+                </svg>
+                <span>Scan QR Presensi</span>
+              </button>
+              <a href="{{ route('peserta.dashboard', ['tab' => 'kegiatan']) }}" class="px-3.5 py-2 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+                <span>+ Cari Kegiatan</span>
+              </a>
+            </div>
           </div>
 
           <div class="flex flex-col gap-3">
@@ -738,9 +782,17 @@
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                       </svg>
                     </div>
-                  @else
+                  @elseif($reg->event->format === 'offline')
                     <div class="size-11 rounded-xl bg-blue-100 text-blue-950 flex items-center justify-center shrink-0 font-mono font-bold text-xs">
                       PASS
+                    </div>
+                  @else
+                    <div class="size-11 rounded-xl bg-blue-50 text-blue-900 flex items-center justify-center shrink-0">
+                      <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect width="20" height="14" x="2" y="3" rx="2"/>
+                        <line x1="8" x2="16" y1="21" y2="21"/>
+                        <line x1="12" x2="12" y1="17" y2="21"/>
+                      </svg>
                     </div>
                   @endif
                   <div class="min-w-0">
@@ -753,8 +805,10 @@
                     <div class="text-[11px] text-slate-500 font-mono mt-0.5">
                       @if($reg->payment_status === 'pending')
                         No. Tiket: {{ $reg->registration_code }} &bull; Rp {{ number_format($reg->amount_paid > 0 ? $reg->amount_paid : $reg->event->price, 0, ',', '.') }} &bull; <span class="text-amber-700 font-medium">Tiket Terkunci</span>
-                      @else
+                      @elseif($reg->event->format === 'offline' && $reg->qr_pass)
                         No. Tiket: {{ $reg->registration_code }} &bull; Pass: <strong class="text-blue-950">#{{ $reg->qr_pass }}</strong>
+                      @else
+                        No. Tiket: {{ $reg->registration_code }} &bull; <span class="text-slate-600 font-sans">Akses Webinar Online</span>
                       @endif
                     </div>
                   </div>
@@ -788,13 +842,25 @@
                     <span class="px-2 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold rounded-md">
                       {{ $reg->payment_status === 'free' ? 'Gratis' : 'Lunas' }}
                     </span>
+                    @if($reg->event->format === 'offline')
+                      @if($reg->is_checked_in)
+                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-md">
+                          Check-in: Masuk
+                        </span>
+                      @else
+                        <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-xs font-semibold rounded-md">
+                          Check-in: Belum
+                        </span>
+                      @endif
+                    @endif
+
                     @if($reg->attendance_status === 'attended')
-                      <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-md">
-                        Hadir ({{ $reg->checked_in_at ? $reg->checked_in_at->format('H:i') : '' }} WIB)
+                      <span class="px-2 py-0.5 bg-blue-100 text-blue-900 text-xs font-semibold rounded-md">
+                        Presensi: Hadir ({{ $reg->attended_at ? $reg->attended_at->format('H:i') : '' }} WIB)
                       </span>
                     @else
-                      <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-xs font-semibold rounded-md">
-                        Belum Check-In
+                      <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-semibold rounded-md">
+                        Presensi: Belum
                       </span>
                     @endif
                   @endif
@@ -1173,6 +1239,74 @@
   </div>
 </div>
 
+<div id="modal-qr-scanner" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+  <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 flex flex-col gap-4 shadow-2xl my-auto">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      <h2 class="text-base font-bold text-slate-900">Scan QR Presensi Kegiatan</h2>
+      <button type="button" onclick="closeQrScannerModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="scanner-view-container" class="flex flex-col gap-3">
+      <div class="relative w-full aspect-square bg-slate-950 rounded-2xl overflow-hidden border border-slate-200 flex items-center justify-center">
+        <div id="qr-reader" class="w-full h-full"></div>
+        <div id="scanner-loading" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900 text-white text-xs p-4 text-center">
+          <svg class="size-6 text-slate-400 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+          <span id="scanner-loading-text" class="text-slate-300 text-[11px]">Menyiapkan kamera...</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="scanner-processing" class="hidden flex-col items-center justify-center gap-3 py-8 text-center">
+      <svg class="size-8 text-blue-950 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+      </svg>
+      <div class="text-xs font-bold text-slate-900">Memverifikasi Presensi Kehadiran...</div>
+      <div class="text-[11px] text-slate-500">Mohon tunggu sebentar selagi kehadiran Anda divalidasi.</div>
+    </div>
+
+    <div id="scanner-result" class="hidden flex-col items-center gap-4 text-center py-2">
+      <div id="scanner-result-icon" class="size-16 rounded-full flex items-center justify-center"></div>
+      <div class="flex flex-col gap-1">
+        <h3 id="scanner-result-title" class="text-base font-bold text-slate-900"></h3>
+        <p id="scanner-result-message" class="text-xs text-slate-600 leading-relaxed"></p>
+      </div>
+      <div id="scanner-result-details" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 hidden"></div>
+      <div class="w-full flex items-center gap-2 pt-2">
+        <button type="button" id="scanner-action-btn" onclick="closeQrScannerModal(true)" class="flex-1 py-2.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition cursor-pointer">
+          Tutup & Muat Ulang
+        </button>
+        <button type="button" id="scanner-retry-btn" onclick="restartQrScanner()" class="hidden py-2.5 px-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold transition cursor-pointer">
+          Scan Ulang
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+#qr-reader {
+  width: 100% !important;
+  border: none !important;
+}
+#qr-reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 1rem !important;
+}
+#qr-reader__scan_region {
+  border-radius: 1rem !important;
+}
+</style>
+
+<script src="{{ asset('vendor/html5-qrcode/html5-qrcode.min.js') }}"></script>
 <script src="{{ config('midtrans.snap_url') }}" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
 function payWithSnap(registrationId, existingToken) {
@@ -1291,5 +1425,181 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 });
+
+let html5QrCode = null;
+let isScanning = false;
+
+function openQrScannerModal() {
+  const modal = document.getElementById('modal-qr-scanner');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  resetScannerUI();
+  startCameraScanner();
+}
+
+function closeQrScannerModal(shouldReload) {
+  stopCameraScanner().then(() => {
+    const modal = document.getElementById('modal-qr-scanner');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    if (shouldReload === true) {
+      window.location.reload();
+    }
+  });
+}
+
+function resetScannerUI() {
+  document.getElementById('scanner-view-container').classList.remove('hidden');
+  document.getElementById('scanner-processing').classList.add('hidden');
+  document.getElementById('scanner-processing').classList.remove('flex');
+  document.getElementById('scanner-result').classList.add('hidden');
+  document.getElementById('scanner-result').classList.remove('flex');
+  document.getElementById('scanner-loading').classList.remove('hidden');
+  document.getElementById('scanner-retry-btn').classList.add('hidden');
+  document.getElementById('scanner-loading-text').textContent = 'Menyiapkan kamera...';
+}
+
+function startCameraScanner() {
+  if (typeof Html5Qrcode === 'undefined') {
+    document.getElementById('scanner-loading-text').textContent = 'Pustaka pemindai belum siap. Silakan muat ulang halaman.';
+    return;
+  }
+
+  if (html5QrCode) {
+    try {
+      html5QrCode.stop().then(() => initAndStartScanner()).catch(() => initAndStartScanner());
+      return;
+    } catch(e) {}
+  }
+  initAndStartScanner();
+}
+
+function initAndStartScanner() {
+  html5QrCode = new Html5Qrcode("qr-reader");
+  const config = {
+    fps: 10,
+    qrbox: { width: 250, height: 250 }
+  };
+
+  html5QrCode.start(
+    { facingMode: "environment" },
+    config,
+    onQrCodeSuccess,
+    onQrCodeError
+  ).then(() => {
+    isScanning = true;
+    const loadingElem = document.getElementById('scanner-loading');
+    if (loadingElem) loadingElem.classList.add('hidden');
+  }).catch(err => {
+    const loadingText = document.getElementById('scanner-loading-text');
+    if (loadingText) {
+      loadingText.textContent = 'Akses kamera tidak tersedia atau izin belum diberikan.';
+    }
+  });
+}
+
+function stopCameraScanner() {
+  if (html5QrCode && isScanning) {
+    isScanning = false;
+    return html5QrCode.stop().then(() => {
+      try { html5QrCode.clear(); } catch(e) {}
+    }).catch(() => {});
+  }
+  return Promise.resolve();
+}
+
+function onQrCodeSuccess(decodedText) {
+  if (!isScanning) return;
+  isScanning = false;
+
+  stopCameraScanner().then(() => {
+    processQrPresence(decodedText);
+  });
+}
+
+function onQrCodeError(error) {
+}
+
+function processQrPresence(qrData) {
+  document.getElementById('scanner-view-container').classList.add('hidden');
+  document.getElementById('scanner-processing').classList.remove('hidden');
+  document.getElementById('scanner-processing').classList.add('flex');
+
+  fetch('{{ route('peserta.presence.scan') }}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({ qr_data: qrData })
+  })
+  .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })))
+  .then(result => {
+    document.getElementById('scanner-processing').classList.add('hidden');
+    document.getElementById('scanner-processing').classList.remove('flex');
+    showScannerResult(result.ok, result.data);
+  })
+  .catch(err => {
+    document.getElementById('scanner-processing').classList.add('hidden');
+    document.getElementById('scanner-processing').classList.remove('flex');
+    showScannerResult(false, {
+      status: 'error',
+      message: 'Terjadi kesalahan jaringan saat memproses presensi.'
+    });
+  });
+}
+
+function showScannerResult(isSuccess, data) {
+  const resultContainer = document.getElementById('scanner-result');
+  const icon = document.getElementById('scanner-result-icon');
+  const title = document.getElementById('scanner-result-title');
+  const message = document.getElementById('scanner-result-message');
+  const details = document.getElementById('scanner-result-details');
+  const actionBtn = document.getElementById('scanner-action-btn');
+  const retryBtn = document.getElementById('scanner-retry-btn');
+
+  resultContainer.classList.remove('hidden');
+  resultContainer.classList.add('flex');
+
+  if (isSuccess && (data.status === 'success' || data.status === 'already_attended')) {
+    icon.className = 'size-16 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-700';
+    icon.innerHTML = '<svg class="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    title.textContent = data.status === 'already_attended' ? 'Kehadiran Sudah Tercatat' : 'Presensi Berhasil!';
+    message.textContent = data.message;
+
+    if (data.event_title) {
+      details.classList.remove('hidden');
+      details.innerHTML = '<div class="font-bold text-slate-900">' + data.event_title + '</div>' + 
+        (data.checked_in_at ? '<div class="text-[11px] text-emerald-800 mt-1">Status: <strong>Hadir</strong> (' + data.checked_in_at + ')</div>' : '');
+    }
+
+    actionBtn.textContent = 'Selesai & Perbarui Halaman';
+    actionBtn.onclick = function() { closeQrScannerModal(true); };
+    retryBtn.classList.add('hidden');
+
+    setTimeout(() => {
+      closeQrScannerModal(true);
+    }, 2500);
+  } else {
+    icon.className = 'size-16 rounded-full flex items-center justify-center bg-rose-100 text-rose-700';
+    icon.innerHTML = '<svg class="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+    title.textContent = 'Presensi Belum Berhasil';
+    message.textContent = data.message || 'QR Code tidak valid atau gerbang presensi ditutup.';
+    details.classList.add('hidden');
+
+    actionBtn.textContent = 'Tutup';
+    actionBtn.onclick = function() { closeQrScannerModal(false); };
+    retryBtn.classList.remove('hidden');
+  }
+}
+
+function restartQrScanner() {
+  resetScannerUI();
+  startCameraScanner();
+}
 </script>
 @endsection

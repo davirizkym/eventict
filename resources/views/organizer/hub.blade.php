@@ -348,7 +348,6 @@
             <select name="format" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
               <option value="offline" selected>Offline</option>
               <option value="online">Online</option>
-              <option value="hybrid">Hybrid</option>
             </select>
           </div>
         </div>

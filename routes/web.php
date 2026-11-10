@@ -33,6 +33,7 @@ Route::middleware(['auth', 'role:peserta'])->group(function () {
     Route::put('/peserta/profil', [PesertaController::class, 'updateProfile'])->name('peserta.profile.update');
     Route::get('/kegiatan/{slug}/daftar', [EventController::class, 'showRegistrationForm'])->name('events.register.form');
     Route::post('/kegiatan/{slug}/daftar', [EventController::class, 'registerEvent'])->name('events.register');
+    Route::post('/peserta/presensi/scan', [PesertaController::class, 'scanPresence'])->name('peserta.presence.scan');
     Route::delete('/peserta/registrasi/{registration}/batal', [PesertaController::class, 'cancelRegistration'])->name('peserta.registration.cancel');
 });
 
@@ -74,5 +75,6 @@ Route::middleware(['auth', 'role:penyelenggara'])->group(function () {
     Route::post('/penyelenggara/registrasi/{registration}/upload-sertifikat', [OrganizerController::class, 'uploadSingle'])->name('organizer.certificate.single');
     Route::post('/penyelenggara/upload-sertifikat-massal', [OrganizerController::class, 'uploadBatch'])->name('organizer.certificate.batch');
     Route::post('/penyelenggara/registrasi/{registration}/presensi', [OrganizerController::class, 'toggleAttendance'])->name('organizer.attendance.toggle');
+    Route::post('/penyelenggara/registrasi/{registration}/checkin', [OrganizerController::class, 'toggleCheckin'])->name('organizer.checkin.toggle');
     Route::delete('/penyelenggara/registrasi/{registration}/sertifikat', [OrganizerController::class, 'deleteCertificate'])->name('organizer.certificate.delete');
 });

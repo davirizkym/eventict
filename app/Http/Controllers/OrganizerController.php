@@ -84,7 +84,7 @@ class OrganizerController extends Controller
             'type' => 'nullable|string|in:Workshop,Seminar,Webinar,Sertifikasi',
             'category_id' => 'nullable|exists:categories,id',
             'category' => 'nullable|string|max:100',
-            'format' => 'required|in:online,offline,hybrid',
+            'format' => 'required|in:online,offline',
             'location' => 'required|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -106,7 +106,7 @@ class OrganizerController extends Controller
             'speaker_topic' => 'nullable|string|max:255',
         ], [
             'title.required' => 'Judul kegiatan wajib diisi.',
-            'format.required' => 'Format kegiatan (online/offline/hybrid) wajib dipilih.',
+            'format.required' => 'Format kegiatan (online/offline) wajib dipilih.',
             'location.required' => 'Lokasi atau link platform kegiatan wajib diisi.',
             'start_date.required' => 'Tanggal mulai kegiatan wajib diisi.',
             'start_date.date' => 'Format tanggal mulai kegiatan tidak valid.',
@@ -266,6 +266,7 @@ class OrganizerController extends Controller
         $event->load(['speakers']);
 
         $totalRegistrations = $event->registrations()->count();
+        $checkedInRegistrations = $event->registrations()->where('is_checked_in', true)->count();
         $attendedRegistrations = $event->registrations()->where('attendance_status', 'attended')->count();
         $attendancePercentage = $totalRegistrations > 0 ? round(($attendedRegistrations / $totalRegistrations) * 100, 1) : 0;
         $certificatesCount = $event->registrations()->whereHas('certificate')->count();
@@ -285,6 +286,10 @@ class OrganizerController extends Controller
                             ->orWhere('phone', 'like', "%{$keyword}%");
                     });
             });
+        }
+
+        if ($request->filled('checkin') && $event->format === 'offline') {
+            $query->where('is_checked_in', $request->query('checkin') === 'checked_in');
         }
 
         if ($request->filled('attendance')) {
@@ -315,6 +320,7 @@ class OrganizerController extends Controller
             'tab',
             'registrations',
             'totalRegistrations',
+            'checkedInRegistrations',
             'attendedRegistrations',
             'attendancePercentage',
             'certificatesCount',
@@ -333,7 +339,7 @@ class OrganizerController extends Controller
             'type' => 'nullable|string|in:Workshop,Seminar,Webinar,Sertifikasi',
             'category_id' => 'nullable|exists:categories,id',
             'category' => 'nullable|string|max:100',
-            'format' => 'required|in:online,offline,hybrid',
+            'format' => 'required|in:online,offline',
             'location' => 'required|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -349,7 +355,7 @@ class OrganizerController extends Controller
             'virtual_meeting_url' => 'nullable|url|max:255',
         ], [
             'title.required' => 'Judul kegiatan wajib diisi.',
-            'format.required' => 'Format kegiatan (online/offline/hybrid) wajib dipilih.',
+            'format.required' => 'Format kegiatan (online/offline) wajib dipilih.',
             'location.required' => 'Lokasi atau link platform kegiatan wajib diisi.',
             'start_date.required' => 'Tanggal mulai kegiatan wajib diisi.',
             'start_date.date' => 'Format tanggal mulai kegiatan tidak valid.',
@@ -465,6 +471,17 @@ class OrganizerController extends Controller
             'code' => 'required|string|max:100',
         ]);
 
+        if ($event->format !== 'offline') {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Check-in registrasi ulang hanya berlaku untuk kegiatan tatap muka (offline).',
+                ], 422);
+            }
+            return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
+                ->with('error', 'Check-in registrasi ulang hanya berlaku untuk kegiatan tatap muka (offline).');
+        }
+
         $token = trim($request->code);
         $cleanToken = ltrim($token, '#');
 
@@ -481,29 +498,74 @@ class OrganizerController extends Controller
             ->first();
 
         if (! $registration) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Peserta dengan kode atau email '{$token}' tidak ditemukan pada kegiatan ini.",
+                ], 404);
+            }
             return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
                 ->with('error', "Peserta dengan kode atau email '{$token}' tidak ditemukan pada event ini.");
         }
 
         if ($registration->payment_status === 'pending') {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Peserta {$registration->user->name} ({$registration->registration_code}) belum menyelesaikan pembayaran tiket.",
+                ], 422);
+            }
             return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
                 ->with('error', "Peserta {$registration->user->name} ({$registration->registration_code}) belum menyelesaikan pembayaran tiket.");
         }
 
-        if ($registration->attendance_status === 'attended') {
+        if ($registration->is_checked_in) {
             $time = $registration->checked_in_at ? $registration->checked_in_at->format('H:i') . ' WIB' : 'sebelumnya';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'already_checked_in',
+                    'message' => "Peserta {$registration->user->name} ({$registration->registration_code}) sudah melakukan check-in pada {$time}.",
+                    'registration' => [
+                        'id' => $registration->id,
+                        'name' => $registration->user->name,
+                        'registration_code' => $registration->registration_code,
+                        'qr_pass' => $registration->qr_pass,
+                        'is_checked_in' => true,
+                        'checked_in_at' => $time,
+                        'check_in_gate' => $registration->check_in_gate,
+                    ],
+                ], 200);
+            }
             return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
-                ->with('warning', "Peserta {$registration->user->name} ({$registration->registration_code}) sudah presensi pada {$time}.");
+                ->with('warning', "Peserta {$registration->user->name} ({$registration->registration_code}) sudah check-in pada {$time}.");
         }
 
+        $now = now();
+        $gate = $request->input('source') === 'camera' ? 'Scan QR Pass (Pintu Masuk)' : 'Quick Check-in Lab ICT';
         $registration->update([
-            'attendance_status' => 'attended',
-            'checked_in_at' => now(),
-            'check_in_gate' => 'Quick Check-in Lab ICT',
+            'is_checked_in' => true,
+            'checked_in_at' => $now,
+            'check_in_gate' => $gate,
         ]);
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => "Check-in berhasil! {$registration->user->name} ({$registration->registration_code}) terverifikasi masuk.",
+                'registration' => [
+                    'id' => $registration->id,
+                    'name' => $registration->user->name,
+                    'registration_code' => $registration->registration_code,
+                    'qr_pass' => $registration->qr_pass,
+                    'is_checked_in' => true,
+                    'checked_in_at' => $now->format('H:i') . ' WIB',
+                    'check_in_gate' => $gate,
+                ],
+            ], 200);
+        }
+
         return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
-            ->with('success', "Presensi berhasil! {$registration->user->name} ({$registration->registration_code}) ditandai Hadir.");
+            ->with('success', "Check-in berhasil! {$registration->user->name} ({$registration->registration_code}) terverifikasi masuk.");
     }
 
     public function togglePresence(Request $request, Event $event)
@@ -1136,12 +1198,33 @@ class OrganizerController extends Controller
         $newStatus = $registration->attendance_status === 'attended' ? 'unattended' : 'attended';
         $registration->update([
             'attendance_status' => $newStatus,
-            'checked_in_at' => $newStatus === 'attended' ? now() : null,
-            'check_in_gate' => $newStatus === 'attended' ? 'Manual Panitia' : null,
+            'attended_at' => $newStatus === 'attended' ? now() : null,
+            'attendance_gate' => $newStatus === 'attended' ? 'Manual Panitia' : null,
         ]);
 
-        $statusText = $newStatus === 'attended' ? 'HADIR' : 'BELUM HADIR';
+        $statusText = $newStatus === 'attended' ? 'HADIR SESI' : 'BELUM HADIR';
         return back()->with('success', "Status presensi {$registration->user->name} diubah menjadi {$statusText}.");
+    }
+
+    public function toggleCheckin(Registration $registration)
+    {
+        if ($registration->event->format !== 'offline') {
+            return back()->with('error', 'Check-in registrasi ulang hanya berlaku untuk kegiatan offline.');
+        }
+
+        if (!$registration->is_checked_in && $registration->payment_status === 'pending') {
+            return back()->with('error', "Peserta {$registration->user->name} belum menyelesaikan pembayaran tiket.");
+        }
+
+        $newCheckedIn = !$registration->is_checked_in;
+        $registration->update([
+            'is_checked_in' => $newCheckedIn,
+            'checked_in_at' => $newCheckedIn ? now() : null,
+            'check_in_gate' => $newCheckedIn ? 'Manual Panitia' : null,
+        ]);
+
+        $statusText = $newCheckedIn ? 'SUDAH CHECK-IN' : 'BATAL CHECK-IN';
+        return back()->with('success', "Status check-in {$registration->user->name} diubah menjadi {$statusText}.");
     }
 
     public function deleteCertificate(Registration $registration)
