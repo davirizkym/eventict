@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\OrganizerController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PesertaController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,21 +14,26 @@ Route::get('/tentang', [EventController::class, 'about'])->name('about');
 Route::get('/kegiatan/{slug}', [EventController::class, 'show'])->name('events.show');
 Route::get('/kegiatan/{slug}/presensi', [EventController::class, 'presence'])->name('events.presence');
 Route::post('/kegiatan/{slug}/presensi', [EventController::class, 'presenceSubmit'])->name('events.presence_submit');
+Route::post('/midtrans/notification', [PaymentController::class, 'handleNotification'])->name('midtrans.notification');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:6,1');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+Route::get('/pembayaran/{registrationCode}', [PaymentController::class, 'showInvoice'])->name('payment.invoice')->middleware('auth');
+Route::post('/pembayaran/{registration}/snap-token', [PaymentController::class, 'getSnapToken'])->name('payment.snap_token')->middleware('auth');
+Route::post('/pembayaran/{registration}/check-status', [PaymentController::class, 'checkStatus'])->name('payment.check_status')->middleware('auth');
 
 Route::middleware(['auth', 'role:peserta'])->group(function () {
     Route::get('/peserta', [PesertaController::class, 'dashboard'])->name('peserta.dashboard');
     Route::put('/peserta/profil', [PesertaController::class, 'updateProfile'])->name('peserta.profile.update');
     Route::get('/kegiatan/{slug}/daftar', [EventController::class, 'showRegistrationForm'])->name('events.register.form');
     Route::post('/kegiatan/{slug}/daftar', [EventController::class, 'registerEvent'])->name('events.register');
+    Route::delete('/peserta/registrasi/{registration}/batal', [PesertaController::class, 'cancelRegistration'])->name('peserta.registration.cancel');
 });
 
 Route::middleware(['auth', 'role:penyelenggara'])->group(function () {

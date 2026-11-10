@@ -255,20 +255,56 @@
                 Buka di Workspace Panitia
               </a>
             @elseif($isRegistered)
-              <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex flex-col gap-2">
-                <div class="flex items-center gap-2 text-emerald-900 font-semibold text-xs">
-                  <svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  <span>Anda Sudah Terdaftar</span>
+              @if($userRegistration->payment_status === 'pending')
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col gap-2.5">
+                  <div class="flex items-center gap-2 text-amber-900 font-semibold text-xs">
+                    <svg class="size-4 text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="8" x2="12" y2="12"/>
+                      <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span>Pendaftaran Menunggu Pembayaran</span>
+                  </div>
+                  <div class="text-[11px] text-amber-800 leading-relaxed">
+                    Kode: <span class="font-mono font-bold">{{ $userRegistration->registration_code }}</span><br>
+                    E-Tiket belum aktif. Selesaikan pembayaran untuk mengaktifkan tiket dan QR Pass Anda.
+                  </div>
+                  <a href="{{ route('payment.invoice', $userRegistration->registration_code) }}" class="mt-1 py-2 px-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold text-center transition">
+                    Buka Invoice Pembayaran &rarr;
+                  </a>
+                  <button type="button" onclick="checkEventPayment('{{ $userRegistration->id }}')" class="py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-950 border border-blue-200 rounded-lg text-xs font-semibold text-center transition cursor-pointer flex items-center justify-center gap-1.5">
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                      <path d="M3 3v5h5"/>
+                      <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                      <path d="M16 21h5v-5"/>
+                    </svg>
+                    <span>Cek Status Pembayaran</span>
+                  </button>
+                  <form method="POST" action="{{ route('peserta.registration.cancel', $userRegistration->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pendaftaran kegiatan ini?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="w-full py-1.5 px-3 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-semibold text-center transition cursor-pointer">
+                      Batalkan Pendaftaran
+                    </button>
+                  </form>
                 </div>
-                <div class="text-[11px] text-emerald-800">
-                  Kode Registrasi: <span class="font-mono font-bold">{{ $userRegistration->registration_code }}</span>
+              @else
+                <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex flex-col gap-2">
+                  <div class="flex items-center gap-2 text-emerald-900 font-semibold text-xs">
+                    <svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Anda Sudah Terdaftar (Tiket Aktif)</span>
+                  </div>
+                  <div class="text-[11px] text-emerald-800">
+                    Kode Registrasi: <span class="font-mono font-bold">{{ $userRegistration->registration_code }}</span>
+                  </div>
+                  <a href="{{ route('peserta.dashboard', ['tab' => 'tiket']) }}" class="mt-2 py-2 px-3 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-semibold text-center transition">
+                    Buka E-Tiket di Portal Peserta &rarr;
+                  </a>
                 </div>
-                <a href="{{ route('peserta.dashboard') }}" class="mt-2 py-2 px-3 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-semibold text-center transition">
-                  Buka E-Tiket di Portal Peserta &rarr;
-                </a>
-              </div>
+              @endif
             @elseif($isFull)
               <button disabled class="w-full py-3 bg-slate-200 text-slate-500 rounded-xl text-xs font-semibold font-['Poppins'] cursor-not-allowed text-center">
                 Kuota Kegiatan Telah Penuh
@@ -296,4 +332,29 @@
 
   @include('partials.footer')
 </div>
+
+<script>
+function checkEventPayment(registrationId) {
+  fetch('/pembayaran/' + registrationId + '/check-status', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}',
+      'Accept': 'application/json'
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'paid') {
+      alert(data.message || 'Pembayaran berhasil dikonfirmasi! E-Tiket Anda telah aktif.');
+      window.location.reload();
+    } else {
+      alert(data.message || 'Status pembayaran belum terkonfirmasi.');
+    }
+  })
+  .catch(err => {
+    alert('Gagal mengecek status pembayaran.');
+  });
+}
+</script>
 @endsection

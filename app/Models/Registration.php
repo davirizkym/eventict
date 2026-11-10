@@ -17,6 +17,11 @@ class Registration extends Model
         'registration_code',
         'qr_pass',
         'payment_status',
+        'midtrans_order_id',
+        'snap_token',
+        'payment_method',
+        'amount_paid',
+        'paid_at',
         'attendance_status',
         'checked_in_at',
         'check_in_gate',
@@ -27,6 +32,7 @@ class Registration extends Model
     {
         return [
             'checked_in_at' => 'datetime',
+            'paid_at' => 'datetime',
         ];
     }
 

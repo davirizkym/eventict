@@ -583,26 +583,87 @@
         </div>
 
       @elseif($tab === 'sertifikat')
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <span class="text-slate-500 text-xs font-medium">Total Pendaftar</span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span class="text-xl sm:text-2xl font-bold text-slate-900">{{ $totalRegistrations }}</span>
+              <span class="text-[11px] text-slate-400">Peserta</span>
+            </div>
+          </div>
+          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <span class="text-slate-500 text-xs font-medium">Hadir (Berhak Sertifikat)</span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span class="text-xl sm:text-2xl font-bold text-emerald-700">{{ $attendedRegistrations }}</span>
+              <span class="text-[11px] text-slate-400 font-semibold">{{ $attendancePercentage }}%</span>
+            </div>
+          </div>
+          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <span class="text-slate-500 text-xs font-medium">Sertifikat Terbit</span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span class="text-xl sm:text-2xl font-bold text-blue-950">{{ $certificatesCount }}</span>
+              <span class="text-[11px] text-blue-800 font-semibold">
+                {{ $attendedRegistrations > 0 ? round(($certificatesCount / $attendedRegistrations) * 100) : 0 }}%
+              </span>
+            </div>
+          </div>
+          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <span class="text-slate-500 text-xs font-medium">Belum Diterbitkan</span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span class="text-xl sm:text-2xl font-bold text-amber-700">
+                {{ max(0, $attendedRegistrations - $certificatesCount) }}
+              </span>
+              <span class="text-[11px] text-slate-400">Peserta</span>
+            </div>
+          </div>
+        </div>
+
+        @if($totalRegistrations === 0)
+          <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 text-xs text-amber-900 shadow-2xs">
+            <svg class="size-5 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div class="flex flex-col gap-1">
+              <span class="font-bold text-amber-950">Kegiatan ini belum memiliki peserta terdaftar</span>
+              <p class="text-amber-800 leading-relaxed">
+                Penerbitan e-sertifikat ditujukan untuk peserta yang terdaftar pada kegiatan ini. Karena belum ada peserta yang terdaftar, berkas PDF yang diunggah belum dapat dicocokkan ke siapa pun. Anda dapat mendaftarkan peserta terlebih dahulu, atau mencoba fitur sertifikat pada kegiatan yang sudah memiliki peserta (seperti <a href="{{ route('organizer.workspace', ['event' => 1, 'tab' => 'sertifikat']) }}" class="underline font-bold text-amber-950 hover:text-blue-950">Kegiatan ID 1</a>).
+              </p>
+            </div>
+          </div>
+        @endif
+
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-6 shadow-2xs">
           <div class="flex flex-col gap-1">
             <h3 class="text-sm font-bold text-slate-900">Upload Sertifikat Massal untuk Kegiatan Ini</h3>
             <p class="text-xs text-slate-500 leading-relaxed">
-              Pilih satu atau banyak file PDF sertifikat secara bersamaan. Sistem otomatis mencocokkan nama file dengan No. Registrasi atau Email peserta.
+              Pilih satu atau banyak berkas PDF sertifikat secara bersamaan. Sistem otomatis mencocokkan nama berkas dengan No. Registrasi, Email, atau QR Pass peserta.
             </p>
           </div>
 
           <form action="{{ route('organizer.workspace.certificate.batch', ['event' => $event->id]) }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
             @csrf
-            <div class="p-6 border-2 border-dashed border-slate-200 hover:border-blue-950 rounded-2xl bg-slate-50 flex flex-col items-center justify-center gap-2 text-center transition">
+            <div id="batch-dropzone-box" onclick="document.getElementById('batch-cert-input').click()" class="p-6 border-2 border-dashed border-slate-300 hover:border-blue-950 rounded-2xl bg-slate-50 flex flex-col items-center justify-center gap-2 text-center transition cursor-pointer">
               <svg class="size-8 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="8" r="6"/>
                 <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
               </svg>
-              <label class="text-xs font-semibold text-blue-950 cursor-pointer hover:underline">
-                Pilih Berkas PDF Sertifikat
-                <input type="file" name="certificate_files[]" multiple required accept=".pdf,image/*" class="hidden">
-              </label>
-              <span class="text-[11px] text-slate-400">Format PDF, JPG, PNG maksimal 10MB per file</span>
+              <div class="text-xs font-semibold text-blue-950 hover:underline">
+                Pilih atau Tarik Berkas PDF Sertifikat ke Sini
+              </div>
+              <input type="file" id="batch-cert-input" name="certificate_files[]" multiple required accept=".pdf,image/*" onchange="handleBatchFileChange(this)" class="hidden">
+              <span class="text-[11px] text-slate-400">Format PDF, JPG, PNG maksimal 10MB per berkas (Bisa pilih banyak sekaligus)</span>
+
+              <div id="batch-file-feedback" class="w-full max-w-lg mt-3 p-3 bg-white border border-blue-200 rounded-xl flex items-center justify-between text-left hidden shadow-2xs" onclick="event.stopPropagation()">
+                <div class="min-w-0 pr-2">
+                  <div id="batch-file-count" class="text-xs font-bold text-blue-950 truncate"></div>
+                  <div id="batch-file-list" class="text-[10px] text-slate-500 truncate mt-0.5"></div>
+                </div>
+                <button type="button" onclick="event.stopPropagation(); resetBatchFileInput()" class="px-2.5 py-1 text-[11px] text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-lg shrink-0 cursor-pointer transition">
+                  Ganti
+                </button>
+              </div>
             </div>
 
             <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-2 text-xs">
@@ -610,15 +671,142 @@
               <ul class="text-slate-600 flex flex-col gap-1 list-disc list-inside">
                 <li>Berdasarkan Nomor Registrasi: <code class="bg-white px-1.5 py-0.5 rounded text-blue-950 font-mono">REG-2026-0001.pdf</code></li>
                 <li>Berdasarkan Email Peserta: <code class="bg-white px-1.5 py-0.5 rounded text-blue-950 font-mono">peserta@budi-luhur.ac.id.pdf</code></li>
+                <li>Berdasarkan QR Pass: <code class="bg-white px-1.5 py-0.5 rounded text-blue-950 font-mono">PASS-1234-USER.pdf</code></li>
               </ul>
             </div>
 
             <div class="flex justify-end">
               <button type="submit" class="px-5 py-2.5 bg-blue-950 text-white rounded-xl text-xs font-semibold hover:bg-blue-900 transition shadow-xs cursor-pointer">
-                Mulai Unggah & Cocokkan Sertifikat
+                Mulai Unggah &amp; Cocokkan Sertifikat
               </button>
             </div>
           </form>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-5 shadow-2xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Manajemen &amp; Status Sertifikat Peserta</h3>
+              <p class="text-xs text-slate-500">Pantau dokumen yang telah terbit, unduh PDF berkas, atau unggah sertifikat per orang.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700">
+                Total {{ $registrations->count() }} Peserta
+              </span>
+              @if($registrations->isNotEmpty())
+                <button type="button" onclick="openSingleCertModal('', '', '')" class="px-3 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                  <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  <span>Unggah Satuan Manual</span>
+                </button>
+              @endif
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                  <th class="px-4 py-3 font-semibold">Peserta &amp; Institusi</th>
+                  <th class="px-4 py-3 font-semibold">No. Registrasi</th>
+                  <th class="px-4 py-3 font-semibold">Kehadiran</th>
+                  <th class="px-4 py-3 font-semibold">No. Sertifikat &amp; ID Keabsahan</th>
+                  <th class="px-4 py-3 font-semibold">Status Dokumen</th>
+                  <th class="px-4 py-3 font-semibold text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700">
+                @forelse($registrations as $reg)
+                  <tr class="hover:bg-slate-50/60 transition">
+                    <td class="px-4 py-3">
+                      <div class="font-bold text-slate-900">{{ $reg->user->name }}</div>
+                      <div class="text-[11px] text-slate-500">{{ $reg->user->email }}</div>
+                      @if($reg->user->institution)
+                        <div class="text-[10px] text-slate-400 mt-0.5 truncate max-w-xs">{{ $reg->user->institution }}</div>
+                      @endif
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap font-mono text-xs text-blue-950 font-semibold">
+                      {{ $reg->registration_code }}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                      @if($reg->attendance_status === 'attended')
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          Hadir
+                        </span>
+                      @else
+                        <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
+                          Belum Hadir
+                        </span>
+                      @endif
+                    </td>
+                    <td class="px-4 py-3">
+                      @if($reg->certificate)
+                        <div class="font-mono text-xs font-semibold text-slate-800">{{ $reg->certificate->certificate_number }}</div>
+                        <div class="font-mono text-[10px] text-slate-400 mt-0.5">ID: {{ $reg->certificate->verify_hash }}</div>
+                      @else
+                        <span class="text-slate-400 text-xs italic">Belum dibuat</span>
+                      @endif
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                      @if($reg->certificate)
+                        <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-blue-50 text-blue-950 border border-blue-200 inline-block">
+                          Terbit
+                        </span>
+                        @if($reg->certificate->issued_at)
+                          <span class="text-[10px] text-slate-400 block mt-0.5">{{ $reg->certificate->issued_at->format('d M Y') }}</span>
+                        @endif
+                      @else
+                        <span class="px-2.5 py-1 rounded-md text-[10px] font-medium bg-slate-100 text-slate-500 inline-block">
+                          Belum Terbit
+                        </span>
+                      @endif
+                    </td>
+                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                      <div class="inline-flex items-center gap-1.5">
+                        @if($reg->certificate)
+                          <a href="{{ $reg->certificate->download_url ? asset($reg->certificate->download_url) : '#' }}" target="_blank" class="px-2.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+                            <svg class="size-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                              <polyline points="7 10 12 15 17 10"/>
+                              <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            <span>Lihat PDF</span>
+                          </a>
+
+                          <form method="POST" action="{{ route('organizer.certificate.delete', $reg->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus sertifikat untuk {{ $reg->user->name }}?');" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="p-1.5 text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 rounded-lg transition cursor-pointer" title="Hapus Sertifikat">
+                              <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h18"/>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                              </svg>
+                            </button>
+                          </form>
+                        @else
+                          <button type="button" onclick="openSingleCertModal('{{ $reg->id }}', '{{ addslashes($reg->user->name) }}', '{{ $reg->registration_code }}')" class="px-2.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                            <svg class="size-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                              <polyline points="17 8 12 3 7 8"/>
+                              <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            <span>Unggah Satuan</span>
+                          </button>
+                        @endif
+                      </div>
+                    </td>
+                  </tr>
+                @empty
+                  <tr>
+                    <td colspan="6" class="p-8 text-center text-slate-400">Belum ada peserta terdaftar dalam kegiatan ini.</td>
+                  </tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
         </div>
 
       @elseif($tab === 'narasumber')
@@ -977,6 +1165,65 @@
       </div>
     </div>
   </div>
+
+  <div id="modal-upload-single-cert" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 flex flex-col gap-5 shadow-2xl my-auto">
+      <div class="w-full flex items-start justify-between pb-3 border-b border-slate-100">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-blue-50 text-blue-950 border border-blue-200">
+            Unggah Satuan
+          </span>
+          <h2 class="text-base font-bold text-slate-900 mt-1">Unggah Sertifikat Peserta</h2>
+        </div>
+        <button type="button" onclick="closeSingleCertModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <form id="form-upload-single-cert" method="POST" action="" enctype="multipart/form-data" class="flex flex-col gap-4 text-xs">
+        @csrf
+        <div id="single-cert-specific-block" class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-1">
+          <span class="text-slate-500 text-[11px]">Nama Peserta:</span>
+          <span id="single-cert-user-name" class="font-bold text-slate-900 text-sm"></span>
+          <span id="single-cert-reg-code" class="font-mono text-xs text-blue-950 font-semibold mt-0.5"></span>
+        </div>
+
+        <div id="single-cert-select-block" class="flex flex-col gap-1.5 hidden">
+          <label class="font-semibold text-slate-700">Pilih Peserta Penerima Sertifikat <span class="text-rose-500">*</span></label>
+          <select id="single-cert-select-reg" onchange="onSingleCertSelectChange(this)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 text-xs font-medium text-slate-800 cursor-pointer">
+            <option value="">-- Pilih Peserta --</option>
+            @foreach($registrations as $r)
+              <option value="{{ $r->id }}">{{ $r->user->name }} ({{ $r->registration_code }}) - {{ $r->attendance_status === 'attended' ? 'Hadir' : 'Belum Hadir' }}</option>
+            @endforeach
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="font-semibold text-slate-700">Nomor Sertifikat (Opsional)</label>
+          <input type="text" name="certificate_number" placeholder="Contoh: ICT-CERT/2026/00001 (Kosongkan untuk otomatis)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 text-xs">
+          <span class="text-[10px] text-slate-400">Jika dikosongkan, sistem akan membuat nomor secara otomatis.</span>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="font-semibold text-slate-700">Berkas Sertifikat (PDF / Gambar) <span class="text-rose-500">*</span></label>
+          <input type="file" name="certificate_file" required accept=".pdf,image/*" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-950 file:text-white hover:file:bg-blue-900 cursor-pointer">
+          <span class="text-[10px] text-slate-400">Ukuran maksimal berkas 10MB.</span>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeSingleCertModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 cursor-pointer">
+            Batal
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-950 hover:bg-blue-900 text-white font-semibold shadow-xs cursor-pointer">
+            Simpan Sertifikat
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1059,6 +1306,122 @@ function closeAssignSpeakerModal() {
   if (selectEl) {
     selectEl.selectedIndex = 0;
     onAssignSpeakerChange(selectEl);
+  }
+}
+
+function openSingleCertModal(regId, userName, regCode) {
+  const m = document.getElementById('modal-upload-single-cert');
+  const form = document.getElementById('form-upload-single-cert');
+  const specificBlock = document.getElementById('single-cert-specific-block');
+  const selectBlock = document.getElementById('single-cert-select-block');
+  const nameEl = document.getElementById('single-cert-user-name');
+  const codeEl = document.getElementById('single-cert-reg-code');
+  const selectEl = document.getElementById('single-cert-select-reg');
+  if (!m || !form) return;
+
+  if (regId) {
+    form.action = '/penyelenggara/registrasi/' + regId + '/upload-sertifikat';
+    if (specificBlock) specificBlock.classList.remove('hidden');
+    if (selectBlock) selectBlock.classList.add('hidden');
+    if (nameEl) nameEl.textContent = userName;
+    if (codeEl) codeEl.textContent = 'Kode: ' + regCode;
+  } else {
+    form.action = '';
+    if (specificBlock) specificBlock.classList.add('hidden');
+    if (selectBlock) selectBlock.classList.remove('hidden');
+    if (selectEl) {
+      selectEl.selectedIndex = 0;
+      onSingleCertSelectChange(selectEl);
+    }
+  }
+
+  m.classList.remove('hidden');
+  m.classList.add('flex');
+}
+
+function onSingleCertSelectChange(selectEl) {
+  const form = document.getElementById('form-upload-single-cert');
+  if (!form) return;
+  if (selectEl.value) {
+    form.action = '/penyelenggara/registrasi/' + selectEl.value + '/upload-sertifikat';
+  } else {
+    form.action = '';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const formSingle = document.getElementById('form-upload-single-cert');
+  if (formSingle) {
+    formSingle.addEventListener('submit', (e) => {
+      if (!formSingle.action || formSingle.action.endsWith('/upload-sertifikat') && formSingle.action.includes('//upload-sertifikat')) {
+        e.preventDefault();
+        alert('Silakan pilih peserta penerima sertifikat terlebih dahulu.');
+      }
+    });
+  }
+
+  const dropzone = document.getElementById('batch-dropzone-box');
+  if (dropzone) {
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add('border-blue-950', 'bg-blue-50/60');
+      });
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove('border-blue-950', 'bg-blue-50/60');
+      });
+    });
+    dropzone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      const input = document.getElementById('batch-cert-input');
+      if (input && files.length > 0) {
+        input.files = files;
+        handleBatchFileChange(input);
+      }
+    });
+  }
+});
+
+function closeSingleCertModal() {
+  const m = document.getElementById('modal-upload-single-cert');
+  if (m) {
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+  }
+}
+
+function handleBatchFileChange(input) {
+  const feedback = document.getElementById('batch-file-feedback');
+  const countEl = document.getElementById('batch-file-count');
+  const listEl = document.getElementById('batch-file-list');
+  if (!feedback || !countEl || !listEl) return;
+
+  if (input.files && input.files.length > 0) {
+    feedback.classList.remove('hidden');
+    feedback.classList.add('flex');
+    countEl.textContent = input.files.length + ' Berkas Dipilih';
+    const names = Array.from(input.files).map(f => f.name).slice(0, 3).join(', ');
+    const more = input.files.length > 3 ? ' dan ' + (input.files.length - 3) + ' lainnya' : '';
+    listEl.textContent = names + more;
+  } else {
+    feedback.classList.add('hidden');
+    feedback.classList.remove('flex');
+  }
+}
+
+function resetBatchFileInput() {
+  const input = document.getElementById('batch-cert-input');
+  const feedback = document.getElementById('batch-file-feedback');
+  if (input) input.value = '';
+  if (feedback) {
+    feedback.classList.add('hidden');
+    feedback.classList.remove('flex');
   }
 }
 </script>

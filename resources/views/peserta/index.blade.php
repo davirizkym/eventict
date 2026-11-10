@@ -258,7 +258,11 @@
                 <span class="text-xs font-semibold text-blue-950 uppercase tracking-wider">
                   Agenda Hari Ini &bull; {{ substr($todayRegistration->event->start_time, 0, 5) }} WIB
                 </span>
-                @if($todayRegistration->attendance_status === 'attended')
+                @if($todayRegistration->payment_status === 'pending')
+                  <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-semibold rounded-md">
+                    Menunggu Pembayaran
+                  </span>
+                @elseif($todayRegistration->attendance_status === 'attended')
                   <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-semibold rounded-md">
                     Presensi Berhasil ({{ $todayRegistration->checked_in_at ? $todayRegistration->checked_in_at->format('H:i') : '' }} WIB)
                   </span>
@@ -282,23 +286,49 @@
               </div>
 
               <div class="flex flex-wrap items-center gap-2.5 pt-2">
-                @if($todayRegistration->event->virtual_meeting_url)
-                  <a href="{{ $todayRegistration->event->virtual_meeting_url }}" target="_blank" class="px-3.5 py-2 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-medium transition flex items-center gap-2 shadow-2xs">
+                @if($todayRegistration->payment_status === 'pending')
+                  <button type="button" onclick="payWithSnap('{{ $todayRegistration->id }}', '{{ $todayRegistration->snap_token }}')" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
                     <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <polygon points="10 8 16 12 10 16 10 8"/>
+                      <rect width="20" height="14" x="2" y="5" rx="2"/>
+                      <line x1="2" x2="22" y1="10" y2="10"/>
                     </svg>
-                    <span>Masuk Ruang Virtual</span>
-                  </a>
-                @endif
-                @if($todayRegistration->attendance_status !== 'attended' && $todayRegistration->event->is_presence_open)
-                  <a href="{{ route('events.presence', $todayRegistration->event->slug) }}" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+                    <span>Bayar (Rp {{ number_format($todayRegistration->amount_paid > 0 ? $todayRegistration->amount_paid : $todayRegistration->event->price, 0, ',', '.') }})</span>
+                  </button>
+                  <button type="button" onclick="checkPaymentStatus('{{ $todayRegistration->id }}')" title="Cek Status Pembayaran" class="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-950 border border-blue-200 rounded-xl text-xs font-semibold transition flex items-center gap-1 shadow-2xs cursor-pointer">
                     <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                      <polyline points="9 12 11 14 15 10"/>
+                      <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                      <path d="M3 3v5h5"/>
+                      <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                      <path d="M16 21h5v-5"/>
                     </svg>
-                    <span>Isi Presensi Sesi</span>
-                  </a>
+                    <span>Cek</span>
+                  </button>
+                  <form method="POST" action="{{ route('peserta.registration.cancel', $todayRegistration->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pendaftaran kegiatan ini?');" class="inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-3 py-2 bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-xs font-semibold transition cursor-pointer">
+                      Batal
+                    </button>
+                  </form>
+                @else
+                  @if($todayRegistration->event->virtual_meeting_url)
+                    <a href="{{ $todayRegistration->event->virtual_meeting_url }}" target="_blank" class="px-3.5 py-2 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-medium transition flex items-center gap-2 shadow-2xs">
+                      <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polygon points="10 8 16 12 10 16 10 8"/>
+                      </svg>
+                      <span>Masuk Ruang Virtual</span>
+                    </a>
+                  @endif
+                  @if($todayRegistration->attendance_status !== 'attended' && $todayRegistration->event->is_presence_open)
+                    <a href="{{ route('events.presence', $todayRegistration->event->slug) }}" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+                      <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <polyline points="9 12 11 14 15 10"/>
+                      </svg>
+                      <span>Isi Presensi Sesi</span>
+                    </a>
+                  @endif
                 @endif
                 <a href="{{ route('events.show', $todayRegistration->event->slug) }}" class="px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-medium transition flex items-center gap-1.5 shadow-2xs">
                   <span>Lihat Detail Sesi</span>
@@ -306,7 +336,25 @@
               </div>
             </div>
 
-            @if($todayRegistration->attendance_status === 'attended')
+            @if($todayRegistration->payment_status === 'pending')
+              <div class="p-4 bg-amber-50/80 rounded-xl border border-amber-200 flex flex-col items-center justify-center gap-2 text-center shrink-0 w-full sm:w-56">
+                <div class="size-11 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center">
+                  <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-amber-900">Tiket Belum Aktif</div>
+                  <div class="text-[11px] text-amber-700 mt-0.5 leading-tight">
+                    Selesaikan pembayaran untuk mengaktifkan tiket dan QR Pass.
+                  </div>
+                </div>
+                <button type="button" onclick="payWithSnap('{{ $todayRegistration->id }}', '{{ $todayRegistration->snap_token }}')" class="w-full px-3 py-1.5 bg-amber-800 hover:bg-amber-900 text-white rounded-lg text-xs font-semibold transition text-center shadow-2xs cursor-pointer">
+                  Bayar Sekarang
+                </button>
+              </div>
+            @elseif($todayRegistration->attendance_status === 'attended')
               <div class="p-4 bg-emerald-50/70 rounded-xl border border-emerald-200 flex flex-col items-center justify-center gap-2 text-center shrink-0 w-full sm:w-52">
                 <div class="size-11 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
                   <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -400,9 +448,18 @@
             @forelse($registrations->take(3) as $reg)
               <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center gap-3 min-w-0">
-                  <div class="size-9 rounded-lg bg-blue-100 text-blue-950 flex items-center justify-center shrink-0 font-mono font-bold text-[10px]">
-                    PASS
-                  </div>
+                  @if($reg->payment_status === 'pending')
+                    <div class="size-9 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                    </div>
+                  @else
+                    <div class="size-9 rounded-lg bg-blue-100 text-blue-950 flex items-center justify-center shrink-0 font-mono font-bold text-[10px]">
+                      PASS
+                    </div>
+                  @endif
                   <div class="min-w-0">
                     <div class="text-slate-400 text-[11px]">
                       {{ $reg->event->start_date ? $reg->event->start_date->format('d M Y') : '' }} &bull; {{ substr($reg->event->start_time ?? '', 0, 5) }} WIB
@@ -411,20 +468,49 @@
                       {{ $reg->event->title }}
                     </a>
                     <div class="text-[10px] text-slate-500 font-mono">
-                      No: {{ $reg->registration_code }} &bull; Pass: #{{ $reg->qr_pass }}
+                      @if($reg->payment_status === 'pending')
+                        No: {{ $reg->registration_code }} &bull; Rp {{ number_format($reg->amount_paid > 0 ? $reg->amount_paid : $reg->event->price, 0, ',', '.') }} &bull; <span class="text-amber-700 font-medium">Tiket Terkunci</span>
+                      @else
+                        No: {{ $reg->registration_code }} &bull; Pass: #{{ $reg->qr_pass }}
+                      @endif
                     </div>
                   </div>
                 </div>
 
-                <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                  @if($reg->attendance_status === 'attended')
-                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-semibold rounded-md">
-                      Hadir
-                    </span>
+                <div class="flex items-center gap-1.5 self-start sm:self-auto shrink-0 flex-wrap">
+                  @if($reg->payment_status === 'pending')
+                    <a href="{{ route('payment.invoice', $reg->registration_code) }}" class="px-2 py-0.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-semibold rounded-md transition" title="Buka Halaman Invoice">
+                      Invoice
+                    </a>
+                    <button type="button" onclick="payWithSnap('{{ $reg->id }}', '{{ $reg->snap_token }}')" class="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-md text-[10px] font-semibold transition cursor-pointer">
+                      Bayar
+                    </button>
+                    <button type="button" onclick="checkPaymentStatus('{{ $reg->id }}')" title="Cek Status Pembayaran" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-md text-[10px] font-medium transition flex items-center gap-1 shadow-2xs cursor-pointer">
+                      <svg class="size-3 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                        <path d="M16 21h5v-5"/>
+                      </svg>
+                      <span>Cek</span>
+                    </button>
+                    <form method="POST" action="{{ route('peserta.registration.cancel', $reg->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pendaftaran ini?');" class="inline">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit" class="px-2 py-1 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 rounded-md text-[10px] font-medium transition cursor-pointer">
+                        Batal
+                      </button>
+                    </form>
                   @else
-                    <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-semibold rounded-md">
-                      Belum Check-In
-                    </span>
+                    @if($reg->attendance_status === 'attended')
+                      <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-semibold rounded-md">
+                        Hadir
+                      </span>
+                    @else
+                      <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-semibold rounded-md">
+                        Belum Check-In
+                      </span>
+                    @endif
                   @endif
                   <a href="{{ route('events.show', $reg->event->slug) }}" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[11px] font-medium text-slate-700 hover:bg-slate-100 transition shadow-2xs">
                     Detail
@@ -574,21 +660,47 @@
 
                 <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
                   <div class="text-[11px] text-slate-500 font-mono">
-                    Pass: <strong class="text-blue-950">#{{ $reg->qr_pass }}</strong>
+                    @if($reg->payment_status === 'pending')
+                      Status: <span class="text-amber-700 font-medium">Belum Bayar (Rp {{ number_format($reg->amount_paid > 0 ? $reg->amount_paid : $reg->event->price, 0, ',', '.') }})</span>
+                    @else
+                      Pass: <strong class="text-blue-950">#{{ $reg->qr_pass }}</strong>
+                    @endif
                   </div>
 
-                  <div class="flex items-center gap-2">
-                    @if($reg->event->virtual_meeting_url)
-                      <a href="{{ $reg->event->virtual_meeting_url }}" target="_blank" class="px-3 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
-                        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <circle cx="12" cy="12" r="10"/>
-                          <polygon points="10 8 16 12 10 16 10 8"/>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    @if($reg->payment_status === 'pending')
+                      <button type="button" onclick="payWithSnap('{{ $reg->id }}', '{{ $reg->snap_token }}')" class="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold transition cursor-pointer">
+                        Bayar
+                      </button>
+                      <button type="button" onclick="checkPaymentStatus('{{ $reg->id }}')" title="Cek Status Pembayaran" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1 shadow-2xs cursor-pointer">
+                        <svg class="size-3 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                          <path d="M3 3v5h5"/>
+                          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                          <path d="M16 21h5v-5"/>
                         </svg>
-                        <span>Ruang Virtual</span>
-                      </a>
+                        <span>Cek</span>
+                      </button>
+                      <form method="POST" action="{{ route('peserta.registration.cancel', $reg->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pendaftaran ini?');" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="px-2 py-1 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-xs font-medium transition cursor-pointer">
+                          Batal
+                        </button>
+                      </form>
+                    @else
+                      @if($reg->event->virtual_meeting_url)
+                        <a href="{{ $reg->event->virtual_meeting_url }}" target="_blank" class="px-2.5 py-1 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+                          <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polygon points="10 8 16 12 10 16 10 8"/>
+                          </svg>
+                          <span>Ruang Virtual</span>
+                        </a>
+                      @endif
                     @endif
-                    <a href="{{ route('events.show', $reg->event->slug) }}" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1">
-                      <span>Detail Sesi</span>
+                    <a href="{{ route('events.show', $reg->event->slug) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                      <span>Detail</span>
                       <span class="text-sm">&rarr;</span>
                     </a>
                   </div>
@@ -619,9 +731,18 @@
             @forelse($registrations as $reg)
               <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="flex items-center gap-4 min-w-0">
-                  <div class="size-11 rounded-xl bg-blue-100 text-blue-950 flex items-center justify-center shrink-0 font-mono font-bold text-xs">
-                    PASS
-                  </div>
+                  @if($reg->payment_status === 'pending')
+                    <div class="size-11 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                      <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                    </div>
+                  @else
+                    <div class="size-11 rounded-xl bg-blue-100 text-blue-950 flex items-center justify-center shrink-0 font-mono font-bold text-xs">
+                      PASS
+                    </div>
+                  @endif
                   <div class="min-w-0">
                     <div class="text-slate-500 text-xs">
                       {{ $reg->event->start_date ? $reg->event->start_date->format('d M Y') : '' }} &bull; {{ substr($reg->event->start_time ?? '', 0, 5) }} WIB
@@ -630,30 +751,62 @@
                       {{ $reg->event->title }}
                     </a>
                     <div class="text-[11px] text-slate-500 font-mono mt-0.5">
-                      No. Tiket: {{ $reg->registration_code }} &bull; Pass: <strong class="text-blue-950">#{{ $reg->qr_pass }}</strong>
+                      @if($reg->payment_status === 'pending')
+                        No. Tiket: {{ $reg->registration_code }} &bull; Rp {{ number_format($reg->amount_paid > 0 ? $reg->amount_paid : $reg->event->price, 0, ',', '.') }} &bull; <span class="text-amber-700 font-medium">Tiket Terkunci</span>
+                      @else
+                        No. Tiket: {{ $reg->registration_code }} &bull; Pass: <strong class="text-blue-950">#{{ $reg->qr_pass }}</strong>
+                      @endif
                     </div>
                   </div>
                 </div>
 
-                <div class="flex items-center gap-2 self-start sm:self-auto shrink-0 flex-wrap">
-                  @if($reg->attendance_status === 'attended')
-                    <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-md">
-                      Hadir ({{ $reg->checked_in_at ? $reg->checked_in_at->format('H:i') : '' }} WIB)
-                    </span>
+                <div class="flex items-center gap-1.5 self-start sm:self-auto shrink-0 flex-wrap">
+                  @if($reg->payment_status === 'pending')
+                    <a href="{{ route('payment.invoice', $reg->registration_code) }}" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg text-xs font-semibold transition" title="Buka Halaman Invoice">
+                      Invoice
+                    </a>
+                    <button type="button" id="pay-btn-{{ $reg->id }}" onclick="payWithSnap('{{ $reg->id }}', '{{ $reg->snap_token }}')" class="px-3 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold transition cursor-pointer">
+                      Bayar
+                    </button>
+                    <button type="button" onclick="checkPaymentStatus('{{ $reg->id }}')" title="Cek Status Pembayaran" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1 shadow-2xs cursor-pointer">
+                      <svg class="size-3 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                        <path d="M16 21h5v-5"/>
+                      </svg>
+                      <span>Cek</span>
+                    </button>
+                    <form method="POST" action="{{ route('peserta.registration.cancel', $reg->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pendaftaran kegiatan ini?');" class="inline">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit" class="px-2.5 py-1 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-xs font-medium transition cursor-pointer">
+                        Batal
+                      </button>
+                    </form>
                   @else
-                    <span class="px-2.5 py-1 bg-slate-200 text-slate-700 text-xs font-semibold rounded-md">
-                      Belum Check-In
+                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold rounded-md">
+                      {{ $reg->payment_status === 'free' ? 'Gratis' : 'Lunas' }}
                     </span>
+                    @if($reg->attendance_status === 'attended')
+                      <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-md">
+                        Hadir ({{ $reg->checked_in_at ? $reg->checked_in_at->format('H:i') : '' }} WIB)
+                      </span>
+                    @else
+                      <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-xs font-semibold rounded-md">
+                        Belum Check-In
+                      </span>
+                    @endif
                   @endif
 
-                  @if($reg->event->virtual_meeting_url)
-                    <a href="{{ $reg->event->virtual_meeting_url }}" target="_blank" class="px-3 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-medium transition flex items-center gap-1 shadow-2xs">
+                  @if($reg->event->virtual_meeting_url && $reg->payment_status !== 'pending')
+                    <a href="{{ $reg->event->virtual_meeting_url }}" target="_blank" class="px-2.5 py-1 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-medium transition flex items-center gap-1 shadow-2xs">
                       <span>Ruang Virtual</span>
                     </a>
                   @endif
 
-                  <a href="{{ route('events.show', $reg->event->slug) }}" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 transition shadow-2xs">
-                    Detail Sesi
+                  <a href="{{ route('events.show', $reg->event->slug) }}" class="px-2.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 transition shadow-2xs">
+                    Detail
                   </a>
                 </div>
               </div>
@@ -1019,4 +1172,124 @@
     </main>
   </div>
 </div>
+
+<script src="{{ config('midtrans.snap_url') }}" data-client-key="{{ config('midtrans.client_key') }}"></script>
+<script>
+function payWithSnap(registrationId, existingToken) {
+  if (existingToken && existingToken !== '') {
+    triggerSnapPay(existingToken, registrationId);
+    return;
+  }
+
+  const btn = document.getElementById('pay-btn-' + registrationId);
+  const originalText = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>Memuat...</span>';
+  }
+
+  fetch('/pembayaran/' + registrationId + '/snap-token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}',
+      'Accept': 'application/json'
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+    if (data.status === 'already_paid') {
+      window.location.reload();
+      return;
+    }
+    if (data.status === 'success' && data.snap_token) {
+      triggerSnapPay(data.snap_token, registrationId);
+    } else {
+      alert(data.message || 'Gagal memuat sesi pembayaran.');
+    }
+  })
+  .catch(err => {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  });
+}
+
+function triggerSnapPay(snapToken, registrationId) {
+  if (typeof window.snap === 'undefined') {
+    alert('Sistem pembayaran sedang disiapkan. Silakan muat ulang halaman.');
+    return;
+  }
+
+  window.snap.pay(snapToken, {
+    onSuccess: function(result) {
+      if (registrationId) {
+        checkPaymentStatus(registrationId, result.order_id, true);
+      } else {
+        window.location.reload();
+      }
+    },
+    onPending: function(result) {
+      if (registrationId) {
+        checkPaymentStatus(registrationId, result.order_id, true);
+      } else {
+        window.location.reload();
+      }
+    },
+    onError: function(result) {
+      alert('Pembayaran gagal atau dibatalkan.');
+    },
+    onClose: function() {
+    }
+  });
+}
+
+function checkPaymentStatus(registrationId, orderId, showAlert) {
+  fetch('/pembayaran/' + registrationId + '/check-status', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({ order_id: orderId || null })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'paid') {
+      alert(data.message || 'Pembayaran berhasil dikonfirmasi! E-Tiket Anda telah aktif.');
+      window.location.reload();
+    } else {
+      if (showAlert !== false && showAlert !== undefined) {
+        alert(data.message || 'Status pembayaran belum terkonfirmasi.');
+      }
+    }
+  })
+  .catch(err => {
+    if (showAlert !== false && showAlert !== undefined) {
+      alert('Gagal mengecek status pembayaran.');
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const autoPayId = urlParams.get('pay');
+  if (autoPayId) {
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete('pay');
+    window.history.replaceState({}, document.title, cleanUrl.toString());
+
+    const payBtn = document.getElementById('pay-btn-' + autoPayId);
+    if (payBtn) {
+      setTimeout(function() { payBtn.click(); }, 350);
+    }
+  }
+});
+</script>
 @endsection

@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
@@ -170,7 +172,6 @@ class EventController extends Controller
             'nik.max' => 'NIM / NIP maksimal 20 karakter.',
         ]);
 
-        // Perbarui data profil peserta jika diisi dan data sebelumnya belum ada
         $userUpdates = [];
         if ($request->filled('nik') && empty($user->nik)) {
             $userUpdates['nik'] = $request->nik;
@@ -197,17 +198,40 @@ class EventController extends Controller
             $qrPass = 'PASS-' . rand(1000, 9999) . '-' . $cleanName;
         } while (Registration::where('qr_pass', $qrPass)->exists());
 
-        Registration::create([
+        $isFree = ((int) $event->price) === 0;
+        $orderId = !$isFree ? ($regCode . '-' . time()) : null;
+
+        $registration = Registration::create([
             'user_id' => $user->id,
             'event_id' => $event->id,
             'registration_code' => $regCode,
             'qr_pass' => $qrPass,
-            'payment_status' => $event->price == 0 ? 'free' : 'paid',
+            'payment_status' => $isFree ? 'free' : 'pending',
+            'midtrans_order_id' => $orderId,
+            'amount_paid' => $isFree ? 0 : (int) $event->price,
+            'paid_at' => $isFree ? now() : null,
+            'payment_method' => null,
+            'snap_token' => null,
             'attendance_status' => 'unattended',
             'evaluation_status' => 'pending',
         ]);
 
-        return redirect()->route('peserta.dashboard')->with('success', 'Pendaftaran berhasil! E-Tiket Anda (' . $regCode . ') telah terbit.');
+        if (!$isFree) {
+            try {
+                $snapToken = app(MidtransService::class)->createSnapToken($registration);
+                if ($snapToken) {
+                    $registration->update(['snap_token' => $snapToken]);
+                }
+            } catch (\Throwable $e) {
+                Log::error('Snap token error: ' . $e->getMessage());
+            }
+
+            return redirect()->route('payment.invoice', $registration->registration_code)
+                ->with('success', 'Pendaftaran berhasil disimpan! Silakan selesaikan pembayaran tiket Anda.');
+        }
+
+        return redirect()->route('peserta.dashboard', ['tab' => 'tiket'])
+            ->with('success', 'Pendaftaran berhasil! E-Tiket Anda (' . $regCode . ') telah terbit.');
     }
 
     public function presence(Request $request, string $slug)
@@ -242,6 +266,10 @@ class EventController extends Controller
 
         if (!$registration) {
             return back()->with('error', 'Anda belum terdaftar dalam kegiatan ini. Silakan mendaftar terlebih dahulu.');
+        }
+
+        if ($registration->payment_status === 'pending') {
+            return back()->with('error', 'Tiket Anda belum aktif karena pembayaran belum diselesaikan. Silakan selesaikan pembayaran terlebih dahulu.');
         }
 
         if ($registration->attendance_status === 'attended') {

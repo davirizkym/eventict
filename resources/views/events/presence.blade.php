@@ -171,6 +171,38 @@
             Buka Portal Peserta
           </a>
         </div>
+      @elseif($registration->payment_status === 'pending')
+        <div class="bg-white rounded-3xl border border-amber-200 p-6 sm:p-8 flex flex-col items-center text-center gap-4 shadow-2xs">
+          <div class="size-16 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center">
+            <svg class="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+
+          <div class="max-w-md flex flex-col gap-1">
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-200 mx-auto">
+              Tiket Belum Aktif
+            </span>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900 mt-2">Menunggu Pembayaran</h2>
+            <p class="text-xs text-slate-500 leading-relaxed">
+              Anda belum dapat melakukan presensi kehadiran karena pembayaran tiket kegiatan ini belum diselesaikan. Selesaikan pembayaran terlebih dahulu untuk mengaktifkan tiket.
+            </p>
+          </div>
+
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-600 font-mono">
+            No. Registrasi: {{ $registration->registration_code }} &bull; Total: Rp {{ number_format($registration->amount_paid > 0 ? $registration->amount_paid : $registration->event->price, 0, ',', '.') }}
+          </div>
+
+          <div class="flex items-center gap-3">
+            <a href="{{ route('peserta.dashboard', ['tab' => 'tiket', 'pay' => $registration->id]) }}" class="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold shadow-xs transition">
+              Selesaikan Pembayaran Sekarang
+            </a>
+            <a href="{{ route('peserta.dashboard') }}" class="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition">
+              Portal Peserta
+            </a>
+          </div>
+        </div>
       @elseif(!$event->is_presence_open)
         <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 flex flex-col items-center text-center gap-4 shadow-2xs">
           <div class="size-14 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center">
