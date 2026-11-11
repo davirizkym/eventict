@@ -40,10 +40,10 @@
               </select>
             </div>
             <div class="h-8 w-px bg-slate-200 hidden md:block"></div>
-            <div class="w-full md:w-52 flex flex-col justify-start items-start px-3 py-1">
-              <label class="text-slate-500 text-[10px] uppercase tracking-wider font-semibold font-['Poppins']">Rumpun Ilmu</label>
+            <div class="w-full md:w-56 flex flex-col justify-start items-start px-3 py-1">
+              <label class="text-slate-500 text-[10px] uppercase tracking-wider font-semibold font-['Poppins']">Kategori Acara</label>
               <select name="category" class="w-full bg-transparent border-none outline-none text-slate-900 text-xs font-medium font-['Poppins'] cursor-pointer">
-                <option value="">Semua Rumpun</option>
+                <option value="">Semua Kategori</option>
                 @foreach($allCategories ?? [] as $catOption)
                 <option value="{{ $catOption }}" {{ request('category') === $catOption ? 'selected' : '' }}>{{ $catOption }}</option>
                 @endforeach
@@ -96,34 +96,38 @@
                     <img src="{{ asset($event->banner_url) }}" alt="{{ $event->title }}" class="absolute inset-0 w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
                   @endif
-                  <div class="relative z-10 flex justify-between items-start">
-                    <div class="px-2.5 py-1 bg-blue-500/20 backdrop-blur-md rounded-md border border-blue-400/30 flex items-center gap-1.5">
-                      <span class="text-blue-100 text-xs font-semibold font-['Poppins']">Sertifikat Resmi</span>
+                  <div class="relative z-10 flex justify-between items-center gap-2">
+                    <div class="px-2.5 py-1 bg-blue-500/20 backdrop-blur-md rounded-md border border-blue-400/30 flex items-center gap-1.5 shrink-0">
+                      <span class="text-blue-100 text-xs font-semibold font-['Poppins'] whitespace-nowrap">Sertifikat Resmi</span>
                     </div>
-                    <div class="flex items-center gap-1.5">
+                    <div class="flex items-center gap-1.5 shrink-0">
                       @if($isPassed)
-                        <span class="px-2 py-0.5 bg-slate-600 text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs">
+                        <span class="px-2.5 py-1 bg-slate-700/80 backdrop-blur-md text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs whitespace-nowrap">
                           Selesai
                         </span>
                       @elseif($isFull)
-                        <span class="px-2 py-0.5 bg-rose-600 text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs">
+                        <span class="px-2.5 py-1 bg-rose-600/90 backdrop-blur-md text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs whitespace-nowrap">
                           Penuh
                         </span>
                       @elseif($remaining <= 5 && $remaining > 0)
-                        <span class="px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs">
+                        <span class="px-2.5 py-1 bg-amber-500/90 backdrop-blur-md text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs whitespace-nowrap">
                           Sisa {{ $remaining }} Tempat
                         </span>
                       @endif
-                      <span class="px-2 py-0.5 bg-white/10 backdrop-blur-md text-white/90 text-[10px] font-medium rounded uppercase tracking-wider">{{ $event->category }}</span>
                     </div>
                   </div>
-                  <div class="relative z-10 flex items-center justify-between">
-                    <span class="text-white/80 text-xs font-medium tracking-wider">{{ $event->format === 'offline' ? 'Luring' : 'Daring' }}</span>
-                    @if(($event->organizer_type ?? 'internal') === 'partner')
-                      <span class="px-2 py-0.5 bg-white/20 backdrop-blur-md text-white text-[10px] font-semibold rounded max-w-[170px] truncate" title="Penyelenggara: {{ $event->organizer_name }}">
-                        Penyelenggara: {{ $event->organizer_name }}
-                      </span>
-                    @endif
+                  <div class="relative z-10 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <span class="text-white/80 text-xs font-medium tracking-wider whitespace-nowrap">{{ $event->format === 'offline' ? 'Luring' : 'Daring' }}</span>
+                      @if(($event->organizer_type ?? 'internal') === 'partner')
+                        <span class="px-2 py-0.5 bg-white/20 backdrop-blur-md text-white text-[10px] font-semibold rounded truncate max-w-[130px]" title="Penyelenggara: {{ $event->organizer_name }}">
+                          {{ $event->organizer_name }}
+                        </span>
+                      @endif
+                    </div>
+                    <span class="px-2.5 py-0.5 bg-white/15 backdrop-blur-md text-white/95 text-[10px] font-medium rounded uppercase tracking-wider whitespace-nowrap shrink-0">
+                      {{ $event->category }}
+                    </span>
                   </div>
                 </div>
 
@@ -208,7 +212,7 @@
                 <path d="m21 21-4.35-4.35"/>
               </svg>
               <div class="text-slate-800 font-semibold text-base font-['Poppins']">Tidak ada kegiatan yang cocok</div>
-              <p class="text-slate-500 text-xs font-normal font-['Poppins'] max-w-md">Coba ubah kata kunci pencarian atau bersihkan filter format dan rumpun ilmu.</p>
+              <p class="text-slate-500 text-xs font-normal font-['Poppins'] max-w-md">Coba ubah kata kunci pencarian atau bersihkan filter format dan kategori acara.</p>
               <a href="{{ route('events.index_public') }}" class="mt-2 px-4 py-2 bg-blue-950 text-white rounded-lg text-xs font-semibold font-['Poppins']">Tampilkan Semua Kegiatan</a>
             </div>
           @endforelse
