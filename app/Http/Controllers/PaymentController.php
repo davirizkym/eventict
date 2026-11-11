@@ -21,7 +21,7 @@ class PaymentController extends Controller
             abort(403);
         }
 
-        $expiresAt = $registration->created_at ? $registration->created_at->copy()->addHours(24) : now()->addHours(24);
+        $expiresAt = $registration->created_at ? $registration->created_at->copy()->addMinutes(10) : now()->addMinutes(10);
 
         if ($registration->payment_status === 'pending' && empty($registration->snap_token)) {
             try {
@@ -48,6 +48,13 @@ class PaymentController extends Controller
                 'status' => 'already_paid',
                 'message' => 'Tiket sudah lunas atau gratis.',
             ]);
+        }
+
+        if ($registration->payment_status === 'pending' && $registration->created_at && $registration->created_at->lt(now()->subMinutes(10))) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Batas waktu pembayaran (10 menit) telah kedaluwarsa. Silakan lakukan pendaftaran ulang.',
+            ], 422);
         }
 
         $token = $registration->snap_token;
@@ -103,6 +110,13 @@ class PaymentController extends Controller
             return response()->json([
                 'status' => 'paid',
                 'message' => 'Pembayaran berhasil dikonfirmasi! E-Tiket Anda telah aktif.',
+            ]);
+        }
+
+        if ($registration->payment_status === 'pending' && $registration->created_at && $registration->created_at->lt(now()->subMinutes(10))) {
+            return response()->json([
+                'status' => 'expired',
+                'message' => 'Batas waktu pembayaran (10 menit) telah kedaluwarsa. Silakan lakukan pendaftaran ulang.',
             ]);
         }
 

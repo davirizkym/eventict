@@ -16,7 +16,17 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Event::with('speakers')->withCount('registrations')->where('status', '!=', 'draft');
+        $query = Event::with('speakers')
+            ->withCount(['registrations' => function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereIn('payment_status', ['paid', 'free'])
+                        ->orWhere(function ($pq) {
+                            $pq->where('payment_status', 'pending')
+                               ->where('created_at', '>=', now()->subMinutes(10));
+                        });
+                });
+            }])
+            ->where('status', '!=', 'draft');
 
         if ($request->filled('q')) {
             $keyword = $request->query('q');
@@ -61,7 +71,17 @@ class EventController extends Controller
 
     public function catalog(Request $request)
     {
-        $query = Event::with('speakers')->withCount('registrations')->where('status', '!=', 'draft');
+        $query = Event::with('speakers')
+            ->withCount(['registrations' => function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereIn('payment_status', ['paid', 'free'])
+                        ->orWhere(function ($pq) {
+                            $pq->where('payment_status', 'pending')
+                               ->where('created_at', '>=', now()->subMinutes(10));
+                        });
+                });
+            }])
+            ->where('status', '!=', 'draft');
 
         if ($request->filled('q')) {
             $keyword = $request->query('q');
@@ -104,7 +124,7 @@ class EventController extends Controller
 
     public function show(string $slug)
     {
-        $event = Event::with('speakers')->where('slug', $slug)->firstOrFail();
+        $event = Event::with(['speakers', 'mediaPartners'])->where('slug', $slug)->firstOrFail();
 
         $isRegistered = false;
         $userRegistration = null;
@@ -116,10 +136,20 @@ class EventController extends Controller
             $isRegistered = $userRegistration !== null;
         }
 
-        $registeredCount = $event->registrations()->count();
+        $isPassed = $event->isPassed();
+
+        $registeredCount = $event->registrations()
+            ->where(function ($q) {
+                $q->whereIn('payment_status', ['paid', 'free'])
+                  ->orWhere(function ($pq) {
+                      $pq->where('payment_status', 'pending')
+                         ->where('created_at', '>=', now()->subMinutes(10));
+                  });
+            })
+            ->count();
         $isFull = $registeredCount >= $event->quota;
 
-        return view('events.show', compact('event', 'isRegistered', 'userRegistration', 'registeredCount', 'isFull'));
+        return view('events.show', compact('event', 'isRegistered', 'userRegistration', 'registeredCount', 'isFull', 'isPassed'));
     }
 
     public function showRegistrationForm(string $slug)
@@ -127,15 +157,31 @@ class EventController extends Controller
         $event = Event::with('speakers')->where('slug', $slug)->where('status', '!=', 'draft')->firstOrFail();
         $user = Auth::user();
 
+        if ($event->isPassed()) {
+            return redirect()->route('events.show', $slug)->with('error', 'Pendaftaran untuk kegiatan ini telah ditutup karena kegiatan telah selesai.');
+        }
+
         $existing = Registration::where('user_id', $user->id)
             ->where('event_id', $event->id)
             ->first();
 
         if ($existing) {
-            return redirect()->route('peserta.dashboard')->with('info', 'Anda sudah terdaftar pada kegiatan ini.');
+            if ($existing->payment_status === 'pending' && $existing->created_at && $existing->created_at->lt(now()->subMinutes(10))) {
+                $existing->delete();
+            } else {
+                return redirect()->route('peserta.dashboard')->with('info', 'Anda sudah terdaftar pada kegiatan ini.');
+            }
         }
 
-        $registeredCount = $event->registrations()->count();
+        $registeredCount = $event->registrations()
+            ->where(function ($q) {
+                $q->whereIn('payment_status', ['paid', 'free'])
+                  ->orWhere(function ($pq) {
+                      $pq->where('payment_status', 'pending')
+                         ->where('created_at', '>=', now()->subMinutes(10));
+                  });
+            })
+            ->count();
         if ($registeredCount >= $event->quota) {
             return redirect()->route('events.show', $slug)->with('error', 'Mohon maaf, kuota peserta untuk kegiatan ini telah penuh.');
         }
@@ -148,15 +194,33 @@ class EventController extends Controller
         $event = Event::where('slug', $slug)->where('status', '!=', 'draft')->firstOrFail();
         $user = Auth::user();
 
+        if ($event->isPassed()) {
+            return redirect()->route('events.show', $slug)->with('error', 'Pendaftaran untuk kegiatan ini telah ditutup karena kegiatan telah selesai.');
+        }
+
         $existing = Registration::where('user_id', $user->id)
             ->where('event_id', $event->id)
             ->first();
 
         if ($existing) {
-            return redirect()->route('peserta.dashboard')->with('info', 'Anda sudah terdaftar pada kegiatan ini.');
+            if ($existing->payment_status === 'pending' && $existing->created_at && $existing->created_at->lt(now()->subMinutes(10))) {
+                $existing->delete();
+            } else {
+                return redirect()->route('peserta.dashboard')->with('info', 'Anda sudah terdaftar pada kegiatan ini.');
+            }
         }
 
-        if ($event->registrations()->count() >= $event->quota) {
+        $activeRegistrationsCount = $event->registrations()
+            ->where(function ($q) {
+                $q->whereIn('payment_status', ['paid', 'free'])
+                  ->orWhere(function ($pq) {
+                      $pq->where('payment_status', 'pending')
+                         ->where('created_at', '>=', now()->subMinutes(10));
+                  });
+            })
+            ->count();
+
+        if ($activeRegistrationsCount >= $event->quota) {
             return redirect()->route('events.show', $slug)->with('error', 'Mohon maaf, kuota peserta untuk kegiatan ini telah penuh.');
         }
 
@@ -164,12 +228,12 @@ class EventController extends Controller
             'nik' => ['nullable', 'string', 'max:20'],
             'phone' => ['nullable', 'string', 'max:25'],
             'institution' => ['nullable', 'string', 'max:255'],
-            'attendance_mode' => ['nullable', 'string', 'in:offline,online,hybrid'],
+            'attendance_mode' => ['nullable', 'string', 'in:offline,online'],
             'payment_method' => ['nullable', 'string', 'max:50'],
             'agree_terms' => ['required', 'accepted'],
         ], [
             'agree_terms.accepted' => 'Anda wajib menyetujui syarat & ketentuan kehadiran kegiatan.',
-            'nik.max' => 'NIM / NIP maksimal 20 karakter.',
+            'nik.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
         ]);
 
         $userUpdates = [];
@@ -192,11 +256,14 @@ class EventController extends Controller
             $latestId++;
         } while (Registration::where('registration_code', $regCode)->exists());
 
-        do {
-            $cleanName = strtoupper(preg_replace('/[^A-Z]/', '', $user->name));
-            $cleanName = substr($cleanName, 0, 8) ?: 'USER';
-            $qrPass = 'PASS-' . rand(1000, 9999) . '-' . $cleanName;
-        } while (Registration::where('qr_pass', $qrPass)->exists());
+        $qrPass = null;
+        if ($event->format === 'offline') {
+            do {
+                $cleanName = strtoupper(preg_replace('/[^A-Z]/', '', $user->name));
+                $cleanName = substr($cleanName, 0, 8) ?: 'USER';
+                $qrPass = 'PASS-' . rand(1000, 9999) . '-' . $cleanName;
+            } while (Registration::where('qr_pass', $qrPass)->exists());
+        }
 
         $isFree = ((int) $event->price) === 0;
         $orderId = !$isFree ? ($regCode . '-' . time()) : null;
@@ -236,7 +303,7 @@ class EventController extends Controller
 
     public function presence(Request $request, string $slug)
     {
-        $event = Event::with('speakers')->where('slug', $slug)->firstOrFail();
+        $event = Event::with(['speakers', 'mediaPartners'])->where('slug', $slug)->firstOrFail();
 
         $registration = null;
         if (Auth::check()) {
@@ -251,12 +318,18 @@ class EventController extends Controller
     public function presenceSubmit(Request $request, string $slug)
     {
         if (!Auth::check()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['status' => 'unauthenticated', 'message' => 'Silakan masuk terlebih dahulu untuk melakukan presensi.'], 401);
+            }
             return redirect()->route('login')->with('warning', 'Silakan masuk terlebih dahulu untuk melakukan presensi.');
         }
 
         $event = Event::where('slug', $slug)->firstOrFail();
 
         if (!$event->is_presence_open) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => 'Gerbang presensi mandiri saat ini sedang ditutup oleh panitia.'], 422);
+            }
             return back()->with('error', 'Gerbang presensi mandiri saat ini sedang ditutup oleh panitia.');
         }
 
@@ -265,28 +338,69 @@ class EventController extends Controller
             ->first();
 
         if (!$registration) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => 'Anda belum terdaftar dalam kegiatan ini. Silakan mendaftar terlebih dahulu.'], 422);
+            }
             return back()->with('error', 'Anda belum terdaftar dalam kegiatan ini. Silakan mendaftar terlebih dahulu.');
         }
 
         if ($registration->payment_status === 'pending') {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => 'Tiket Anda belum aktif karena pembayaran belum diselesaikan. Silakan selesaikan pembayaran terlebih dahulu.'], 422);
+            }
             return back()->with('error', 'Tiket Anda belum aktif karena pembayaran belum diselesaikan. Silakan selesaikan pembayaran terlebih dahulu.');
         }
 
+        if ($event->format === 'offline' && !$registration->is_checked_in) {
+            $msg = 'Anda belum melakukan registrasi ulang (check-in) di lokasi kegiatan. Silakan tunjukkan QR Pass Anda ke panitia di meja registrasi terlebih dahulu.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
+        }
+
+        $submittedToken = $request->query('token') ?: $request->input('token');
+        if (!empty($event->presence_token) && !empty($submittedToken) && $submittedToken !== $event->presence_token) {
+            $msg = 'Token QR Presensi sudah kedaluwarsa atau tidak valid.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
+        }
+
         if ($registration->attendance_status === 'attended') {
-            return back()->with('info', 'Kehadiran Anda sudah terkonfirmasi sebelumnya pada ' . ($registration->checked_in_at ? $registration->checked_in_at->format('H:i') . ' WIB' : 'hari ini') . '.');
+            $msg = 'Presensi Anda sudah terkonfirmasi sebelumnya pada ' . ($registration->attended_at ? $registration->attended_at->format('H:i') . ' WIB' : 'hari ini') . '.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'already_attended',
+                    'message' => $msg,
+                    'event_title' => $event->title,
+                    'attended_at' => $registration->attended_at ? $registration->attended_at->format('H:i') . ' WIB' : null,
+                ], 200);
+            }
+            return back()->with('info', $msg);
         }
 
         $gateMethod = match ($event->format) {
             'online' => 'Presensi Mandiri Online',
-            'hybrid' => 'Presensi Mandiri Sesi',
-            default => 'Self Check-in Sesi',
+            default => 'Presensi Mandiri Sesi',
         };
 
+        $now = now();
         $registration->update([
             'attendance_status' => 'attended',
-            'checked_in_at' => now(),
-            'check_in_gate' => $gateMethod,
+            'attended_at' => $now,
+            'attendance_gate' => $gateMethod,
         ]);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Presensi kehadiran Anda berhasil dikonfirmasi! Terima kasih atas partisipasi Anda.',
+                'event_title' => $event->title,
+                'attended_at' => $now->format('H:i') . ' WIB',
+            ], 200);
+        }
 
         return redirect()->route('events.presence', $event->slug)
             ->with('success', 'Presensi kehadiran Anda berhasil dikonfirmasi! Terima kasih atas partisipasi Anda.');

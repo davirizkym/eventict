@@ -171,7 +171,7 @@ class OrganizerSpeakersTest extends TestCase
             'title' => 'Simposium AI & Robotics 2026',
             'slug' => 'simposium-ai-robotics-2026',
             'category' => 'AI',
-            'format' => 'hybrid',
+            'format' => 'offline',
             'location' => 'Auditorium Lab ICT',
             'start_date' => now()->addDays(10),
             'end_date' => now()->addDays(10),

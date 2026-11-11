@@ -45,6 +45,10 @@ class MidtransService
             'callbacks' => [
                 'finish' => route('peserta.dashboard', ['tab' => 'tiket']),
             ],
+            'expiry' => [
+                'unit' => 'minute',
+                'duration' => 10,
+            ],
         ];
 
         try {
@@ -105,6 +109,10 @@ class MidtransService
             ],
             'callbacks' => [
                 'finish' => route('peserta.dashboard', ['tab' => 'tiket']),
+            ],
+            'expiry' => [
+                'unit' => 'minute',
+                'duration' => 10,
             ],
         ];
 
