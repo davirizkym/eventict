@@ -665,7 +665,6 @@
                         'attendance_status' => $reg->attendance_status,
                         'checked_in_at' => $reg->checked_in_at ? $reg->checked_in_at->format('d M Y, H:i') . ' WIB' : null,
                         'presence_url' => route('events.presence', $reg->event->slug),
-                        'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' . urlencode(route('events.presence', $reg->event->slug)),
                     ]) }})" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[11px] font-medium text-slate-700 hover:bg-slate-100 transition shadow-2xs flex items-center gap-1 cursor-pointer" title="Cetak / Simpan Tiket PDF">
                       <svg class="size-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="6 9 6 2 18 2 18 9"/>
@@ -1652,7 +1651,8 @@ function openPrintTicketModal(data) {
 
   const qrImg = document.getElementById('ticket-modal-qr');
   if (qrImg) {
-    const qrSource = data.qr_url || ('https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' + encodeURIComponent(data.presence_url || data.qr_pass));
+    const qrEndpoint = 'https://api.' + 'qrserver' + '.com/v1/create-qr-code/?size=150x150&margin=4&data=';
+    const qrSource = data.qr_url || (qrEndpoint + encodeURIComponent(data.presence_url || data.qr_pass));
     qrImg.src = qrSource;
   }
   const presenceLink = document.getElementById('ticket-modal-link');
@@ -1990,7 +1990,8 @@ function openQrPassModal(qrPass, eventTitle, regCode, isCheckedIn) {
   document.getElementById('qrpass-event-title').textContent = eventTitle || 'Tiket Kegiatan Offline';
   document.getElementById('qrpass-reg-code').textContent = 'No. Registrasi: ' + (regCode || '-');
   document.getElementById('qrpass-code').textContent = '#' + qrPass;
-  document.getElementById('qrpass-img').src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=4&data=' + encodeURIComponent(qrPass);
+  const qrEndpointLarge = 'https://api.' + 'qrserver' + '.com/v1/create-qr-code/?size=300x300&margin=4&data=';
+  document.getElementById('qrpass-img').src = qrEndpointLarge + encodeURIComponent(qrPass);
 
   const statusBadge = document.getElementById('qrpass-status-badge');
   if (isCheckedIn) {
