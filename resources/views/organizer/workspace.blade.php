@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $event->title . ' — Ruang Kerja Penyelenggara Eventict')
+@section('title', $event->title . ' â€” Ruang Kerja Penyelenggara Eventict')
 
 @section('content')
 <div class="min-h-screen bg-slate-50 text-slate-800 antialiased font-['Poppins'] flex flex-col">
@@ -263,6 +263,17 @@
       @endif
 
       @if($tab === 'dashboard')
+        @if($event->isExternal())
+          <div class="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex flex-col gap-0.5">
+              <span class="text-xs font-bold text-blue-950">Kegiatan Promosi Media Partner</span>
+              <span class="text-[11px] text-slate-600">Pendaftaran peserta diarahkan ke form eksternal mitra: <a href="{{ $event->registration_url }}" target="_blank" class="font-semibold underline text-blue-900">{{ $event->registration_url ?? 'Belum diisi' }}</a></span>
+            </div>
+            @if($event->registration_url)
+              <a href="{{ $event->registration_url }}" target="_blank" class="px-3 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold shrink-0 text-center">Buka Form Pendaftaran</a>
+            @endif
+          </div>
+        @endif
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between">
             <div class="flex items-center justify-between">
@@ -335,7 +346,7 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-4 shadow-2xs">
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-bold text-slate-900">Pengisi Acara Sesi Ini ({{ $event->speakers->count() }})</h3>
-            <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber']) }}" class="text-xs font-semibold text-blue-950 hover:underline">Kelola Pengisi Acara →</a>
+            <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber']) }}" class="text-xs font-semibold text-blue-950 hover:underline">Kelola Pengisi Acara â†’</a>
           </div>
           @if($event->speakers->isEmpty())
             <p class="text-xs text-slate-500">Belum ada pengisi acara yang ditugaskan ke sesi ini. Silakan pilih dari daftar Pengisi Acara.</p>
@@ -974,7 +985,7 @@
             </p>
           </div>
 
-          <form action="{{ route('organizer.event.update', $event->id) }}" method="POST" class="flex flex-col gap-4 text-xs">
+          <form action="{{ route('organizer.event.update', $event->id) }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4 text-xs">
             @csrf
             @method('PUT')
 
@@ -1053,6 +1064,27 @@
               </div>
             </div>
 
+            <div id="edit-partner-promo-fields" class="{{ ($event->organizer_type ?? 'internal') === 'partner' ? '' : 'hidden' }} flex flex-col gap-3.5 p-4 bg-blue-50/60 border border-blue-200/80 rounded-2xl">
+              <div class="flex flex-col gap-0.5">
+                <span class="text-xs font-bold text-blue-950">Informasi Promosi Media Partner</span>
+                <span class="text-[11px] text-slate-500">Kegiatan ini bersifat promosi eksternal. Cantumkan tautan form pendaftaran mitra dan poster kegiatan.</span>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="font-semibold text-slate-700">Link Form Pendaftaran Mitra</label>
+                <input type="url" name="registration_url" value="{{ $event->registration_url }}" placeholder="https://forms.gle/... atau https://..." class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-blue-950 text-xs">
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="font-semibold text-slate-700">Unggah Poster Kegiatan</label>
+                <input type="file" name="poster" accept="image/*" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 cursor-pointer file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-950 hover:file:bg-blue-200">
+                @if($event->banner_url)
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="text-[11px] text-slate-500">Poster saat ini:</span>
+                    <a href="{{ asset($event->banner_url) }}" target="_blank" class="text-[11px] text-blue-950 font-semibold underline">Lihat Poster</a>
+                  </div>
+                @endif
+              </div>
+            </div>
+
             <div class="flex flex-col gap-2">
               <div class="flex items-center justify-between">
                 <label class="font-semibold text-slate-700">Media Partner Pendukung Acara</label>
@@ -1077,6 +1109,7 @@
               @else
                 <p class="text-xs text-slate-400">Belum ada master media partner terdaftar.</p>
               @endif
+            </div>
             </div>
 
             <div class="flex flex-col gap-1.5">
@@ -1225,7 +1258,7 @@
                 $alreadyAssigned = in_array($mspk->id, $assignedSpeakerIds);
               @endphp
               <option value="{{ $mspk->id }}" data-institution="{{ $mspk->institution ?? 'Lab ICT' }}" {{ $alreadyAssigned ? 'disabled class=text-slate-400' : '' }}>
-                {{ $mspk->name }}{{ $alreadyAssigned ? ' — (Sudah Ditugaskan)' : '' }}
+                {{ $mspk->name }}{{ $alreadyAssigned ? ' â€” (Sudah Ditugaskan)' : '' }}
               </option>
             @endforeach
           </select>
@@ -1423,11 +1456,20 @@ function onAssignSpeakerChange(selectEl) {
 
 function toggleEditPartnerName(val) {
   const container = document.getElementById('edit-partner-name-container');
-  if (!container) return;
-  if (val === 'partner') {
-    container.classList.remove('hidden');
-  } else {
-    container.classList.add('hidden');
+  const promoFields = document.getElementById('edit-partner-promo-fields');
+  if (container) {
+    if (val === 'partner') {
+      container.classList.remove('hidden');
+    } else {
+      container.classList.add('hidden');
+    }
+  }
+  if (promoFields) {
+    if (val === 'partner') {
+      promoFields.classList.remove('hidden');
+    } else {
+      promoFields.classList.add('hidden');
+    }
   }
 }
 

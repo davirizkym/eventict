@@ -155,6 +155,11 @@ class EventController extends Controller
     public function showRegistrationForm(string $slug)
     {
         $event = Event::with('speakers')->where('slug', $slug)->where('status', '!=', 'draft')->firstOrFail();
+
+        if ($event->isExternal() && !empty($event->registration_url)) {
+            return redirect()->away($event->registration_url);
+        }
+
         $user = Auth::user();
 
         if ($event->isPassed()) {
@@ -192,6 +197,11 @@ class EventController extends Controller
     public function registerEvent(Request $request, string $slug)
     {
         $event = Event::where('slug', $slug)->where('status', '!=', 'draft')->firstOrFail();
+
+        if ($event->isExternal() && !empty($event->registration_url)) {
+            return redirect()->away($event->registration_url);
+        }
+
         $user = Auth::user();
 
         if ($event->isPassed()) {

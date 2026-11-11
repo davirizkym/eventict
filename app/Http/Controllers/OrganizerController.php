@@ -82,6 +82,9 @@ class OrganizerController extends Controller
 
     public function storeEvent(Request $request)
     {
+        $organizerTypeInput = $request->input('organizer_type', 'internal');
+        $speakerRequiredRule = ($organizerTypeInput === 'partner') ? 'nullable|array' : 'required_without:speaker_id|array|min:1';
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'type' => 'nullable|string|in:Workshop,Seminar,Webinar,Sertifikasi',
@@ -98,11 +101,14 @@ class OrganizerController extends Controller
             'organizer_type' => 'nullable|in:internal,partner',
             'media_partner_id' => 'nullable|exists:media_partners,id',
             'organizer_name' => 'nullable|string|max:255',
+            'registration_url' => 'nullable|url|max:500',
+            'poster' => 'nullable|image|max:5120',
+            'banner_url' => 'nullable|string|max:500',
             'media_partner_ids' => 'nullable|array',
             'media_partner_ids.*' => 'exists:media_partners,id',
             'description' => 'required|string',
-            'speaker_ids' => 'required_without:speaker_id|array|min:1',
-            'speaker_ids.*' => 'required|distinct|exists:speakers,id',
+            'speaker_ids' => $speakerRequiredRule,
+            'speaker_ids.*' => 'nullable|distinct|exists:speakers,id',
             'speaker_roles' => 'nullable|array',
             'speaker_roles.*' => 'nullable|string|max:50',
             'speaker_topics' => 'nullable|array',
@@ -189,6 +195,12 @@ class OrganizerController extends Controller
             }
         }
 
+        $bannerUrl = $validated['banner_url'] ?? null;
+        if ($request->hasFile('poster')) {
+            $posterPath = $request->file('poster')->store('posters', 'public');
+            $bannerUrl = '/storage/' . $posterPath;
+        }
+
         $event = Event::create([
             'title' => $validated['title'],
             'slug' => $slug,
@@ -206,6 +218,8 @@ class OrganizerController extends Controller
             'organizer_type' => $organizerType,
             'media_partner_id' => $mediaPartnerId,
             'organizer_name' => $organizerName,
+            'registration_url' => $validated['registration_url'] ?? null,
+            'banner_url' => $bannerUrl,
             'description' => $validated['description'],
             'status' => 'published',
         ]);
@@ -364,6 +378,9 @@ class OrganizerController extends Controller
             'organizer_type' => 'nullable|in:internal,partner',
             'media_partner_id' => 'nullable|exists:media_partners,id',
             'organizer_name' => 'nullable|string|max:255',
+            'registration_url' => 'nullable|url|max:500',
+            'poster' => 'nullable|image|max:5120',
+            'banner_url' => 'nullable|string|max:500',
             'media_partner_ids' => 'nullable|array',
             'media_partner_ids.*' => 'exists:media_partners,id',
             'description' => 'required|string',
@@ -416,6 +433,11 @@ class OrganizerController extends Controller
                     $validated['organizer_name'] = 'Media Partner';
                 }
             }
+        }
+
+        if ($request->hasFile('poster')) {
+            $posterPath = $request->file('poster')->store('posters', 'public');
+            $validated['banner_url'] = '/storage/' . $posterPath;
         }
 
         $event->update($validated);
