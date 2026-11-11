@@ -165,8 +165,8 @@
           <div class="p-5 bg-white rounded-xl border border-slate-200 hover:border-slate-300 transition shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
             <div class="flex-1 flex flex-col gap-2">
               <div class="flex flex-wrap items-center gap-2">
-                <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 text-[11px] font-semibold rounded-md border border-slate-200 uppercase tracking-wide">
-                  {{ $event->format }}
+                <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 text-[11px] font-semibold rounded-md border border-slate-200 tracking-wide">
+                  {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
                 </span>
                 <span class="px-2.5 py-0.5 bg-blue-50 text-blue-950 text-[11px] font-semibold rounded-md border border-blue-200">
                   {{ $event->category }}

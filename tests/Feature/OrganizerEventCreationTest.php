@@ -20,7 +20,7 @@ class OrganizerEventCreationTest extends TestCase
         $response = $this->actingAs($panitia)->post('/penyelenggara/event/create', [
             'title' => 'Workshop Deep Dive Laravel 12',
             'category' => 'Workshop',
-            'format' => 'hybrid',
+            'format' => 'offline',
             'location' => 'Laboratorium ICT Lab 4',
             'start_date' => now()->addDays(5)->toDateString(),
             'end_date' => now()->addDays(5)->toDateString(),
@@ -37,7 +37,7 @@ class OrganizerEventCreationTest extends TestCase
         $this->assertDatabaseHas('events', [
             'title' => 'Workshop Deep Dive Laravel 12',
             'category' => 'Workshop',
-            'format' => 'hybrid',
+            'format' => 'offline',
         ]);
     }
 

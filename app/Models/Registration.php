@@ -22,16 +22,21 @@ class Registration extends Model
         'payment_method',
         'amount_paid',
         'paid_at',
-        'attendance_status',
+        'is_checked_in',
         'checked_in_at',
         'check_in_gate',
+        'attendance_status',
+        'attended_at',
+        'attendance_gate',
         'evaluation_status',
     ];
 
     protected function casts(): array
     {
         return [
+            'is_checked_in' => 'boolean',
             'checked_in_at' => 'datetime',
+            'attended_at' => 'datetime',
             'paid_at' => 'datetime',
         ];
     }

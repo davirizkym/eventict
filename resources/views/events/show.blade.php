@@ -49,16 +49,16 @@
         <span class="px-3 py-1 bg-white/10 text-white/90 text-xs font-medium rounded-md uppercase tracking-wider">
           {{ $event->category }}
         </span>
-        <span class="px-3 py-1 bg-white/10 text-white/90 text-xs font-medium rounded-md capitalize">
-          Format {{ $event->format }}
+        <span class="px-3 py-1 bg-white/10 text-white/90 text-xs font-medium rounded-md">
+          {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
         </span>
         @if(($event->organizer_type ?? 'internal') === 'partner')
           <span class="px-3 py-1 bg-white/20 text-white text-xs font-semibold rounded-md">
-            Media Partner: {{ $event->organizer_name }}
+            Penyelenggara: {{ $event->organizer_name }}
           </span>
         @else
           <span class="px-3 py-1 bg-white/10 text-white/90 text-xs font-medium rounded-md">
-            Laboratorium ICT
+            Penyelenggara: Laboratorium ICT
           </span>
         @endif
       </div>
@@ -181,18 +181,49 @@
           <ul class="flex flex-col gap-2.5 text-xs text-slate-700 font-normal font-['Poppins']">
             <li class="flex items-start gap-2">
               <span class="text-blue-950 font-bold">&bull;</span>
-              <span>Peserta wajib melakukan presensi kehadiran melalui pemindaian QR Pass pada hari pelaksanaan.</span>
+              @if($event->format === 'offline')
+                <span>Tunjukkan QR Pass pada tiket kepada panitia di lokasi acara untuk pencatatan kehadiran.</span>
+              @else
+                <span>Ikuti sesi melalui ruang virtual dan pastikan kehadiran Anda tercatat selama acara berlangsung.</span>
+              @endif
             </li>
             <li class="flex items-start gap-2">
               <span class="text-blue-950 font-bold">&bull;</span>
-              <span>Minimal kehadiran 80% dari total sesi untuk memenuhi syarat penerbitan E-Sertifikat resmi.</span>
+              <span>E-Sertifikat resmi diterbitkan untuk peserta yang terkonfirmasi hadir mengikuti kegiatan.</span>
             </li>
             <li class="flex items-start gap-2">
               <span class="text-blue-950 font-bold">&bull;</span>
-              <span>Setelah seluruh sesi berakhir, dokumen E-Sertifikat ber-QR dapat diunduh langsung melalui Portal Peserta.</span>
+              <span>Setelah seluruh sesi berakhir, dokumen E-Sertifikat dapat diunduh langsung melalui Portal Peserta.</span>
             </li>
           </ul>
         </div>
+
+        @if($event->mediaPartners->isNotEmpty())
+          <div class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 sm:p-8 flex flex-col gap-4 shadow-xs">
+            <h2 class="text-slate-900 text-lg font-semibold font-['Poppins']">Media Partner</h2>
+            <div class="flex flex-wrap items-center gap-3 sm:gap-4 pt-1">
+              @foreach($event->mediaPartners as $mp)
+                @if($mp->website_url)
+                  <a href="{{ $mp->website_url }}" target="_blank" rel="noopener noreferrer" class="h-16 w-32 sm:h-20 sm:w-36 rounded-xl bg-slate-50 border border-slate-200/80 p-2.5 flex items-center justify-center hover:border-blue-900 hover:shadow-xs transition" title="{{ $mp->name }} (Buka Tautan Resmi)">
+                    @if($mp->logo)
+                      <img src="{{ asset($mp->logo) }}" alt="{{ $mp->name }}" class="max-h-full max-w-full object-contain">
+                    @else
+                      <span class="text-xs font-semibold text-slate-700 text-center line-clamp-2 px-1">{{ $mp->name }}</span>
+                    @endif
+                  </a>
+                @else
+                  <div class="h-16 w-32 sm:h-20 sm:w-36 rounded-xl bg-slate-50 border border-slate-200/80 p-2.5 flex items-center justify-center hover:border-slate-300 transition" title="{{ $mp->name }}">
+                    @if($mp->logo)
+                      <img src="{{ asset($mp->logo) }}" alt="{{ $mp->name }}" class="max-h-full max-w-full object-contain">
+                    @else
+                      <span class="text-xs font-semibold text-slate-700 text-center line-clamp-2 px-1">{{ $mp->name }}</span>
+                    @endif
+                  </div>
+                @endif
+              @endforeach
+            </div>
+          </div>
+        @endif
       </div>
 
       <div class="flex flex-col gap-6 lg:sticky lg:top-24">
@@ -204,7 +235,17 @@
             </div>
           </div>
 
-          @if($isFull)
+          @if($isPassed ?? false)
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-1.5">
+              <div class="flex justify-between items-center text-xs font-medium text-slate-700">
+                <span>Status Pendaftaran</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-200 text-slate-700">Selesai</span>
+              </div>
+              <div class="text-[11px] text-slate-500">
+                Kegiatan telah selesai diselenggarakan. Pendaftaran ditutup.
+              </div>
+            </div>
+          @elseif($isFull)
             <div class="p-3.5 bg-rose-50 rounded-xl border border-rose-200 flex flex-col gap-1.5">
               <div class="flex justify-between items-center text-xs font-medium text-rose-900">
                 <span>Status Pendaftaran</span>
@@ -237,7 +278,11 @@
           @endif
 
           @guest
-            @if($isFull)
+            @if($isPassed ?? false)
+              <button disabled class="w-full py-3 bg-slate-200 text-slate-500 rounded-xl text-xs font-semibold font-['Poppins'] cursor-not-allowed text-center">
+                Pendaftaran Ditutup (Kegiatan Selesai)
+              </button>
+            @elseif($isFull)
               <button disabled class="w-full py-3 bg-slate-200 text-slate-500 rounded-xl text-xs font-semibold font-['Poppins'] cursor-not-allowed text-center">
                 Pendaftaran Ditutup (Kuota Penuh)
               </button>
@@ -251,11 +296,48 @@
             @endif
           @else
             @if(Auth::user()->role === 'penyelenggara')
-              <a href="{{ route('organizer.dashboard') }}" class="w-full py-3 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold font-['Poppins'] transition text-center shadow-xs">
+              <a href="{{ route('organizer.workspace', ['event' => $event->id]) }}" class="w-full py-3 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold font-['Poppins'] transition text-center shadow-xs">
                 Buka di Workspace Panitia
               </a>
             @elseif($isRegistered)
-              @if($userRegistration->payment_status === 'pending')
+              @php
+                $isUserRegPendingExpired = $userRegistration->payment_status === 'pending' && $userRegistration->created_at && $userRegistration->created_at->lt(now()->subMinutes(10));
+              @endphp
+              @if($isUserRegPendingExpired)
+                <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl flex flex-col gap-2.5">
+                  <div class="flex items-center gap-2 text-rose-900 font-semibold text-xs">
+                    <svg class="size-4 text-rose-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span>Batas Waktu Pembayaran Habis</span>
+                  </div>
+                  <div class="text-[11px] text-rose-800 leading-relaxed">
+                    Kode: <span class="font-mono font-bold">{{ $userRegistration->registration_code }}</span><br>
+                    Waktu pembayaran 10 menit telah kedaluwarsa. Silakan lakukan pendaftaran ulang untuk memilih tiket kembali.
+                  </div>
+                  @if($isPassed ?? false)
+                    <button disabled class="mt-1 py-2 px-3 bg-slate-200 text-slate-500 rounded-lg text-xs font-semibold text-center cursor-not-allowed">
+                      Kegiatan Telah Selesai
+                    </button>
+                  @elseif($isFull)
+                    <button disabled class="mt-1 py-2 px-3 bg-slate-200 text-slate-500 rounded-lg text-xs font-semibold text-center cursor-not-allowed">
+                      Kuota Penuh
+                    </button>
+                  @else
+                    <a href="{{ route('events.register.form', $event->slug) }}" class="mt-1 py-2 px-3 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold text-center transition shadow-xs">
+                      Daftar Ulang Kegiatan &rarr;
+                    </a>
+                  @endif
+                  <form method="POST" action="{{ route('peserta.registration.cancel', $userRegistration->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus riwayat pendaftaran ini?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="w-full py-1.5 px-3 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-semibold text-center transition cursor-pointer">
+                      Hapus Pendaftaran
+                    </button>
+                  </form>
+                </div>
+              @elseif($userRegistration->payment_status === 'pending')
                 <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col gap-2.5">
                   <div class="flex items-center gap-2 text-amber-900 font-semibold text-xs">
                     <svg class="size-4 text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -305,6 +387,10 @@
                   </a>
                 </div>
               @endif
+            @elseif($isPassed ?? false)
+              <button disabled class="w-full py-3 bg-slate-200 text-slate-500 rounded-xl text-xs font-semibold font-['Poppins'] cursor-not-allowed text-center">
+                Pendaftaran Ditutup (Kegiatan Selesai)
+              </button>
             @elseif($isFull)
               <button disabled class="w-full py-3 bg-slate-200 text-slate-500 rounded-xl text-xs font-semibold font-['Poppins'] cursor-not-allowed text-center">
                 Kuota Kegiatan Telah Penuh
@@ -316,15 +402,6 @@
               </a>
             @endif
           @endguest
-        </div>
-
-        <div class="p-4 bg-white rounded-xl border border-slate-200 flex items-center gap-3 text-xs text-slate-600">
-          <svg class="size-5 text-blue-950 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
-          </svg>
-          <div class="leading-relaxed">
-            Terhubung langsung dengan basis data sertifikasi nasional dan akreditasi organisasi profesi.
-          </div>
         </div>
       </div>
     </div>
@@ -347,6 +424,9 @@ function checkEventPayment(registrationId) {
   .then(data => {
     if (data.status === 'paid') {
       alert(data.message || 'Pembayaran berhasil dikonfirmasi! E-Tiket Anda telah aktif.');
+      window.location.reload();
+    } else if (data.status === 'expired') {
+      alert(data.message || 'Batas waktu pembayaran (10 menit) telah kedaluwarsa. Silakan lakukan pendaftaran ulang.');
       window.location.reload();
     } else {
       alert(data.message || 'Status pembayaran belum terkonfirmasi.');

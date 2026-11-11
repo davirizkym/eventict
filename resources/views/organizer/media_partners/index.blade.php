@@ -181,8 +181,30 @@
             @forelse($mediaPartners as $mp)
               <tr class="hover:bg-slate-50/60 transition">
                 <td class="py-4 px-6">
-                  <div class="font-semibold text-slate-900 text-sm">{{ $mp->name }}</div>
-                  <div class="text-[11px] text-slate-400 font-mono mt-0.5">{{ $mp->slug }}</div>
+                  <div class="flex items-center gap-3">
+                    <div class="size-10 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                      @if($mp->logo)
+                        <img src="{{ asset($mp->logo) }}" alt="{{ $mp->name }}" class="size-full object-contain p-1">
+                      @else
+                        <span class="font-bold text-xs text-slate-400 uppercase">{{ substr($mp->name, 0, 2) }}</span>
+                      @endif
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-1.5">
+                        <span class="font-semibold text-slate-900 text-sm">{{ $mp->name }}</span>
+                        @if($mp->website_url)
+                          <a href="{{ $mp->website_url }}" target="_blank" rel="noopener noreferrer" class="text-blue-900 hover:text-blue-700" title="Buka tautan website/sosial media: {{ $mp->website_url }}">
+                            <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M15 3h6v6"/>
+                              <path d="M10 14 21 3"/>
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                            </svg>
+                          </a>
+                        @endif
+                      </div>
+                      <div class="text-[11px] text-slate-400 font-mono mt-0.5">{{ $mp->slug }}</div>
+                    </div>
+                  </div>
                 </td>
                 <td class="py-4 px-6">
                   <span class="text-slate-600 font-medium">{{ $mp->institution ?? '—' }}</span>
@@ -249,7 +271,7 @@
       </button>
     </div>
 
-    <form action="{{ route('organizer.media_partners.store') }}" method="POST" class="flex flex-col gap-4 text-xs">
+    <form action="{{ route('organizer.media_partners.store') }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4 text-xs">
       @csrf
       <div class="flex flex-col gap-1.5">
         <label class="font-semibold text-slate-700">Nama Media Partner <span class="text-rose-500">*</span></label>
@@ -257,8 +279,20 @@
       </div>
 
       <div class="flex flex-col gap-1.5">
+        <label class="font-semibold text-slate-700">Logo Media Partner</label>
+        <input type="file" name="logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-950 hover:file:bg-blue-100 cursor-pointer">
+        <span class="text-[10px] text-slate-400">Format: PNG, JPG, WebP, SVG (Maks. 2MB). Rekomendasi rasio persegi atau horizontal transparan.</span>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
         <label class="font-semibold text-slate-700">Lembaga / Instansi</label>
         <input type="text" name="institution" placeholder="Contoh: Fakultas Teknologi Informasi" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition">
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="font-semibold text-slate-700">Tautan Web / Media Sosial</label>
+        <input type="url" name="website_url" placeholder="Contoh: https://instagram.com/hmsi_kampus" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition">
+        <span class="text-[10px] text-slate-400">Opsional. Gunakan tautan lengkap berawalan https://</span>
       </div>
 
       <div class="flex flex-col gap-1.5">
@@ -278,7 +312,6 @@
   </div>
 </div>
 
-<!-- Modal Edit Media Partner -->
 <div id="modal-edit-media-partner" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4">
   <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 flex flex-col gap-6 shadow-2xl">
     <div class="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -291,7 +324,7 @@
       </button>
     </div>
 
-    <form id="edit-media-partner-form" method="POST" class="flex flex-col gap-4 text-xs">
+    <form id="edit-media-partner-form" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4 text-xs">
       @csrf
       @method('PUT')
       <div class="flex flex-col gap-1.5">
@@ -300,8 +333,24 @@
       </div>
 
       <div class="flex flex-col gap-1.5">
+        <label class="font-semibold text-slate-700">Logo Media Partner</label>
+        <div id="edit-logo-preview-container" class="hidden items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-xl mb-1">
+          <img id="edit-logo-preview" src="" alt="Logo" class="size-10 object-contain rounded-lg border border-slate-200 bg-white p-1">
+          <span class="text-[11px] text-slate-500">Logo saat ini. Unggah file baru untuk mengganti.</span>
+        </div>
+        <input type="file" name="logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-950 hover:file:bg-blue-100 cursor-pointer">
+        <span class="text-[10px] text-slate-400">Kosongkan jika tidak ingin mengubah logo. Format: PNG, JPG, WebP, SVG (Maks. 2MB).</span>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
         <label class="font-semibold text-slate-700">Lembaga / Instansi</label>
         <input type="text" id="edit-institution" name="institution" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition">
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="font-semibold text-slate-700">Tautan Web / Media Sosial</label>
+        <input type="url" id="edit-website-url" name="website_url" placeholder="Contoh: https://instagram.com/hmsi_kampus" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 focus:bg-white transition">
+        <span class="text-[10px] text-slate-400">Opsional. Gunakan tautan lengkap berawalan https://</span>
       </div>
 
       <div class="flex flex-col gap-1.5">
@@ -340,7 +389,20 @@ function openEditMediaPartnerModal(mp) {
   form.action = `/penyelenggara/media-partner/${mp.id}`;
   document.getElementById('edit-name').value = mp.name || '';
   document.getElementById('edit-institution').value = mp.institution || '';
+  document.getElementById('edit-website-url').value = mp.website_url || '';
   document.getElementById('edit-contact-email').value = mp.contact_email || '';
+
+  const previewContainer = document.getElementById('edit-logo-preview-container');
+  const previewImg = document.getElementById('edit-logo-preview');
+  if (mp.logo) {
+    previewImg.src = '/' + mp.logo.replace(/^\//, '');
+    previewContainer.classList.remove('hidden');
+    previewContainer.classList.add('flex');
+  } else {
+    previewContainer.classList.add('hidden');
+    previewContainer.classList.remove('flex');
+  }
+
   m.classList.remove('hidden');
   m.classList.add('flex');
 }

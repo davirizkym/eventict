@@ -99,7 +99,7 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label for="nik" class="text-xs font-semibold text-slate-700 font-['Poppins']">
-              NIM / NIP <span class="text-slate-400 font-normal">(opsional)</span>
+              NIM / NIP / NIS <span class="text-slate-400 font-normal">(opsional)</span>
             </label>
             <input
               type="text"

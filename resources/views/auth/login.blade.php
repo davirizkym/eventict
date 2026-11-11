@@ -36,7 +36,7 @@
             <svg class="size-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            <span>Verifikasi legalitas sertifikat langsung ke nomor SK profesi</span>
+            <span>Verifikasi legalitas sertifikat resmi berbasis kode unik</span>
           </div>
           <div class="flex items-start gap-2.5 text-xs text-slate-200 font-['Poppins']">
             <svg class="size-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -61,6 +61,18 @@
         <h1 class="text-2xl font-bold font-['Poppins'] text-slate-900">Masuk ke Akun</h1>
         <p class="text-xs text-slate-500 font-normal font-['Poppins']">Masukkan alamat email dan kata sandi akun Eventict Anda.</p>
       </div>
+
+      @if (session('status'))
+        <div class="p-3.5 mb-5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2.5 text-xs text-emerald-800">
+          <svg class="size-4 text-emerald-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <div class="flex-1 font-medium font-['Poppins']">
+            {{ session('status') }}
+          </div>
+        </div>
+      @endif
 
       @if (isset($errors) && $errors->any())
         <div class="p-3.5 mb-5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-800">
@@ -97,7 +109,7 @@
         <div class="flex flex-col gap-1.5">
           <div class="flex items-center justify-between">
             <label for="password" class="text-xs font-semibold text-slate-700 font-['Poppins']">Kata Sandi</label>
-            <a href="#" class="text-[11px] text-blue-950 hover:underline font-medium font-['Poppins']">Lupa kata sandi?</a>
+            <a href="{{ route('password.request') }}" class="text-[11px] text-blue-950 hover:underline font-medium font-['Poppins']">Lupa kata sandi?</a>
           </div>
           <div class="relative">
             <input

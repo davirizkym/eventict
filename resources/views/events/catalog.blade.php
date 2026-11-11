@@ -19,9 +19,6 @@
           <h1 class="text-slate-900 text-2xl sm:text-3xl font-semibold font-['Poppins']">
             Jelajahi Semua Kegiatan
           </h1>
-          <p class="text-slate-600 text-xs sm:text-sm font-normal font-['Poppins']">
-            Temukan simposium, seminar nasional, workshop teknologi, dan pelatihan praktikum Laboratorium ICT.
-          </p>
         </div>
 
         <div class="w-full pt-2 flex flex-col justify-start items-center">
@@ -40,7 +37,6 @@
                 <option value="">Semua Format</option>
                 <option value="offline" {{ request('format') === 'offline' ? 'selected' : '' }}>Offline / Tatap Muka</option>
                 <option value="online" {{ request('format') === 'online' ? 'selected' : '' }}>Online / Webinar</option>
-                <option value="hybrid" {{ request('format') === 'hybrid' ? 'selected' : '' }}>Hybrid</option>
               </select>
             </div>
             <div class="h-8 w-px bg-slate-200 hidden md:block"></div>
@@ -82,7 +78,14 @@
         <div class="self-stretch grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           @forelse($events as $event)
             @php
-              $regCount = $event->registrations_count ?? $event->registrations()->count();
+              $isPassed = $event->isPassed();
+              $regCount = $event->registrations_count ?? $event->registrations()->where(function ($q) {
+                  $q->whereIn('payment_status', ['paid', 'free'])
+                    ->orWhere(function ($pq) {
+                        $pq->where('payment_status', 'pending')
+                           ->where('created_at', '>=', now()->subMinutes(10));
+                    });
+              })->count();
               $remaining = max(0, $event->quota - $regCount);
               $isFull = $event->quota > 0 && $regCount >= $event->quota;
             @endphp
@@ -94,7 +97,11 @@
                       <span class="text-blue-100 text-xs font-semibold font-['Poppins']">Sertifikat Resmi</span>
                     </div>
                     <div class="flex items-center gap-1.5">
-                      @if($isFull)
+                      @if($isPassed)
+                        <span class="px-2 py-0.5 bg-slate-600 text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs">
+                          Selesai
+                        </span>
+                      @elseif($isFull)
                         <span class="px-2 py-0.5 bg-rose-600 text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs">
                           Penuh
                         </span>
@@ -107,10 +114,10 @@
                     </div>
                   </div>
                   <div class="relative z-10 flex items-center justify-between">
-                    <span class="text-white/60 text-xs font-medium uppercase tracking-wider capitalize">{{ $event->format }} Event</span>
+                    <span class="text-white/80 text-xs font-medium tracking-wider">{{ $event->format === 'offline' ? 'Luring' : 'Daring' }}</span>
                     @if(($event->organizer_type ?? 'internal') === 'partner')
-                      <span class="px-2 py-0.5 bg-white/20 backdrop-blur-md text-white text-[10px] font-semibold rounded">
-                        Media Partner
+                      <span class="px-2 py-0.5 bg-white/20 backdrop-blur-md text-white text-[10px] font-semibold rounded max-w-[170px] truncate" title="Penyelenggara: {{ $event->organizer_name }}">
+                        Penyelenggara: {{ $event->organizer_name }}
                       </span>
                     @endif
                   </div>
@@ -138,7 +145,7 @@
 
                   <div>
                     <span class="text-[11px] font-medium text-slate-500 font-['Poppins']">
-                      {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'Media Partner: ' . $event->organizer_name : 'Laboratorium ICT' }}
+                      {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'Penyelenggara: ' . $event->organizer_name : 'Penyelenggara: Laboratorium ICT' }}
                     </span>
                     <h3 class="text-slate-900 text-base font-semibold font-['Poppins'] leading-snug line-clamp-2 group-hover:text-blue-900 transition mt-0.5">
                       {{ $event->title }}
@@ -166,7 +173,11 @@
                   <span class="text-slate-900 font-semibold text-sm font-['Poppins']">
                     {{ $event->price == 0 ? 'Gratis' : 'Rp ' . number_format($event->price, 0, ',', '.') }}
                   </span>
-                  @if($isFull)
+                  @if($isPassed)
+                    <span class="text-slate-500 font-semibold text-[11px] font-['Poppins']">
+                      Kegiatan Selesai
+                    </span>
+                  @elseif($isFull)
                     <span class="text-rose-600 font-semibold text-[11px] font-['Poppins']">
                       Kuota Penuh
                     </span>
@@ -179,7 +190,7 @@
                   @endif
                 </div>
                 <div class="flex items-center gap-2">
-                  <a href="{{ route('events.show', $event->slug) }}" class="px-3.5 py-2 {{ $isFull ? 'bg-slate-700 hover:bg-slate-800' : 'bg-blue-950 hover:bg-blue-900' }} text-white rounded-lg flex items-center gap-1.5 text-xs font-semibold font-['Poppins'] transition">
+                  <a href="{{ route('events.show', $event->slug) }}" class="px-3.5 py-2 {{ $isPassed ? 'bg-slate-700 hover:bg-slate-800' : ($isFull ? 'bg-slate-700 hover:bg-slate-800' : 'bg-blue-950 hover:bg-blue-900') }} text-white rounded-lg flex items-center gap-1.5 text-xs font-semibold font-['Poppins'] transition">
                     <span>Lihat Sesi</span>
                     <span>&rarr;</span>
                   </a>

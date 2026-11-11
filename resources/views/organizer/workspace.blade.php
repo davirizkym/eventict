@@ -110,12 +110,16 @@
               {{ $event->category }}
             </span>
           @endif
-          <span class="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-blue-50 text-blue-900 border border-blue-100">
-            {{ $event->format }}
+          <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-900 border border-blue-100">
+            {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
           </span>
           @if(($event->organizer_type ?? 'internal') === 'partner')
             <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-              Partner: {{ $event->organizer_name }}
+              Penyelenggara: {{ $event->organizer_name }}
+            </span>
+          @else
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-50 text-slate-700 border border-slate-200">
+              Penyelenggara: Laboratorium ICT
             </span>
           @endif
           @if($event->quota > 0 && $totalRegistrations >= $event->quota)
@@ -437,7 +441,7 @@
           <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-2 min-w-0">
               <span class="text-slate-500 font-medium shrink-0">Tautan Presensi Peserta:</span>
-              <span id="session-presence-url" class="font-mono text-blue-950 font-semibold truncate">{{ route('events.presence', $event->slug) }}</span>
+              <span id="session-presence-url" class="font-mono text-blue-950 font-semibold truncate">{{ $event->presence_token ? route('events.presence', ['slug' => $event->slug, 'token' => $event->presence_token]) : route('events.presence', $event->slug) }}</span>
             </div>
             <button type="button" onclick="copySessionUrl()" id="btn-copy-url" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-medium transition flex items-center gap-1.5 shrink-0 cursor-pointer shadow-2xs">
               <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -449,36 +453,72 @@
           </div>
         </div>
 
-        <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <form action="{{ route('organizer.workspace.quick_checkin', ['event' => $event->id]) }}" method="POST" class="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-            @csrf
-            <div class="flex-1 flex items-center gap-2 px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs">
-              <svg class="size-4 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
-                <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
-                <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
-                <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-                <line x1="7" x2="17" y1="12" y2="12"/>
-              </svg>
-              <input type="text" name="code" placeholder="Scan QR Pass atau ketik No. Registrasi / Email peserta untuk presensi cepat..." required class="w-full bg-transparent border-none outline-none text-xs text-slate-900 placeholder:text-slate-400">
-            </div>
-            <button type="submit" class="px-5 py-2.5 bg-blue-950 hover:bg-blue-900 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-2 shadow-xs cursor-pointer">
-              <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              <span>Check-in Hadir</span>
-            </button>
-          </form>
+        @if($event->format === 'offline')
+          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <form action="{{ route('organizer.workspace.quick_checkin', ['event' => $event->id]) }}" method="POST" id="form-quick-checkin" class="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              @csrf
+              <div class="flex-1 flex items-center gap-2 px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs">
+                <svg class="size-4 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+                  <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+                  <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+                  <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+                  <line x1="7" x2="17" y1="12" y2="12"/>
+                </svg>
+                <input type="text" id="quick-checkin-code" name="code" placeholder="Scan QR Pass atau ketik No. Registrasi / Email peserta untuk registrasi ulang (check-in)..." required class="w-full bg-transparent border-none outline-none text-xs text-slate-900 placeholder:text-slate-400">
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="submit" class="px-5 py-2.5 bg-blue-950 hover:bg-blue-900 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-2 shadow-xs cursor-pointer">
+                  <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <span>Check-in Masuk</span>
+                </button>
 
-          <a href="{{ route('organizer.workspace.export', ['event' => $event->id]) }}" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition flex items-center justify-center gap-2 shadow-2xs shrink-0">
-            <svg class="size-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" x2="12" y1="15" y2="3"/>
-            </svg>
-            <span>Ekspor CSV</span>
-          </a>
-        </div>
+                <button type="button" onclick="openOrganizerScannerModal()" class="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-2 shadow-xs cursor-pointer shrink-0">
+                  <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/>
+                    <rect width="6" height="6" x="9" y="9" rx="1"/>
+                  </svg>
+                  <span>Pindai QR Pass</span>
+                </button>
+              </div>
+            </form>
+
+            <a href="{{ route('organizer.workspace.export', ['event' => $event->id]) }}" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition flex items-center justify-center gap-2 shadow-2xs shrink-0">
+              <svg class="size-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" x2="12" y1="15" y2="3"/>
+              </svg>
+              <span>Ekspor CSV</span>
+            </a>
+          </div>
+        @else
+          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5 text-xs text-slate-600">
+              <div class="size-8 rounded-lg bg-blue-50 text-blue-900 flex items-center justify-center shrink-0">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="20" height="14" x="2" y="3" rx="2"/>
+                  <line x1="8" x2="16" y1="21" y2="21"/>
+                  <line x1="12" x2="12" y1="17" y2="21"/>
+                </svg>
+              </div>
+              <div>
+                <span class="font-semibold text-slate-800 block">Acara Berformat Online / Webinar</span>
+                <span class="text-slate-500 text-[11px]">Tidak memerlukan check-in pintu masuk. Presensi kehadiran sesi dilakukan mandiri oleh peserta saat gerbang presensi dibuka.</span>
+              </div>
+            </div>
+            <a href="{{ route('organizer.workspace.export', ['event' => $event->id]) }}" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition flex items-center justify-center gap-2 shadow-2xs shrink-0 self-end sm:self-auto">
+              <svg class="size-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" x2="12" y1="15" y2="3"/>
+              </svg>
+              <span>Ekspor CSV</span>
+            </a>
+          </div>
+        @endif
 
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs flex flex-col">
           <div class="p-4 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -492,9 +532,17 @@
                 <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama, email, no reg..." class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-blue-950">
               </div>
 
+              @if($event->format === 'offline')
+                <select name="checkin" onchange="this.form.submit()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none cursor-pointer">
+                  <option value="">Semua Check-in</option>
+                  <option value="checked_in" {{ request('checkin') === 'checked_in' ? 'selected' : '' }}>Sudah Check-in</option>
+                  <option value="not_checked_in" {{ request('checkin') === 'not_checked_in' ? 'selected' : '' }}>Belum Check-in</option>
+                </select>
+              @endif
+
               <select name="attendance" onchange="this.form.submit()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none cursor-pointer">
-                <option value="">Semua Presensi</option>
-                <option value="attended" {{ request('attendance') === 'attended' ? 'selected' : '' }}>Hadir</option>
+                <option value="">Semua Presensi Sesi</option>
+                <option value="attended" {{ request('attendance') === 'attended' ? 'selected' : '' }}>Hadir Sesi</option>
                 <option value="unattended" {{ request('attendance') === 'unattended' ? 'selected' : '' }}>Belum Hadir</option>
               </select>
 
@@ -515,7 +563,10 @@
                   <th class="px-4 py-3">No. Registrasi</th>
                   <th class="px-4 py-3">Nama Peserta</th>
                   <th class="px-4 py-3">Instansi / Kampus</th>
-                  <th class="px-4 py-3">Status Presensi</th>
+                  @if($event->format === 'offline')
+                    <th class="px-4 py-3">Check-in (Pintu Masuk)</th>
+                  @endif
+                  <th class="px-4 py-3">Presensi Sesi</th>
                   <th class="px-4 py-3">Status Tiket</th>
                   <th class="px-4 py-3">Status Sertifikat</th>
                   <th class="px-4 py-3 text-right">Aksi</th>
@@ -523,24 +574,59 @@
               </thead>
               <tbody class="divide-y divide-slate-100">
                 @forelse($registrations as $reg)
-                  <tr class="hover:bg-slate-50/80 transition">
-                    <td class="px-4 py-3 font-semibold text-blue-950 whitespace-nowrap">
-                      {{ $reg->registration_code }}
+                  <tr class="hover:bg-slate-50/80 transition" id="reg-row-{{ $reg->id }}">
+                    <td class="px-4 py-3 whitespace-nowrap">
+                      <div class="font-semibold text-blue-950">{{ $reg->registration_code }}</div>
+                      @if($event->format === 'offline' && $reg->qr_pass)
+                        <div class="text-[10px] font-mono text-slate-500 font-medium">Pass: #{{ $reg->qr_pass }}</div>
+                      @endif
                     </td>
                     <td class="px-4 py-3">
                       <div class="flex flex-col">
                         <span class="font-semibold text-slate-900">{{ $reg->user->name ?? '-' }}</span>
                         <span class="text-slate-400 text-[11px]">{{ $reg->user->email ?? '-' }}</span>
+                        @if(!empty($reg->user->nik))
+                          <span class="text-slate-500 font-mono text-[10px]">NIM/NIP/NIS: {{ $reg->user->nik }}</span>
+                        @endif
                       </div>
                     </td>
                     <td class="px-4 py-3 text-slate-600">
                       {{ $reg->user->institution ?? '-' }}
                     </td>
-                    <td class="px-4 py-3 whitespace-nowrap">
+                    @if($event->format === 'offline')
+                      <td class="px-4 py-3 whitespace-nowrap" id="checkin-cell-{{ $reg->id }}">
+                        @if($reg->is_checked_in)
+                          <div class="flex flex-col gap-0.5">
+                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit">
+                              <svg class="size-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20 6 9 17 4 12"/>
+                              </svg>
+                              <span>Sudah Check-in ({{ $reg->checked_in_at ? $reg->checked_in_at->format('H:i') : '' }})</span>
+                            </span>
+                            @if($reg->check_in_gate)
+                              <span class="text-[10px] text-slate-400 font-mono">{{ $reg->check_in_gate }}</span>
+                            @endif
+                          </div>
+                        @else
+                          <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
+                            Belum Check-in
+                          </span>
+                        @endif
+                      </td>
+                    @endif
+                    <td class="px-4 py-3 whitespace-nowrap" id="attendance-cell-{{ $reg->id }}">
                       @if($reg->attendance_status === 'attended')
-                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          Hadir ({{ $reg->checked_in_at ? $reg->checked_in_at->format('H:i') : '' }})
-                        </span>
+                        <div class="flex flex-col gap-0.5">
+                          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-900 border border-blue-200 w-fit">
+                            <svg class="size-3 text-blue-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Hadir Sesi ({{ $reg->attended_at ? $reg->attended_at->format('H:i') : ($reg->checked_in_at ? $reg->checked_in_at->format('H:i') : '') }})</span>
+                          </span>
+                          @if($reg->attendance_gate)
+                            <span class="text-[10px] text-slate-400 font-mono">{{ $reg->attendance_gate }}</span>
+                          @endif
+                        </div>
                       @else
                         <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
                           Belum Hadir
@@ -563,9 +649,17 @@
                     </td>
                     <td class="px-4 py-3 text-right whitespace-nowrap">
                       <div class="inline-flex items-center gap-1.5">
+                        @if($event->format === 'offline')
+                          <form method="POST" action="{{ route('organizer.checkin.toggle', $reg->id) }}">
+                            @csrf
+                            <button type="submit" class="px-2 py-1 rounded text-[11px] font-semibold {{ $reg->is_checked_in ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-emerald-600 text-white hover:bg-emerald-700' }} transition cursor-pointer">
+                              {{ $reg->is_checked_in ? 'Batal Check-in' : 'Check-in' }}
+                            </button>
+                          </form>
+                        @endif
                         <form method="POST" action="{{ route('organizer.attendance.toggle', $reg->id) }}">
                           @csrf
-                          <button type="submit" class="px-2 py-1 rounded text-[11px] font-semibold {{ $reg->attendance_status === 'attended' ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-emerald-600 text-white hover:bg-emerald-700' }} transition">
+                          <button type="submit" class="px-2 py-1 rounded text-[11px] font-semibold {{ $reg->attendance_status === 'attended' ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-blue-950 text-white hover:bg-blue-900' }} transition cursor-pointer">
                             {{ $reg->attendance_status === 'attended' ? 'Batal Hadir' : 'Tandai Hadir' }}
                           </button>
                         </form>
@@ -574,7 +668,7 @@
                   </tr>
                 @empty
                   <tr>
-                    <td colspan="7" class="p-8 text-center text-slate-400">Tidak ada peserta yang cocok dengan kriteria pencarian.</td>
+                    <td colspan="{{ $event->format === 'offline' ? 8 : 7 }}" class="p-8 text-center text-slate-400">Tidak ada peserta yang cocok dengan kriteria pencarian.</td>
                   </tr>
                 @endforelse
               </tbody>
@@ -638,7 +732,7 @@
           <div class="flex flex-col gap-1">
             <h3 class="text-sm font-bold text-slate-900">Upload Sertifikat Massal untuk Kegiatan Ini</h3>
             <p class="text-xs text-slate-500 leading-relaxed">
-              Pilih satu atau banyak berkas PDF sertifikat secara bersamaan. Sistem otomatis mencocokkan nama berkas dengan No. Registrasi, Email, atau QR Pass peserta.
+              Pilih satu atau banyak berkas PDF sertifikat secara bersamaan. Sistem otomatis mencocokkan nama berkas dengan NIM/NIP/NIS, No. Registrasi, Email, atau QR Pass peserta.
             </p>
           </div>
 
@@ -664,15 +758,6 @@
                   Ganti
                 </button>
               </div>
-            </div>
-
-            <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-2 text-xs">
-              <span class="font-semibold text-blue-950">Aturan Penamaan Berkas Otomatis:</span>
-              <ul class="text-slate-600 flex flex-col gap-1 list-disc list-inside">
-                <li>Berdasarkan Nomor Registrasi: <code class="bg-white px-1.5 py-0.5 rounded text-blue-950 font-mono">REG-2026-0001.pdf</code></li>
-                <li>Berdasarkan Email Peserta: <code class="bg-white px-1.5 py-0.5 rounded text-blue-950 font-mono">peserta@budi-luhur.ac.id.pdf</code></li>
-                <li>Berdasarkan QR Pass: <code class="bg-white px-1.5 py-0.5 rounded text-blue-950 font-mono">PASS-1234-USER.pdf</code></li>
-              </ul>
             </div>
 
             <div class="flex justify-end">
@@ -723,6 +808,9 @@
                     <td class="px-4 py-3">
                       <div class="font-bold text-slate-900">{{ $reg->user->name }}</div>
                       <div class="text-[11px] text-slate-500">{{ $reg->user->email }}</div>
+                      @if(!empty($reg->user->nik))
+                        <div class="text-[10px] text-slate-500 font-mono">NIM/NIP/NIS: {{ $reg->user->nik }}</div>
+                      @endif
                       @if($reg->user->institution)
                         <div class="text-[10px] text-slate-400 mt-0.5 truncate max-w-xs">{{ $reg->user->institution }}</div>
                       @endif
@@ -941,7 +1029,6 @@
                 <select name="format" onchange="toggleVirtualMeetingUrl(this.value)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
                   <option value="offline" {{ $event->format === 'offline' ? 'selected' : '' }}>Offline</option>
                   <option value="online" {{ $event->format === 'online' ? 'selected' : '' }}>Online</option>
-                  <option value="hybrid" {{ $event->format === 'hybrid' ? 'selected' : '' }}>Hybrid</option>
                 </select>
               </div>
               <div class="flex flex-col gap-1.5">
@@ -959,16 +1046,16 @@
                 <label class="font-semibold text-slate-700">Penyelenggara Kegiatan</label>
                 <select name="organizer_type" onchange="toggleEditPartnerName(this.value)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
                   <option value="internal" {{ ($event->organizer_type ?? 'internal') === 'internal' ? 'selected' : '' }}>Internal (Laboratorium ICT)</option>
-                  <option value="partner" {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'selected' : '' }}>Media Partner (Himpunan / BEM / Eksternal)</option>
+                  <option value="partner" {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'selected' : '' }}>Mitra Penyelenggara (Himpunan / BEM / Eksternal)</option>
                 </select>
               </div>
               <div id="edit-partner-name-container" class="{{ ($event->organizer_type ?? 'internal') === 'partner' ? '' : 'hidden' }} flex flex-col gap-1.5">
                 <div class="flex items-center justify-between">
-                  <label class="font-semibold text-slate-700">Pilih Media Partner</label>
+                  <label class="font-semibold text-slate-700">Pilih Mitra Penyelenggara</label>
                   <a href="{{ route('organizer.media_partners.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola Data</a>
                 </div>
                 <select name="media_partner_id" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-                  <option value="" disabled {{ empty($event->media_partner_id) ? 'selected' : '' }}>-- Pilih Media Partner --</option>
+                  <option value="" disabled {{ empty($event->media_partner_id) ? 'selected' : '' }}>-- Pilih Mitra Penyelenggara --</option>
                   @foreach($allMediaPartners as $mp)
                     <option value="{{ $mp->id }}" {{ $event->media_partner_id == $mp->id || $event->organizer_name === $mp->name ? 'selected' : '' }}>
                       {{ $mp->name }}
@@ -976,6 +1063,32 @@
                   @endforeach
                 </select>
               </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <label class="font-semibold text-slate-700">Media Partner Pendukung Acara</label>
+                <a href="{{ route('organizer.media_partners.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola Master Media Partner</a>
+              </div>
+              @if($allMediaPartners->isNotEmpty())
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-48 overflow-y-auto p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                  @foreach($allMediaPartners as $mp)
+                    <label class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-slate-200/80 hover:border-blue-900 cursor-pointer transition text-xs">
+                      <input type="checkbox" name="media_partner_ids[]" value="{{ $mp->id }}" {{ $event->mediaPartners->contains($mp->id) ? 'checked' : '' }} class="size-4 rounded text-blue-950 focus:ring-blue-950 border-slate-300">
+                      <div class="size-7 rounded-md bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                        @if($mp->logo)
+                          <img src="{{ asset($mp->logo) }}" alt="{{ $mp->name }}" class="size-full object-contain p-0.5">
+                        @else
+                          <span class="text-[10px] font-bold text-slate-400 uppercase">{{ substr($mp->name, 0, 2) }}</span>
+                        @endif
+                      </div>
+                      <span class="font-medium text-slate-800 truncate">{{ $mp->name }}</span>
+                    </label>
+                  @endforeach
+                </div>
+              @else
+                <p class="text-xs text-slate-400">Belum ada master media partner terdaftar.</p>
+              @endif
             </div>
 
             <div class="flex flex-col gap-1.5">
@@ -1016,7 +1129,7 @@
               </div>
             </div>
 
-            <div id="virtual-meeting-container" class="flex flex-col gap-1.5 {{ in_array($event->format, ['online', 'hybrid']) ? '' : 'hidden' }}">
+            <div id="virtual-meeting-container" class="flex flex-col gap-1.5 {{ $event->format === 'online' ? '' : 'hidden' }}">
               <label class="font-semibold text-slate-700">Tautan Pertemuan Virtual</label>
               <input type="url" name="virtual_meeting_url" value="{{ $event->virtual_meeting_url }}" placeholder="https://meet.google.com/..." class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
             </div>
@@ -1036,6 +1149,54 @@
       @endif
     </main>
   </div>
+
+  @if($event->format === 'offline')
+  <div id="modal-organizer-scanner" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 flex flex-col gap-4 shadow-2xl">
+      <div class="flex items-start justify-between gap-4 pb-3 border-b border-slate-100">
+        <div class="flex flex-col">
+          <h2 class="text-base font-bold text-slate-900">Pindai QR Pass Peserta</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Arahkan kamera ke QR Pass di tiket atau ponsel peserta untuk registrasi ulang.</p>
+        </div>
+        <button type="button" onclick="closeOrganizerScannerModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="relative w-full aspect-square bg-slate-950 rounded-xl overflow-hidden flex items-center justify-center border border-slate-200">
+        <div id="organizer-qr-reader" class="size-full"></div>
+        <div id="organizer-scanner-loading" class="absolute inset-0 flex flex-col items-center justify-center text-white gap-2 bg-slate-950/80">
+          <svg class="size-8 animate-spin text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+            <path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/>
+          </svg>
+          <span class="text-xs font-medium">Mengaktifkan kamera...</span>
+        </div>
+      </div>
+
+      <div id="organizer-scan-feedback" class="hidden p-3.5 rounded-xl border text-xs flex flex-col gap-1">
+        <div class="flex items-center gap-2">
+          <span id="organizer-scan-status-icon" class="shrink-0"></span>
+          <span id="organizer-scan-status-title" class="font-bold"></span>
+        </div>
+        <p id="organizer-scan-status-desc" class="text-[11px] leading-relaxed"></p>
+        <div id="organizer-scan-details" class="hidden mt-1 pt-1.5 border-t border-slate-200/60 flex items-center justify-between text-[10px] font-mono">
+          <span id="organizer-scan-detail-code"></span>
+          <span id="organizer-scan-detail-time"></span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+        <button type="button" onclick="closeOrganizerScannerModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer text-center">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+  @endif
 
   <div id="modal-assign-speaker" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 flex flex-col gap-6 shadow-2xl">
@@ -1196,7 +1357,7 @@
           <select id="single-cert-select-reg" onchange="onSingleCertSelectChange(this)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 text-xs font-medium text-slate-800 cursor-pointer">
             <option value="">-- Pilih Peserta --</option>
             @foreach($registrations as $r)
-              <option value="{{ $r->id }}">{{ $r->user->name }} ({{ $r->registration_code }}) - {{ $r->attendance_status === 'attended' ? 'Hadir' : 'Belum Hadir' }}</option>
+              <option value="{{ $r->id }}">{{ $r->user->name }}@if(!empty($r->user->nik)) - {{ $r->user->nik }}@endif ({{ $r->registration_code }}) - {{ $r->attendance_status === 'attended' ? 'Hadir' : 'Belum Hadir' }}</option>
             @endforeach
           </select>
         </div>
@@ -1285,7 +1446,7 @@ function toggleEditPartnerName(val) {
 function toggleVirtualMeetingUrl(format) {
   const container = document.getElementById('virtual-meeting-container');
   if (!container) return;
-  if (format === 'online' || format === 'hybrid') {
+  if (format === 'online') {
     container.classList.remove('hidden');
   } else {
     container.classList.add('hidden');
@@ -1422,6 +1583,145 @@ function resetBatchFileInput() {
   if (feedback) {
     feedback.classList.add('hidden');
     feedback.classList.remove('flex');
+  }
+}
+
+let organizerQrScanner = null;
+let organizerIsProcessing = false;
+
+function openOrganizerScannerModal() {
+  const modal = document.getElementById('modal-organizer-scanner');
+  const loading = document.getElementById('organizer-scanner-loading');
+  const feedback = document.getElementById('organizer-scan-feedback');
+  if (!modal) return;
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  if (loading) loading.classList.remove('hidden');
+  if (feedback) feedback.classList.add('hidden');
+  organizerIsProcessing = false;
+
+  const startScanner = () => {
+    if (typeof Html5Qrcode === 'undefined') {
+      setTimeout(startScanner, 150);
+      return;
+    }
+    organizerQrScanner = new Html5Qrcode('organizer-qr-reader');
+    organizerQrScanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 220, height: 220 } },
+      onOrganizerQrSuccess,
+      () => {}
+    ).then(() => {
+      if (loading) loading.classList.add('hidden');
+    }).catch(err => {
+      if (loading) loading.classList.add('hidden');
+      showOrganizerScanFeedback('error', 'Kamera Tidak Tersedia', 'Pastikan izin akses kamera diberikan atau periksa perangkat Anda.');
+    });
+  };
+
+  if (!window.html5QrCodeLoaded) {
+    const s = document.createElement('script');
+    s.src = '/vendor/html5-qrcode/html5-qrcode.min.js';
+    s.onload = () => {
+      window.html5QrCodeLoaded = true;
+      startScanner();
+    };
+    document.head.appendChild(s);
+  } else {
+    startScanner();
+  }
+}
+
+function closeOrganizerScannerModal() {
+  const modal = document.getElementById('modal-organizer-scanner');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+  if (organizerQrScanner) {
+    organizerQrScanner.stop().catch(() => {}).then(() => {
+      organizerQrScanner.clear();
+      organizerQrScanner = null;
+    });
+  }
+  organizerIsProcessing = false;
+}
+
+function onOrganizerQrSuccess(decodedText) {
+  if (organizerIsProcessing) return;
+  organizerIsProcessing = true;
+
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+  const url = "{{ route('organizer.workspace.quick_checkin', ['event' => $event->id]) }}";
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': csrf,
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({ code: decodedText, source: 'camera' })
+  })
+  .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, body: data })))
+  .then(result => {
+    const data = result.body;
+    if (result.ok && data.status === 'success') {
+      showOrganizerScanFeedback('success', 'Check-in Berhasil', data.message, data.registration);
+      if (data.registration && data.registration.id) {
+        const cell = document.getElementById('checkin-cell-' + data.registration.id);
+        if (cell) {
+          cell.innerHTML = '<div class="flex flex-col gap-0.5"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit"><svg class="size-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>Sudah Check-in (' + (data.registration.checked_in_at || '') + ')</span></span><span class="text-[10px] text-slate-400 font-mono">' + (data.registration.check_in_gate || 'Scan QR Pass') + '</span></div>';
+        }
+      }
+      setTimeout(() => { organizerIsProcessing = false; }, 2200);
+    } else if (data.status === 'already_checked_in' || data.status === 'already_attended') {
+      showOrganizerScanFeedback('warning', 'Sudah Check-in', data.message, data.registration);
+      setTimeout(() => { organizerIsProcessing = false; }, 2200);
+    } else {
+      showOrganizerScanFeedback('error', 'Check-in Gagal', data.message || 'Data peserta tidak valid.');
+      setTimeout(() => { organizerIsProcessing = false; }, 2200);
+    }
+  })
+  .catch(() => {
+    showOrganizerScanFeedback('error', 'Koneksi Gagal', 'Gagal memverifikasi ke server. Silakan coba kembali.');
+    setTimeout(() => { organizerIsProcessing = false; }, 2200);
+  });
+}
+
+function showOrganizerScanFeedback(type, title, desc, reg) {
+  const feedback = document.getElementById('organizer-scan-feedback');
+  const icon = document.getElementById('organizer-scan-status-icon');
+  const titleEl = document.getElementById('organizer-scan-status-title');
+  const descEl = document.getElementById('organizer-scan-status-desc');
+  const details = document.getElementById('organizer-scan-details');
+  const detailCode = document.getElementById('organizer-scan-detail-code');
+  const detailTime = document.getElementById('organizer-scan-detail-time');
+
+  if (!feedback) return;
+  feedback.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-amber-50', 'border-amber-200', 'text-amber-800', 'bg-rose-50', 'border-rose-200', 'text-rose-800');
+
+  if (type === 'success') {
+    feedback.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+    icon.innerHTML = '<svg class="size-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+  } else if (type === 'warning') {
+    feedback.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-800');
+    icon.innerHTML = '<svg class="size-4 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  } else {
+    feedback.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-800');
+    icon.innerHTML = '<svg class="size-4 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+  }
+
+  titleEl.textContent = title;
+  descEl.textContent = desc;
+
+  if (reg && details) {
+    details.classList.remove('hidden');
+    detailCode.textContent = reg.registration_code + (reg.qr_pass ? ' #' + reg.qr_pass : '');
+    detailTime.textContent = reg.checked_in_at || '';
+  } else if (details) {
+    details.classList.add('hidden');
   }
 }
 </script>

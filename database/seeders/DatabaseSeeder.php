@@ -184,16 +184,14 @@ class DatabaseSeeder extends Seeder
             [
                 'title' => 'Simposium Nasional Telemedicine & Regulasi Medis 2026',
                 'category' => 'Kedokteran & Kesehatan',
-                'format' => 'hybrid',
-                'location' => 'Ruang Rinjani 2, Hotel Borobudur Jakarta / Akses Zoom Terhubung',
+                'format' => 'offline',
+                'location' => 'Ruang Rinjani 2, Hotel Borobudur Jakarta',
                 'start_date' => $today,
                 'end_date' => $today,
                 'start_time' => '08:30:00',
                 'end_time' => '16:00:00',
                 'quota' => 400,
                 'price' => 350000,
-                'skp_points' => 8,
-                'sk_number' => '044/PB-IDI/SKP/XI/2026',
                 'description' => 'Simposium akreditasi resmi PB IDI membahas regulasi terbaru praktik telekonsultasi, tanggung jawab hukum tenaga medis, dan standardisasi keamanan rekam medis elektronik terintegrasi SatuSehat.',
                 'status' => 'published',
                 'organizer_type' => 'internal',
@@ -215,8 +213,6 @@ class DatabaseSeeder extends Seeder
                 'end_time' => '15:30:00',
                 'quota' => 150,
                 'price' => 0,
-                'skp_points' => 32,
-                'sk_number' => 'BNSP-TI-2026-881',
                 'description' => 'Pelatihan intensif 32 jam pembelajaran bersertifikasi kompetensi BNSP mengenai pembuatan model deep learning untuk analisis citra radiologi diagnostik dan pemetaan tabular rekam medis.',
                 'status' => 'published',
                 'organizer_type' => 'partner',
@@ -239,8 +235,6 @@ class DatabaseSeeder extends Seeder
                 'end_time' => '17:00:00',
                 'quota' => 600,
                 'price' => 450000,
-                'skp_points' => 12,
-                'sk_number' => '089/PB-IDI/SKP/XII/2026',
                 'description' => 'Konferensi tahunan pemangku kebijakan rumah sakit dan puskesmas dalam percepatan implementasi rekam medik elektronik serta interoperabilitas data rujukan tingkat lanjut.',
                 'status' => 'published',
                 'organizer_type' => 'internal',
@@ -261,8 +255,6 @@ class DatabaseSeeder extends Seeder
                 'end_time' => '16:30:00',
                 'quota' => 300,
                 'price' => 175000,
-                'skp_points' => 6,
-                'sk_number' => 'HK-MED-2026-012',
                 'description' => 'Kajian komprehensif undang-undang pelindungan data pribadi (UU PDP) dalam tata kelola basis data fasilitas kesehatan dan mitigasi risiko kebocoran data medis.',
                 'status' => 'published',
                 'organizer_type' => 'partner',
@@ -285,8 +277,6 @@ class DatabaseSeeder extends Seeder
                 'end_time' => '15:00:00',
                 'quota' => 250,
                 'price' => 150000,
-                'skp_points' => 16,
-                'sk_number' => 'EKB-STARTUP-2026-005',
                 'description' => 'Strategi validasi ide produk digital, perancangan unit economics, product-market fit, dan teknik pitching pendanaan ventura bagi perintis startup teknologi.',
                 'status' => 'published',
                 'organizer_type' => 'internal',
@@ -355,9 +345,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0104',
                 'qr_pass' => 'PASS-9982-AMANDA',
                 'payment_status' => 'paid',
-                'attendance_status' => 'attended',
+                'is_checked_in' => true,
                 'checked_in_at' => $today->copy()->setTime(8, 24, 12),
                 'check_in_gate' => 'Pintu Aula Utama',
+                'attendance_status' => 'attended',
+                'attended_at' => $today->copy()->setTime(9, 5, 0),
+                'attendance_gate' => 'Scan QR Sesi Aula',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -369,11 +362,14 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'registration_code' => 'REG-2026-0205',
-                'qr_pass' => 'PASS-3341-AMANDA',
+                'qr_pass' => null,
                 'payment_status' => 'free',
+                'is_checked_in' => false,
+                'checked_in_at' => null,
+                'check_in_gate' => null,
                 'attendance_status' => 'attended',
-                'checked_in_at' => $today->copy()->setTime(8, 50, 0),
-                'check_in_gate' => 'Gerbang Virtual Zoom',
+                'attended_at' => $today->copy()->setTime(9, 15, 0),
+                'attendance_gate' => 'Presensi Mandiri Online',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -387,9 +383,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0301',
                 'qr_pass' => 'PASS-0301-AMANDA',
                 'payment_status' => 'free',
-                'attendance_status' => 'attended',
+                'is_checked_in' => true,
                 'checked_in_at' => $today->copy()->setTime(9, 10, 0),
                 'check_in_gate' => 'Pintu Gerbang Utama RME',
+                'attendance_status' => 'attended',
+                'attended_at' => $today->copy()->setTime(9, 40, 0),
+                'attendance_gate' => 'Scan QR Sesi Aula',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -403,9 +402,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0302',
                 'qr_pass' => 'PASS-0302-BUDI',
                 'payment_status' => 'free',
-                'attendance_status' => 'attended',
+                'is_checked_in' => true,
                 'checked_in_at' => $today->copy()->setTime(9, 15, 0),
                 'check_in_gate' => 'Pintu Gerbang Utama RME',
+                'attendance_status' => 'attended',
+                'attended_at' => $today->copy()->setTime(9, 45, 0),
+                'attendance_gate' => 'Scan QR Sesi Aula',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -419,9 +421,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0105',
                 'qr_pass' => 'PASS-5512-BUDI',
                 'payment_status' => 'paid',
-                'attendance_status' => 'attended',
+                'is_checked_in' => true,
                 'checked_in_at' => $today->copy()->setTime(8, 26, 40),
                 'check_in_gate' => 'Pintu Aula Utama',
+                'attendance_status' => 'attended',
+                'attended_at' => $today->copy()->setTime(9, 8, 0),
+                'attendance_gate' => 'Scan QR Sesi Aula',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -435,9 +440,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0106',
                 'qr_pass' => 'PASS-7819-NUR',
                 'payment_status' => 'paid',
-                'attendance_status' => 'unattended',
+                'is_checked_in' => false,
                 'checked_in_at' => null,
                 'check_in_gate' => null,
+                'attendance_status' => 'unattended',
+                'attended_at' => null,
+                'attendance_gate' => null,
                 'evaluation_status' => 'pending',
             ]
         );
@@ -451,9 +459,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0107',
                 'qr_pass' => 'PASS-2290-RIZKY',
                 'payment_status' => 'paid',
-                'attendance_status' => 'attended',
+                'is_checked_in' => true,
                 'checked_in_at' => $today->copy()->setTime(8, 30, 18),
                 'check_in_gate' => 'Pintu Aula Utama',
+                'attendance_status' => 'attended',
+                'attended_at' => $today->copy()->setTime(9, 12, 0),
+                'attendance_gate' => 'Scan QR Sesi Aula',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -467,9 +478,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0108',
                 'qr_pass' => 'PASS-6614-DEWI',
                 'payment_status' => 'paid',
-                'attendance_status' => 'attended',
+                'is_checked_in' => true,
                 'checked_in_at' => $today->copy()->setTime(8, 32, 44),
                 'check_in_gate' => 'Pintu Aula Timur',
+                'attendance_status' => 'attended',
+                'attended_at' => $today->copy()->setTime(9, 14, 0),
+                'attendance_gate' => 'Scan QR Sesi Aula',
                 'evaluation_status' => 'completed',
             ]
         );
@@ -483,9 +497,12 @@ class DatabaseSeeder extends Seeder
                 'registration_code' => 'REG-2026-0109',
                 'qr_pass' => 'PASS-9081-FAUZI',
                 'payment_status' => 'paid',
-                'attendance_status' => 'unattended',
+                'is_checked_in' => false,
                 'checked_in_at' => null,
                 'check_in_gate' => null,
+                'attendance_status' => 'unattended',
+                'attended_at' => null,
+                'attendance_gate' => null,
                 'evaluation_status' => 'pending',
             ]
         );
@@ -495,10 +512,10 @@ class DatabaseSeeder extends Seeder
             [
                 'user_id' => $amanda->id,
                 'event_id' => $event1->id,
-                'certificate_number' => 'SKP-2026-X-091',
+                'certificate_number' => 'CERT-2026-X-091',
                 'verify_hash' => 'EVT-4409-771B',
                 'issued_at' => $today->copy()->setTime(16, 30, 0),
-                'download_url' => '/storage/certificates/SKP-2026-X-091.pdf',
+                'download_url' => '/storage/certificates/CERT-2026-X-091.pdf',
             ]
         );
 
@@ -519,10 +536,10 @@ class DatabaseSeeder extends Seeder
             [
                 'user_id' => $budi->id,
                 'event_id' => $event1->id,
-                'certificate_number' => 'SKP-2026-X-092',
+                'certificate_number' => 'CERT-2026-X-092',
                 'verify_hash' => 'EVT-4409-772C',
                 'issued_at' => $today->copy()->setTime(16, 30, 0),
-                'download_url' => '/storage/certificates/SKP-2026-X-092.pdf',
+                'download_url' => '/storage/certificates/CERT-2026-X-092.pdf',
             ]
         );
 
@@ -531,10 +548,10 @@ class DatabaseSeeder extends Seeder
             [
                 'user_id' => $rizky->id,
                 'event_id' => $event1->id,
-                'certificate_number' => 'SKP-2026-X-093',
+                'certificate_number' => 'CERT-2026-X-093',
                 'verify_hash' => 'EVT-4409-773D',
                 'issued_at' => $today->copy()->setTime(16, 30, 0),
-                'download_url' => '/storage/certificates/SKP-2026-X-093.pdf',
+                'download_url' => '/storage/certificates/CERT-2026-X-093.pdf',
             ]
         );
 
@@ -543,10 +560,10 @@ class DatabaseSeeder extends Seeder
             [
                 'user_id' => $dewi->id,
                 'event_id' => $event1->id,
-                'certificate_number' => 'SKP-2026-X-094',
+                'certificate_number' => 'CERT-2026-X-094',
                 'verify_hash' => 'EVT-4409-774E',
                 'issued_at' => $today->copy()->setTime(16, 30, 0),
-                'download_url' => '/storage/certificates/SKP-2026-X-094.pdf',
+                'download_url' => '/storage/certificates/CERT-2026-X-094.pdf',
             ]
         );
     }
