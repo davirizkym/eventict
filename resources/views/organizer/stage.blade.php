@@ -29,7 +29,7 @@
     <div class="p-6 sm:p-8 md:p-10 bg-white rounded-3xl border-2 border-slate-200 shadow-md flex items-center justify-center cursor-pointer" onclick="toggleFullscreen()">
         <img 
             id="qr-image"
-            src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=10&data={{ urlencode(route('events.presence', $event->slug)) }}" 
+            src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=10&data={{ urlencode(route('events.presence', ['slug' => $event->slug, 'token' => $event->presence_token])) }}" 
             alt="QR Code Presensi {{ $event->title }}"
             class="size-72 sm:size-88 md:size-[450px] lg:size-[520px] max-w-[85vw] max-h-[85vh] object-contain rounded-2xl bg-white select-none"
             loading="eager"

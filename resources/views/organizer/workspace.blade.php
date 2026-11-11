@@ -110,12 +110,16 @@
               {{ $event->category }}
             </span>
           @endif
-          <span class="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-blue-50 text-blue-900 border border-blue-100">
-            {{ $event->format }}
+          <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-900 border border-blue-100">
+            {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
           </span>
           @if(($event->organizer_type ?? 'internal') === 'partner')
             <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-              Partner: {{ $event->organizer_name }}
+              Penyelenggara: {{ $event->organizer_name }}
+            </span>
+          @else
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-50 text-slate-700 border border-slate-200">
+              Penyelenggara: Laboratorium ICT
             </span>
           @endif
           @if($event->quota > 0 && $totalRegistrations >= $event->quota)
@@ -437,7 +441,7 @@
           <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-2 min-w-0">
               <span class="text-slate-500 font-medium shrink-0">Tautan Presensi Peserta:</span>
-              <span id="session-presence-url" class="font-mono text-blue-950 font-semibold truncate">{{ route('events.presence', $event->slug) }}</span>
+              <span id="session-presence-url" class="font-mono text-blue-950 font-semibold truncate">{{ $event->presence_token ? route('events.presence', ['slug' => $event->slug, 'token' => $event->presence_token]) : route('events.presence', $event->slug) }}</span>
             </div>
             <button type="button" onclick="copySessionUrl()" id="btn-copy-url" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-medium transition flex items-center gap-1.5 shrink-0 cursor-pointer shadow-2xs">
               <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -581,6 +585,9 @@
                       <div class="flex flex-col">
                         <span class="font-semibold text-slate-900">{{ $reg->user->name ?? '-' }}</span>
                         <span class="text-slate-400 text-[11px]">{{ $reg->user->email ?? '-' }}</span>
+                        @if(!empty($reg->user->nik))
+                          <span class="text-slate-500 font-mono text-[10px]">NIM/NIP/NIS: {{ $reg->user->nik }}</span>
+                        @endif
                       </div>
                     </td>
                     <td class="px-4 py-3 text-slate-600">
@@ -725,7 +732,7 @@
           <div class="flex flex-col gap-1">
             <h3 class="text-sm font-bold text-slate-900">Upload Sertifikat Massal untuk Kegiatan Ini</h3>
             <p class="text-xs text-slate-500 leading-relaxed">
-              Pilih satu atau banyak berkas PDF sertifikat secara bersamaan. Sistem otomatis mencocokkan nama berkas dengan No. Registrasi, Email, atau QR Pass peserta.
+              Pilih satu atau banyak berkas PDF sertifikat secara bersamaan. Sistem otomatis mencocokkan nama berkas dengan NIM/NIP/NIS, No. Registrasi, Email, atau QR Pass peserta.
             </p>
           </div>
 
@@ -751,15 +758,6 @@
                   Ganti
                 </button>
               </div>
-            </div>
-
-            <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-2 text-xs">
-              <span class="font-semibold text-blue-950">Aturan Penamaan Berkas Otomatis:</span>
-              <ul class="text-slate-600 flex flex-col gap-1 list-disc list-inside">
-                <li>Berdasarkan Nomor Registrasi: <code class="bg-white px-1.5 py-0.5 rounded text-blue-950 font-mono">REG-2026-0001.pdf</code></li>
-                <li>Berdasarkan Email Peserta: <code class="bg-white px-1.5 py-0.5 rounded text-blue-950 font-mono">peserta@budi-luhur.ac.id.pdf</code></li>
-                <li>Berdasarkan QR Pass: <code class="bg-white px-1.5 py-0.5 rounded text-blue-950 font-mono">PASS-1234-USER.pdf</code></li>
-              </ul>
             </div>
 
             <div class="flex justify-end">
@@ -810,6 +808,9 @@
                     <td class="px-4 py-3">
                       <div class="font-bold text-slate-900">{{ $reg->user->name }}</div>
                       <div class="text-[11px] text-slate-500">{{ $reg->user->email }}</div>
+                      @if(!empty($reg->user->nik))
+                        <div class="text-[10px] text-slate-500 font-mono">NIM/NIP/NIS: {{ $reg->user->nik }}</div>
+                      @endif
                       @if($reg->user->institution)
                         <div class="text-[10px] text-slate-400 mt-0.5 truncate max-w-xs">{{ $reg->user->institution }}</div>
                       @endif
@@ -1045,16 +1046,16 @@
                 <label class="font-semibold text-slate-700">Penyelenggara Kegiatan</label>
                 <select name="organizer_type" onchange="toggleEditPartnerName(this.value)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
                   <option value="internal" {{ ($event->organizer_type ?? 'internal') === 'internal' ? 'selected' : '' }}>Internal (Laboratorium ICT)</option>
-                  <option value="partner" {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'selected' : '' }}>Media Partner (Himpunan / BEM / Eksternal)</option>
+                  <option value="partner" {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'selected' : '' }}>Mitra Penyelenggara (Himpunan / BEM / Eksternal)</option>
                 </select>
               </div>
               <div id="edit-partner-name-container" class="{{ ($event->organizer_type ?? 'internal') === 'partner' ? '' : 'hidden' }} flex flex-col gap-1.5">
                 <div class="flex items-center justify-between">
-                  <label class="font-semibold text-slate-700">Pilih Media Partner</label>
+                  <label class="font-semibold text-slate-700">Pilih Mitra Penyelenggara</label>
                   <a href="{{ route('organizer.media_partners.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola Data</a>
                 </div>
                 <select name="media_partner_id" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-                  <option value="" disabled {{ empty($event->media_partner_id) ? 'selected' : '' }}>-- Pilih Media Partner --</option>
+                  <option value="" disabled {{ empty($event->media_partner_id) ? 'selected' : '' }}>-- Pilih Mitra Penyelenggara --</option>
                   @foreach($allMediaPartners as $mp)
                     <option value="{{ $mp->id }}" {{ $event->media_partner_id == $mp->id || $event->organizer_name === $mp->name ? 'selected' : '' }}>
                       {{ $mp->name }}
@@ -1062,6 +1063,32 @@
                   @endforeach
                 </select>
               </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <label class="font-semibold text-slate-700">Media Partner Pendukung Acara</label>
+                <a href="{{ route('organizer.media_partners.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola Master Media Partner</a>
+              </div>
+              @if($allMediaPartners->isNotEmpty())
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-48 overflow-y-auto p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                  @foreach($allMediaPartners as $mp)
+                    <label class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-slate-200/80 hover:border-blue-900 cursor-pointer transition text-xs">
+                      <input type="checkbox" name="media_partner_ids[]" value="{{ $mp->id }}" {{ $event->mediaPartners->contains($mp->id) ? 'checked' : '' }} class="size-4 rounded text-blue-950 focus:ring-blue-950 border-slate-300">
+                      <div class="size-7 rounded-md bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                        @if($mp->logo)
+                          <img src="{{ asset($mp->logo) }}" alt="{{ $mp->name }}" class="size-full object-contain p-0.5">
+                        @else
+                          <span class="text-[10px] font-bold text-slate-400 uppercase">{{ substr($mp->name, 0, 2) }}</span>
+                        @endif
+                      </div>
+                      <span class="font-medium text-slate-800 truncate">{{ $mp->name }}</span>
+                    </label>
+                  @endforeach
+                </div>
+              @else
+                <p class="text-xs text-slate-400">Belum ada master media partner terdaftar.</p>
+              @endif
             </div>
 
             <div class="flex flex-col gap-1.5">
@@ -1330,7 +1357,7 @@
           <select id="single-cert-select-reg" onchange="onSingleCertSelectChange(this)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 text-xs font-medium text-slate-800 cursor-pointer">
             <option value="">-- Pilih Peserta --</option>
             @foreach($registrations as $r)
-              <option value="{{ $r->id }}">{{ $r->user->name }} ({{ $r->registration_code }}) - {{ $r->attendance_status === 'attended' ? 'Hadir' : 'Belum Hadir' }}</option>
+              <option value="{{ $r->id }}">{{ $r->user->name }}@if(!empty($r->user->nik)) - {{ $r->user->nik }}@endif ({{ $r->registration_code }}) - {{ $r->attendance_status === 'attended' ? 'Hadir' : 'Belum Hadir' }}</option>
             @endforeach
           </select>
         </div>

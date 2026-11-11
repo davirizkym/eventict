@@ -35,7 +35,6 @@ class OrganizerWorkspaceTest extends TestCase
             'quota' => 50,
             'price' => 100000,
             'status' => 'published',
-            'skp_points' => 2,
         ]);
 
         $peserta = User::factory()->create(['role' => 'peserta']);
@@ -444,5 +443,56 @@ class OrganizerWorkspaceTest extends TestCase
         $this->assertNotNull($cert);
         $this->assertNotNull($cert->verify_hash);
         $this->assertNotNull($cert->download_url);
+    }
+
+    public function test_workspace_search_by_nim_nip_nis_and_csv_export_includes_nim_column(): void
+    {
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+        $event = Event::create([
+            'title' => 'Seminar Big Data 2026',
+            'slug' => 'seminar-big-data-2026',
+            'category' => 'Seminar',
+            'format' => 'online',
+            'start_date' => now()->addDays(2),
+            'end_date' => now()->addDays(2),
+            'start_time' => '09:00:00',
+            'end_time' => '12:00:00',
+            'quota' => 100,
+            'price' => 0,
+            'status' => 'published',
+        ]);
+
+        $peserta = User::factory()->create([
+            'role' => 'peserta',
+            'name' => 'Fadhil Pratama',
+            'nik' => '2210511055',
+        ]);
+
+        Registration::create([
+            'user_id' => $peserta->id,
+            'event_id' => $event->id,
+            'registration_code' => 'REG-BIGDATA-55',
+            'payment_status' => 'free',
+            'attendance_status' => 'unattended',
+        ]);
+
+        $searchResponse = $this->actingAs($panitia)->get(route('organizer.workspace', [
+            'event' => $event->id,
+            'tab' => 'peserta',
+            'q' => '2210511055',
+        ]));
+        $searchResponse->assertStatus(200);
+        $searchResponse->assertSee('Fadhil Pratama');
+        $searchResponse->assertSee('NIM/NIP/NIS: 2210511055');
+
+        $exportResponse = $this->actingAs($panitia)->get(route('organizer.workspace.export', $event->id));
+        $exportResponse->assertStatus(200);
+
+        ob_start();
+        $exportResponse->sendContent();
+        $csvContent = ob_get_clean();
+
+        $this->assertStringContainsString('NIM / NIP / NIS', $csvContent);
+        $this->assertStringContainsString('2210511055', $csvContent);
     }
 }

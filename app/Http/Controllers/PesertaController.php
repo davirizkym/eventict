@@ -29,13 +29,24 @@ class PesertaController extends Controller
 
         $certificates = Certificate::with('event')
             ->where('user_id', $user->id)
+            ->whereHas('registration', function ($rq) {
+                $rq->where('attendance_status', 'attended');
+            })
             ->latest('issued_at')
             ->get();
 
         $registeredEventIds = $registrations->pluck('event_id')->toArray();
 
         $eventsQuery = Event::with('speakers')
-            ->withCount('registrations')
+            ->withCount(['registrations' => function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereIn('payment_status', ['paid', 'free'])
+                        ->orWhere(function ($pq) {
+                            $pq->where('payment_status', 'pending')
+                               ->where('created_at', '>=', now()->subMinutes(10));
+                        });
+                });
+            }])
             ->where('status', '!=', 'draft')
             ->whereNotIn('id', $registeredEventIds);
 
@@ -54,8 +65,8 @@ class PesertaController extends Controller
 
         $allAvailable = $eventsQuery->get();
 
-        $availableEvents = $allAvailable->sortBy(function ($event) use ($today) {
-            $isPassed = $event->status === 'completed' || ($event->end_date ? $event->end_date->toDateString() < $today : ($event->start_date ? $event->start_date->toDateString() < $today : false));
+        $availableEvents = $allAvailable->sortBy(function ($event) {
+            $isPassed = $event->isPassed();
             $dateTimestamp = $event->start_date ? $event->start_date->timestamp : 0;
             return [
                 $isPassed ? 1 : 0,
@@ -78,7 +89,7 @@ class PesertaController extends Controller
             'password' => 'nullable|string|min:8|confirmed',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
-            'nik.max' => 'NIM / NIP maksimal 20 karakter.',
+            'nik.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
             'password.min' => 'Kata sandi baru minimal 8 karakter.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
         ]);
@@ -108,8 +119,15 @@ class PesertaController extends Controller
             abort(403);
         }
 
-        if ($registration->payment_status !== 'pending') {
-            return back()->with('error', 'Hanya pendaftaran yang berstatus belum dibayar yang dapat dibatalkan.');
+        $canCancel = $registration->payment_status === 'pending' || (
+            $registration->payment_status === 'free' &&
+            !$registration->is_checked_in &&
+            $registration->attendance_status !== 'attended' &&
+            (!$registration->event->start_date || $registration->event->start_date->toDateString() >= now()->toDateString())
+        );
+
+        if (!$canCancel) {
+            return back()->with('error', 'Pendaftaran tidak dapat dibatalkan.');
         }
 
         $eventTitle = $registration->event->title ?? 'kegiatan';
@@ -157,6 +175,18 @@ class PesertaController extends Controller
             ], 422);
         }
 
+        $scannedToken = null;
+        if (preg_match('/[?&]token=([^&#]+)/', $qrData, $tokenMatches)) {
+            $scannedToken = $tokenMatches[1];
+        }
+
+        if (!empty($event->presence_token) && !empty($scannedToken) && $scannedToken !== $event->presence_token) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token QR Presensi sudah kedaluwarsa atau tidak valid.',
+            ], 422);
+        }
+
         $registration = Registration::where('user_id', $user->id)
             ->where('event_id', $event->id)
             ->first();
@@ -172,6 +202,13 @@ class PesertaController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Tiket Anda untuk kegiatan "' . $event->title . '" belum aktif karena pembayaran belum diselesaikan.',
+            ], 422);
+        }
+
+        if ($event->format === 'offline' && !$registration->is_checked_in) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda belum melakukan registrasi ulang (check-in) di lokasi kegiatan. Silakan tunjukkan QR Pass Anda ke panitia di meja registrasi terlebih dahulu.',
             ], 422);
         }
 

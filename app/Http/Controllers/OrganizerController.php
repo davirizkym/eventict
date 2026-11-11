@@ -95,6 +95,8 @@ class OrganizerController extends Controller
             'organizer_type' => 'nullable|in:internal,partner',
             'media_partner_id' => 'nullable|exists:media_partners,id',
             'organizer_name' => 'nullable|string|max:255',
+            'media_partner_ids' => 'nullable|array',
+            'media_partner_ids.*' => 'exists:media_partners,id',
             'description' => 'required|string',
             'speaker_ids' => 'required_without:speaker_id|array|min:1',
             'speaker_ids.*' => 'required|distinct|exists:speakers,id',
@@ -203,8 +205,11 @@ class OrganizerController extends Controller
             'organizer_name' => $organizerName,
             'description' => $validated['description'],
             'status' => 'published',
-            'skp_points' => 0,
         ]);
+
+        if ($request->has('media_partner_ids')) {
+            $event->mediaPartners()->sync($request->input('media_partner_ids', []));
+        }
 
         $speakerIds = $request->input('speaker_ids', []);
         $speakerRoles = $request->input('speaker_roles', []);
@@ -281,6 +286,7 @@ class OrganizerController extends Controller
                     ->orWhere('qr_pass', 'like', "%{$keyword}%")
                     ->orWhereHas('user', function ($uq) use ($keyword) {
                         $uq->where('name', 'like', "%{$keyword}%")
+                            ->orWhere('nik', 'like', "%{$keyword}%")
                             ->orWhere('institution', 'like', "%{$keyword}%")
                             ->orWhere('email', 'like', "%{$keyword}%")
                             ->orWhere('phone', 'like', "%{$keyword}%");
@@ -314,6 +320,8 @@ class OrganizerController extends Controller
             ->where('id', '!=', $event->id)
             ->orderBy('start_date', 'asc')
             ->get();
+
+        $event->load('mediaPartners');
 
         return view('organizer.workspace', compact(
             'event',
@@ -350,6 +358,8 @@ class OrganizerController extends Controller
             'organizer_type' => 'nullable|in:internal,partner',
             'media_partner_id' => 'nullable|exists:media_partners,id',
             'organizer_name' => 'nullable|string|max:255',
+            'media_partner_ids' => 'nullable|array',
+            'media_partner_ids.*' => 'exists:media_partners,id',
             'description' => 'required|string',
             'status' => 'required|in:published,draft,completed',
             'virtual_meeting_url' => 'nullable|url|max:255',
@@ -403,6 +413,10 @@ class OrganizerController extends Controller
         }
 
         $event->update($validated);
+
+        if ($request->has('media_partner_ids')) {
+            $event->mediaPartners()->sync($request->input('media_partner_ids', []));
+        }
 
         return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'pengaturan'])
             ->with('success', 'Pengaturan kegiatan berhasil diperbarui.');
@@ -492,7 +506,8 @@ class OrganizerController extends Controller
                     ->orWhere('registration_code', $cleanToken)
                     ->orWhere('qr_pass', $token)
                     ->orWhereHas('user', function ($uq) use ($token) {
-                        $uq->where('email', $token);
+                        $uq->where('email', $token)
+                            ->orWhere('nik', $token);
                     });
             })
             ->first();
@@ -658,6 +673,7 @@ class OrganizerController extends Controller
                 'No.',
                 'No. Registrasi',
                 'Nama Peserta',
+                'NIM / NIP / NIS',
                 'Email',
                 'Instansi / Universitas',
                 'No. Telepon',
@@ -675,6 +691,7 @@ class OrganizerController extends Controller
                     $index + 1,
                     $reg->registration_code,
                     $reg->user->name ?? '-',
+                    $reg->user->nik ?? '-',
                     $reg->user->email ?? '-',
                     $reg->user->institution ?? '-',
                     $reg->user->phone ?? '-',
@@ -706,15 +723,22 @@ class OrganizerController extends Controller
         foreach ($files as $file) {
             $origName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $cleanCode = trim(str_replace('#', '', $origName));
+            $cleanAlphanumeric = preg_replace('/[^a-zA-Z0-9]/', '', $origName);
 
             $registration = Registration::with('certificate')
                 ->where('event_id', $event->id)
-                ->where(function ($q) use ($cleanCode, $origName) {
+                ->where(function ($q) use ($cleanCode, $origName, $cleanAlphanumeric) {
                     $q->where('registration_code', $origName)
                         ->orWhere('registration_code', $cleanCode)
                         ->orWhere('qr_pass', $origName)
-                        ->orWhereHas('user', function ($uq) use ($origName) {
-                            $uq->where('email', $origName);
+                        ->orWhereHas('user', function ($uq) use ($origName, $cleanCode, $cleanAlphanumeric) {
+                            $uq->where('email', $origName)
+                                ->orWhere('nik', $origName)
+                                ->orWhere('nik', $cleanCode);
+                            if (!empty($cleanAlphanumeric)) {
+                                $uq->orWhere('nik', $cleanAlphanumeric)
+                                   ->orWhereRaw("REPLACE(REPLACE(REPLACE(nik, '.', ''), '-', ''), ' ', '') = ?", [$cleanAlphanumeric]);
+                            }
                         });
                 })
                 ->first();
@@ -741,6 +765,14 @@ class OrganizerController extends Controller
                     'issued_at' => now(),
                 ]
             );
+
+            if ($registration->attendance_status !== 'attended') {
+                $registration->update([
+                    'attendance_status' => 'attended',
+                    'attended_at' => now(),
+                    'attendance_gate' => 'Validasi Sertifikat',
+                ]);
+            }
 
             $uploadedCount++;
         }
@@ -1011,6 +1043,7 @@ class OrganizerController extends Controller
                 'No.',
                 'No. Registrasi',
                 'Nama Peserta',
+                'NIM / NIP / NIS',
                 'Email',
                 'Instansi / Universitas',
                 'No. Telepon',
@@ -1028,6 +1061,7 @@ class OrganizerController extends Controller
                     $index + 1,
                     $reg->registration_code,
                     $reg->user->name ?? '-',
+                    $reg->user->nik ?? '-',
                     $reg->user->email ?? '-',
                     $reg->user->institution ?? '-',
                     $reg->user->phone ?? '-',
@@ -1065,7 +1099,8 @@ class OrganizerController extends Controller
                 ->orWhere('registration_code', $cleanToken)
                 ->orWhere('qr_pass', $token)
                 ->orWhereHas('user', function ($uq) use ($token) {
-                    $uq->where('email', $token);
+                    $uq->where('email', $token)
+                        ->orWhere('nik', $token);
                 });
         });
 
@@ -1121,6 +1156,14 @@ class OrganizerController extends Controller
             ]
         );
 
+        if ($registration->attendance_status !== 'attended') {
+            $registration->update([
+                'attendance_status' => 'attended',
+                'attended_at' => now(),
+                'attendance_gate' => 'Validasi Sertifikat',
+            ]);
+        }
+
         return redirect()->route('organizer.workspace', ['event' => $registration->event_id, 'tab' => 'sertifikat'])
             ->with('success', "Sertifikat untuk {$registration->user->name} ({$registration->registration_code}) berhasil diunggah.");
     }
@@ -1139,18 +1182,25 @@ class OrganizerController extends Controller
         foreach ($files as $file) {
             $origName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $cleanCode = trim(str_replace('#', '', $origName));
+            $cleanAlphanumeric = preg_replace('/[^a-zA-Z0-9]/', '', $origName);
 
             $query = Registration::with('certificate');
             if ($request->filled('event_id') && $request->event_id !== 'all') {
                 $query->where('event_id', $request->event_id);
             }
 
-            $registration = $query->where(function ($q) use ($cleanCode, $origName) {
+            $registration = $query->where(function ($q) use ($cleanCode, $origName, $cleanAlphanumeric) {
                 $q->where('registration_code', $origName)
                     ->orWhere('registration_code', $cleanCode)
                     ->orWhere('qr_pass', $origName)
-                    ->orWhereHas('user', function ($uq) use ($origName) {
-                        $uq->where('email', $origName);
+                    ->orWhereHas('user', function ($uq) use ($origName, $cleanCode, $cleanAlphanumeric) {
+                        $uq->where('email', $origName)
+                            ->orWhere('nik', $origName)
+                            ->orWhere('nik', $cleanCode);
+                        if (!empty($cleanAlphanumeric)) {
+                            $uq->orWhere('nik', $cleanAlphanumeric)
+                               ->orWhereRaw("REPLACE(REPLACE(REPLACE(nik, '.', ''), '-', ''), ' ', '') = ?", [$cleanAlphanumeric]);
+                        }
                     });
             })->first();
 
@@ -1176,6 +1226,14 @@ class OrganizerController extends Controller
                     'issued_at' => now(),
                 ]
             );
+
+            if ($registration->attendance_status !== 'attended') {
+                $registration->update([
+                    'attendance_status' => 'attended',
+                    'attended_at' => now(),
+                    'attendance_gate' => 'Validasi Sertifikat',
+                ]);
+            }
 
             $uploadedCount++;
         }
@@ -1203,7 +1261,10 @@ class OrganizerController extends Controller
         ]);
 
         $statusText = $newStatus === 'attended' ? 'HADIR SESI' : 'BELUM HADIR';
-        return back()->with('success', "Status presensi {$registration->user->name} diubah menjadi {$statusText}.");
+        $notice = ($newStatus === 'unattended' && $registration->certificate()->exists())
+            ? ' (Akses e-sertifikat peserta otomatis dibekukan karena status presensi diubah menjadi belum hadir)'
+            : '';
+        return back()->with('success', "Status presensi {$registration->user->name} diubah menjadi {$statusText}{$notice}.");
     }
 
     public function toggleCheckin(Registration $registration)
@@ -1374,16 +1435,32 @@ class OrganizerController extends Controller
             'name' => 'required|string|max:150|unique:media_partners,name',
             'institution' => 'nullable|string|max:200',
             'contact_email' => 'required|email|max:150',
+            'website_url' => 'nullable|url|max:255',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:2048',
         ], [
             'name.required' => 'Nama media partner wajib diisi.',
             'name.unique' => 'Nama media partner sudah terdaftar.',
             'contact_email.required' => 'Kontak email wajib diisi.',
             'contact_email.email' => 'Format kontak email tidak valid.',
+            'website_url.url' => 'Format URL tautan web / media sosial tidak valid.',
+            'logo.image' => 'File logo harus berupa gambar.',
+            'logo.mimes' => 'Format logo harus berupa JPEG, PNG, JPG, WebP, atau SVG.',
+            'logo.max' => 'Ukuran file logo maksimal 2MB.',
         ]);
+
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            $filename = 'mp_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('media-partners', $filename, 'public');
+            $logoPath = 'storage/' . $path;
+        }
 
         $mediaPartner = MediaPartner::create([
             'name' => trim($validated['name']),
             'slug' => Str::slug($validated['name']),
+            'logo' => $logoPath,
+            'website_url' => !empty($validated['website_url']) ? trim($validated['website_url']) : null,
             'institution' => $validated['institution'] ?? null,
             'contact_email' => trim($validated['contact_email']),
         ]);
@@ -1398,16 +1475,36 @@ class OrganizerController extends Controller
             'name' => 'required|string|max:150|unique:media_partners,name,' . $mediaPartner->id,
             'institution' => 'nullable|string|max:200',
             'contact_email' => 'required|email|max:150',
+            'website_url' => 'nullable|url|max:255',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:2048',
         ], [
             'name.required' => 'Nama media partner wajib diisi.',
             'name.unique' => 'Nama media partner sudah terdaftar.',
             'contact_email.required' => 'Kontak email wajib diisi.',
             'contact_email.email' => 'Format kontak email tidak valid.',
+            'website_url.url' => 'Format URL tautan web / media sosial tidak valid.',
+            'logo.image' => 'File logo harus berupa gambar.',
+            'logo.mimes' => 'Format logo harus berupa JPEG, PNG, JPG, WebP, atau SVG.',
+            'logo.max' => 'Ukuran file logo maksimal 2MB.',
         ]);
+
+        $logoPath = $mediaPartner->logo;
+        if ($request->hasFile('logo')) {
+            if ($mediaPartner->logo && str_starts_with($mediaPartner->logo, 'storage/media-partners/')) {
+                $oldPath = str_replace('storage/', '', $mediaPartner->logo);
+                Storage::disk('public')->delete($oldPath);
+            }
+            $file = $request->file('logo');
+            $filename = 'mp_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('media-partners', $filename, 'public');
+            $logoPath = 'storage/' . $path;
+        }
 
         $mediaPartner->update([
             'name' => trim($validated['name']),
             'slug' => Str::slug($validated['name']),
+            'logo' => $logoPath,
+            'website_url' => !empty($validated['website_url']) ? trim($validated['website_url']) : null,
             'institution' => $validated['institution'] ?? null,
             'contact_email' => trim($validated['contact_email']),
         ]);
@@ -1421,6 +1518,10 @@ class OrganizerController extends Controller
     public function mediaPartnersDestroy(MediaPartner $mediaPartner)
     {
         $name = $mediaPartner->name;
+        if ($mediaPartner->logo && str_starts_with($mediaPartner->logo, 'storage/media-partners/')) {
+            $oldPath = str_replace('storage/', '', $mediaPartner->logo);
+            Storage::disk('public')->delete($oldPath);
+        }
         Event::where('media_partner_id', $mediaPartner->id)->update(['media_partner_id' => null]);
         $mediaPartner->delete();
 

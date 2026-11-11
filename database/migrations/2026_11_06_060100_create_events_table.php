@@ -21,8 +21,6 @@ return new class extends Migration
             $table->time('end_time');
             $table->unsignedInteger('quota')->default(100);
             $table->unsignedInteger('price')->default(0);
-            $table->unsignedInteger('skp_points')->default(0);
-            $table->string('sk_number')->nullable();
             $table->text('description')->nullable();
             $table->enum('status', ['draft', 'published', 'completed', 'cancelled'])->default('published');
             $table->string('banner_url')->nullable();

@@ -58,7 +58,7 @@ class AuthController extends Controller
             'institution' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:25'],
         ], [
-            'nik.max' => 'NIM / NIP maksimal 20 karakter.',
+            'nik.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
             'email.unique' => 'Alamat email ini sudah terdaftar sebagai pengguna.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
             'password.min' => 'Kata sandi minimal terdiri dari :min karakter.',
@@ -76,6 +76,12 @@ class AuthController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+
+        try {
+            event(new \Illuminate\Auth\Events\Registered($user));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Verification email trigger error: ' . $e->getMessage());
+        }
 
         return $this->redirectBasedOnRole($user);
     }

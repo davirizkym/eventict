@@ -95,7 +95,7 @@
 
                 <div class="flex flex-col gap-1.5">
                   <label for="nik" class="text-xs font-semibold text-slate-700">
-                    NIM / NIP <span class="text-rose-500">*</span>
+                    NIM / NIP / NIS <span class="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -217,7 +217,6 @@
               @endif
             </div>
 
-            <!-- Section 4: Persetujuan Syarat & Ketentuan -->
             <div class="flex flex-col gap-3">
               <label class="flex items-start gap-2.5 cursor-pointer p-3.5 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100/80 transition">
                 <input
@@ -229,8 +228,8 @@
                   {{ old('agree_terms') ? 'checked' : '' }}
                 >
                 <div class="text-xs text-slate-700 leading-relaxed">
-                  <span class="font-semibold text-slate-900">Pernyataan & Persetujuan Peserta:</span>
-                  Saya menyatakan bahwa data identitas di atas adalah benar. Saya memahami bahwa presensi scan QR Pass pada hari kegiatan dan pengisian kuesioner evaluasi merupakan syarat mutlak untuk penerbitan E-Sertifikat.
+                  <span class="font-semibold text-slate-900">Pernyataan & Persetujuan:</span>
+                  Saya menyatakan data di atas benar, siap menaati tata tertib, dan bersedia memenuhi seluruh syarat serta ketentuan kegiatan yang telah ditetapkan panitia.
                 </div>
               </label>
             </div>
@@ -253,15 +252,9 @@
         </div>
       </div>
 
-      <!-- Kolom Kanan: Ringkasan Sesi Kegiatan (Sticky) -->
       <div class="flex flex-col gap-6 lg:sticky lg:top-24 font-['Poppins']">
         <div class="bg-gradient-to-br from-blue-950 to-slate-900 text-white rounded-2xl p-6 shadow-xs flex flex-col gap-4">
           <div class="flex flex-wrap items-center gap-2">
-            @if($event->skp_points > 0)
-              <span class="px-2.5 py-0.5 bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 text-xs font-semibold rounded">
-                {{ $event->skp_points }} SKP Resmi
-              </span>
-            @endif
             <span class="px-2.5 py-0.5 bg-white/10 text-white/90 text-xs font-medium rounded uppercase tracking-wider">
               {{ $event->category }}
             </span>

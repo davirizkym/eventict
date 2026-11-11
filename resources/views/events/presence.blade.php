@@ -48,8 +48,8 @@
 
     <div class="bg-blue-950 text-white rounded-3xl p-6 sm:p-8 shadow-md relative overflow-hidden flex flex-col gap-4">
       <div class="flex flex-wrap items-center gap-2">
-        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-white/10 text-blue-200 border border-white/15">
-          {{ $event->format }} Event
+        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wider bg-white/10 text-blue-200 border border-white/15">
+          {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
         </span>
         @if($event->category)
           <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/20 text-blue-100 border border-blue-400/30">
@@ -70,9 +70,13 @@
 
       <div>
         <h1 class="text-xl sm:text-2xl font-bold font-['Poppins'] leading-snug">{{ $event->title }}</h1>
-        <p class="text-slate-300 text-xs sm:text-sm mt-1 leading-relaxed">
-          Laboratorium ICT &bull; {{ \Carbon\Carbon::parse($event->start_date)->translatedFormat('l, d F Y') }} &bull; {{ substr($event->start_time, 0, 5) }} - {{ substr($event->end_time, 0, 5) }} WIB
-        </p>
+        <div class="text-slate-300 text-xs sm:text-sm mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+          <span>{{ ($event->organizer_type ?? 'internal') === 'partner' ? $event->organizer_name : 'Laboratorium ICT' }}</span>
+          <span class="text-white/40">/</span>
+          <span>{{ \Carbon\Carbon::parse($event->start_date)->translatedFormat('l, d F Y') }}</span>
+          <span class="text-white/40">/</span>
+          <span>{{ substr($event->start_time, 0, 5) }} - {{ substr($event->end_time, 0, 5) }} WIB</span>
+        </div>
       </div>
 
       <div class="pt-3 border-t border-white/10 flex flex-wrap items-center gap-4 text-xs text-slate-300">

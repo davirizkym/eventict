@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\OrganizerController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PesertaController;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +23,17 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:6,1');
+
+    Route::get('/lupa-password', [PasswordResetController::class, 'showForgotForm'])->name('password.request');
+    Route::post('/lupa-password', [PasswordResetController::class, 'sendResetLink'])->name('password.email')->middleware('throttle:6,1');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.update')->middleware('throttle:6,1');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verifikasi', [EmailVerificationController::class, 'notice'])->name('verification.notice');
+    Route::get('/email/verifikasi/{id}/{hash}', [EmailVerificationController::class, 'verify'])->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
+    Route::post('/email/verifikasi-ulang', [EmailVerificationController::class, 'resend'])->middleware('throttle:6,1')->name('verification.send');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');

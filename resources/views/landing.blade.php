@@ -76,11 +76,22 @@
                         Acara Terdekat Laboratorium ICT
                       </span>
                       @php
-                        $landRegCount = $event->registrations_count ?? $event->registrations()->count();
+                        $landIsPassed = $event->isPassed();
+                        $landRegCount = $event->registrations_count ?? $event->registrations()->where(function ($q) {
+                            $q->whereIn('payment_status', ['paid', 'free'])
+                              ->orWhere(function ($pq) {
+                                  $pq->where('payment_status', 'pending')
+                                     ->where('created_at', '>=', now()->subMinutes(10));
+                              });
+                        })->count();
                         $landRemaining = max(0, $event->quota - $landRegCount);
                         $isEventFull = $event->quota > 0 && $landRegCount >= $event->quota;
                       @endphp
-                      @if($isEventFull)
+                      @if($landIsPassed)
+                        <span class="px-2.5 py-1 bg-slate-500/40 text-slate-200 border border-slate-400/30 rounded-full text-xs font-semibold font-['Poppins'] shadow-xs">
+                          Kegiatan Selesai
+                        </span>
+                      @elseif($isEventFull)
                         <span class="px-2.5 py-1 bg-rose-500/30 text-rose-200 border border-rose-400/40 rounded-full text-xs font-semibold font-['Poppins'] shadow-xs">
                           Kuota Penuh
                         </span>
@@ -89,15 +100,19 @@
                           Sisa {{ $landRemaining }} Slot Pendaftaran
                         </span>
                       @endif
-                      <span class="px-2.5 py-1 bg-white/10 text-white/90 rounded-full text-xs font-medium font-['Poppins'] uppercase tracking-wider">
-                        {{ $event->format }} Event
+                      <span class="px-2.5 py-1 bg-white/10 text-white/90 rounded-full text-xs font-medium font-['Poppins']">
+                        {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
                       </span>
                       <span class="px-2.5 py-1 bg-white/10 text-white/90 rounded-full text-xs font-medium font-['Poppins']">
                         {{ $event->category }}
                       </span>
                       @if(($event->organizer_type ?? 'internal') === 'partner')
                         <span class="px-2.5 py-1 bg-white/20 text-white rounded-full text-xs font-semibold font-['Poppins']">
-                          Media Partner: {{ $event->organizer_name }}
+                          Penyelenggara: {{ $event->organizer_name }}
+                        </span>
+                      @else
+                        <span class="px-2.5 py-1 bg-white/20 text-white rounded-full text-xs font-semibold font-['Poppins']">
+                          Penyelenggara: Laboratorium ICT
                         </span>
                       @endif
                     </div>
@@ -164,9 +179,15 @@
                           Rp {{ number_format($event->price, 0, ',', '.') }}
                         @endif
                       </span>
-                      <span class="text-emerald-300 text-xs font-semibold font-['Poppins']">
-                        Pendaftaran Dibuka
-                      </span>
+                      @if($landIsPassed)
+                        <span class="text-slate-400 text-xs font-semibold font-['Poppins']">
+                          Kegiatan Selesai
+                        </span>
+                      @else
+                        <span class="text-emerald-300 text-xs font-semibold font-['Poppins']">
+                          Pendaftaran Dibuka
+                        </span>
+                      @endif
                     </div>
 
                     <div class="flex flex-wrap items-center gap-3">
@@ -198,8 +219,8 @@
                       </div>
                       <span class="text-white text-xs font-semibold font-['Poppins']">Poster Kegiatan</span>
                       <span class="text-slate-400 text-[11px] font-normal font-['Poppins'] mt-1">{{ ($event->organizer_type ?? 'internal') === 'partner' ? $event->organizer_name : 'Laboratorium ICT' }}</span>
-                      <div class="mt-4 px-3 py-1 rounded-full bg-white/10 text-slate-300 text-[10px] font-medium font-['Poppins'] uppercase tracking-wider">
-                        {{ $event->format }} Event
+                      <div class="mt-4 px-3 py-1 rounded-full bg-white/10 text-slate-300 text-[10px] font-medium font-['Poppins']">
+                        {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
                       </div>
                     </div>
                   @endif
@@ -457,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentIndex = 1;
     let isTransitioning = false;
     let timer = null;
-    const TRANSITION_TIME = 500; // durasi transisi disamakan merata untuk semua slide (500ms)
+    const TRANSITION_TIME = 500;
     const TRANSITION_EASING = 'cubic-bezier(0.25, 1, 0.5, 1)';
 
     function updateDots() {
@@ -506,6 +527,25 @@ document.addEventListener('DOMContentLoaded', () => {
       isTransitioning = false;
     });
 
+    function stopTimer() {
+      if (timer !== null) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    function startTimer() {
+      stopTimer();
+      timer = setInterval(() => {
+        nextSlide();
+      }, 5000);
+    }
+
+    function resetTimer() {
+      stopTimer();
+      startTimer();
+    }
+
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
         nextSlide();
@@ -528,40 +568,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (targetEventIdx === currentEventIdx) return;
 
-        // Jika dari acara paling belakang ke acara paling depan, maju mulus 1 langkah ke clone pertama dengan waktu yang sama
         if (currentEventIdx === totalEvents - 1 && targetEventIdx === 0) {
           slideTo(totalSlides - 1);
-        }
-        // Jika dari acara paling depan ke acara paling belakang, mundur mulus 1 langkah ke clone terakhir dengan waktu yang sama
-        else if (currentEventIdx === 0 && targetEventIdx === totalEvents - 1) {
+        } else if (currentEventIdx === 0 && targetEventIdx === totalEvents - 1) {
           slideTo(0);
-        }
-        else {
+        } else {
           slideTo(targetEventIdx + 1);
         }
         resetTimer();
       });
     });
 
-    function startTimer() {
-      timer = setInterval(() => {
-        nextSlide();
-      }, 5000);
-    }
-
-    function resetTimer() {
-      if (timer) clearInterval(timer);
-      startTimer();
-    }
-
     if (container) {
       container.addEventListener('mouseenter', () => {
-        if (timer) clearInterval(timer);
+        stopTimer();
       });
       container.addEventListener('mouseleave', () => {
         startTimer();
       });
     }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopTimer();
+      } else {
+        startTimer();
+      }
+    });
 
     let startX = 0;
     track.addEventListener('touchstart', (e) => {
