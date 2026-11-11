@@ -135,19 +135,6 @@
           </div>
         </a>
       </nav>
-
-      <div class="bg-blue-950 text-white rounded-2xl p-4 flex flex-col gap-2 shadow-2xs">
-        <div class="flex items-center gap-2">
-          <svg class="size-4 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-          <span class="text-xs font-semibold">Pusat Layanan Peserta</span>
-        </div>
-        <p class="text-[11px] text-slate-300 leading-relaxed">
-          Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur.
-        </p>
-        <div class="text-[11px] text-blue-200 font-medium">help@eventict.id</div>
-      </div>
     </aside>
 
     <main class="flex-1 flex flex-col gap-6 min-w-0">
@@ -398,20 +385,8 @@
               </div>
             @else
               <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center gap-2 text-center shrink-0 w-full sm:w-auto">
-                <div class="size-24 bg-white p-2 rounded-lg border border-slate-300 flex items-center justify-center shadow-2xs">
-                  <svg class="size-full text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect width="6" height="6" x="2" y="2" rx="1"/>
-                    <rect width="6" height="6" x="16" y="2" rx="1"/>
-                    <rect width="6" height="6" x="2" y="16" rx="1"/>
-                    <path d="M10 2h4"/>
-                    <path d="M2 10v4"/>
-                    <path d="M10 6h4"/>
-                    <path d="M14 10h4"/>
-                    <path d="M10 14h4"/>
-                    <path d="M16 14v4"/>
-                    <path d="M16 20h4"/>
-                    <path d="M20 16v4"/>
-                  </svg>
+                <div class="bg-white p-1 rounded-lg border border-slate-300 flex items-center justify-center shadow-2xs overflow-hidden" style="width: 80px; height: 80px; min-width: 80px; max-width: 80px;">
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data={{ urlencode(route('events.presence', $todayRegistration->event->slug)) }}" alt="QR Presensi {{ $todayRegistration->event->title }}" width="72" height="72" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
                 <div class="text-[11px] text-slate-500 font-medium">Tunjukkan ke Panitia</div>
                 <div class="text-blue-950 font-bold text-xs tracking-wider font-mono">#{{ $todayRegistration->qr_pass }}</div>
@@ -511,6 +486,31 @@
                         Belum Check-In
                       </span>
                     @endif
+                  @endif
+                  @if($reg->payment_status !== 'pending')
+                    <button type="button" onclick="openPrintTicketModal({{ json_encode([
+                        'registration_code' => $reg->registration_code,
+                        'qr_pass' => $reg->qr_pass,
+                        'event_title' => $reg->event->title,
+                        'event_date' => $reg->event->start_date ? $reg->event->start_date->translatedFormat('d F Y') : '—',
+                        'event_time' => substr($reg->event->start_time ?? '', 0, 5) . ' - ' . substr($reg->event->end_time ?? '', 0, 5) . ' WIB',
+                        'event_location' => $reg->event->location ?? 'Online via Eventict Platform',
+                        'event_format' => strtoupper($reg->event->format),
+                        'participant_name' => $user->name,
+                        'participant_nik' => $user->nik ?? '-',
+                        'participant_institution' => $user->institution ?? 'Peserta Umum',
+                        'attendance_status' => $reg->attendance_status,
+                        'checked_in_at' => $reg->checked_in_at ? $reg->checked_in_at->format('d M Y, H:i') . ' WIB' : null,
+                        'presence_url' => route('events.presence', $reg->event->slug),
+                        'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' . urlencode(route('events.presence', $reg->event->slug)),
+                    ]) }})" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[11px] font-medium text-slate-700 hover:bg-slate-100 transition shadow-2xs flex items-center gap-1 cursor-pointer" title="Cetak / Simpan Tiket PDF">
+                      <svg class="size-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 6 2 18 2 18 9"/>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                        <rect width="12" height="8" x="6" y="14"/>
+                      </svg>
+                      <span>Tiket</span>
+                    </button>
                   @endif
                   <a href="{{ route('events.show', $reg->event->slug) }}" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[11px] font-medium text-slate-700 hover:bg-slate-100 transition shadow-2xs">
                     Detail
@@ -727,9 +727,30 @@
             </a>
           </div>
 
+          <!-- Filter Cepat Tiket -->
+          @php
+            $totalCount = $registrations->count();
+            $attendedCount = $registrations->where('attendance_status', 'attended')->count();
+            $unattendedCount = $registrations->where('attendance_status', '!=', 'attended')->count();
+          @endphp
+          <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 pt-1 border-b border-slate-100 pb-3">
+            <button type="button" onclick="filterTickets('all')" id="btn-filter-all" class="ticket-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-950 text-white transition cursor-pointer shadow-2xs flex items-center gap-1.5">
+              <span>Semua</span>
+              <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-white/20 text-white">{{ $totalCount }}</span>
+            </button>
+            <button type="button" onclick="filterTickets('unattended')" id="btn-filter-unattended" class="ticket-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer flex items-center gap-1.5">
+              <span>Belum Hadir</span>
+              <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 text-slate-700">{{ $unattendedCount }}</span>
+            </button>
+            <button type="button" onclick="filterTickets('attended')" id="btn-filter-attended" class="ticket-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer flex items-center gap-1.5">
+              <span>Sudah Presensi</span>
+              <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 text-slate-700">{{ $attendedCount }}</span>
+            </button>
+          </div>
+
           <div class="flex flex-col gap-3">
             @forelse($registrations as $reg)
-              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="ticket-card p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition" data-status="{{ $reg->attendance_status === 'attended' ? 'attended' : 'unattended' }}">
                 <div class="flex items-center gap-4 min-w-0">
                   @if($reg->payment_status === 'pending')
                     <div class="size-11 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
@@ -797,6 +818,31 @@
                         Belum Check-In
                       </span>
                     @endif
+
+                    <!-- Tombol Cetak / Simpan Tiket PDF -->
+                    <button type="button" onclick="openPrintTicketModal({{ json_encode([
+                        'registration_code' => $reg->registration_code,
+                        'qr_pass' => $reg->qr_pass,
+                        'event_title' => $reg->event->title,
+                        'event_date' => $reg->event->start_date ? $reg->event->start_date->translatedFormat('d F Y') : '—',
+                        'event_time' => substr($reg->event->start_time ?? '', 0, 5) . ' - ' . substr($reg->event->end_time ?? '', 0, 5) . ' WIB',
+                        'event_location' => $reg->event->location ?? 'Online via Eventict Platform',
+                        'event_format' => strtoupper($reg->event->format),
+                        'participant_name' => $user->name,
+                        'participant_nik' => $user->nik ?? '-',
+                        'participant_institution' => $user->institution ?? 'Peserta Umum',
+                        'attendance_status' => $reg->attendance_status,
+                        'checked_in_at' => $reg->checked_in_at ? $reg->checked_in_at->format('d M Y, H:i') . ' WIB' : null,
+                        'presence_url' => route('events.presence', $reg->event->slug),
+                        'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' . urlencode(route('events.presence', $reg->event->slug)),
+                    ]) }})" class="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1 shadow-2xs cursor-pointer" title="Cetak / Unduh Tiket PDF">
+                      <svg class="size-3.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 6 2 18 2 18 9"/>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                        <rect width="12" height="8" x="6" y="14"/>
+                      </svg>
+                      <span>Cetak Tiket</span>
+                    </button>
                   @endif
 
                   @if($reg->event->virtual_meeting_url && $reg->payment_status !== 'pending')
@@ -815,6 +861,10 @@
                 Anda belum mendaftar kegiatan apapun. Klik tombol di atas untuk melihat katalog kegiatan yang dibuka.
               </div>
             @endforelse
+
+            <div id="ticket-empty-filter" class="hidden p-8 bg-slate-50 rounded-xl text-center text-xs text-slate-500">
+              Tidak ada tiket yang sesuai dengan filter yang dipilih.
+            </div>
           </div>
         </div>
       @endif
@@ -1173,8 +1223,279 @@
   </div>
 </div>
 
+<!-- Modal Cetak / Simpan Tiket PDF -->
+<div id="modal-print-ticket" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+  <div class="bg-white rounded-3xl max-w-xl w-full flex flex-col shadow-2xl my-auto overflow-hidden">
+    <!-- Header Modal (Hidden in Print) -->
+    <div class="no-print p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+      <div class="flex items-center gap-2">
+        <div class="size-8 rounded-lg bg-blue-950 text-white flex items-center justify-center font-bold text-xs">
+          PASS
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">E-Tiket & Boarding Pass</h3>
+          <p class="text-[11px] text-slate-500">Pratinjau tiket digital resmi kegiatan</p>
+        </div>
+      </div>
+      <button type="button" onclick="closePrintTicketModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer">
+        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Printable Ticket Container -->
+    <div id="printable-ticket-content" class="p-6 sm:p-8 flex flex-col gap-5 bg-white text-slate-900">
+      <!-- Ticket Top Branding -->
+      <div class="flex items-center justify-between pb-4 border-b-2 border-dashed border-slate-200">
+        <div class="flex items-center gap-2.5">
+          <div class="size-9 bg-blue-950 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-xs">
+            <svg class="size-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+              <path d="M6 6h10"/>
+              <path d="M6 10h7"/>
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-base font-bold font-['Poppins'] text-blue-950 leading-tight">Eventict</span>
+            <span class="text-[10px] text-slate-500 font-medium">Laboratorium ICT &bull; Universitas Budi Luhur</span>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-950 border border-blue-200 block">
+            E-Tiket Resmi
+          </span>
+          <span id="ticket-modal-format" class="text-[10px] font-semibold text-slate-500 uppercase mt-1 block"></span>
+        </div>
+      </div>
+
+      <!-- Event Title & Info -->
+      <div class="flex flex-col gap-1.5">
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Kegiatan Terdaftar</span>
+        <h2 id="ticket-modal-title" class="text-base sm:text-lg font-bold text-slate-900 leading-snug"></h2>
+      </div>
+
+      <!-- Event Schedule & Location Grid -->
+      <div class="grid grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+        <div class="flex flex-col">
+          <span class="text-[10px] text-slate-500 uppercase font-medium">Tanggal Pelaksanaan</span>
+          <span id="ticket-modal-date" class="font-semibold text-slate-900 mt-0.5"></span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-[10px] text-slate-500 uppercase font-medium">Waktu Sesi</span>
+          <span id="ticket-modal-time" class="font-semibold text-slate-900 mt-0.5"></span>
+        </div>
+        <div class="col-span-2 flex flex-col pt-2 border-t border-slate-200">
+          <span class="text-[10px] text-slate-500 uppercase font-medium">Lokasi / Platform</span>
+          <span id="ticket-modal-location" class="font-semibold text-slate-900 mt-0.5 truncate"></span>
+        </div>
+      </div>
+
+      <!-- Participant Details -->
+      <div class="grid grid-cols-3 gap-2 py-2 text-xs border-y border-slate-100">
+        <div class="flex flex-col">
+          <span class="text-[10px] text-slate-400 font-medium">Nama Peserta</span>
+          <span id="ticket-modal-name" class="font-semibold text-slate-900 truncate"></span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-[10px] text-slate-400 font-medium">NIK / Identitas</span>
+          <span id="ticket-modal-nik" class="font-mono text-slate-800 text-[11px] truncate"></span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-[10px] text-slate-400 font-medium">Instansi</span>
+          <span id="ticket-modal-institution" class="font-medium text-slate-800 truncate"></span>
+        </div>
+      </div>
+
+      <!-- QR & Pass Box (The centerpiece) -->
+      <div class="rounded-2xl text-white shadow-md overflow-hidden flex flex-col" style="background-color: #142d4e !important; color: #ffffff !important; font-family: 'Poppins', sans-serif !important;">
+        <!-- Top Row: Label & Status Badge -->
+        <div class="px-4 sm:px-5 py-3 flex items-center justify-between gap-3" style="background-color: rgba(255, 255, 255, 0.06); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+          <div class="flex items-center gap-2">
+            <svg class="size-4 text-blue-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span class="text-xs font-semibold text-blue-100 uppercase tracking-wider font-['Poppins']">Pass Presensi Resmi</span>
+          </div>
+          <div id="ticket-modal-status"></div>
+        </div>
+
+        <!-- Main Row: QR Code di kiri, Kode Pass & Info di kanan -->
+        <div class="p-4 sm:p-5 flex items-center gap-4">
+          <!-- QR Code Container -->
+          <div class="bg-white p-1.5 rounded-xl flex items-center justify-center shrink-0 shadow-sm" style="width: 76px; height: 76px; min-width: 76px; max-width: 76px; background-color: #ffffff !important;">
+            <img id="ticket-modal-qr" src="" alt="QR Code Presensi Acara" width="68" height="68" style="width: 68px; height: 68px; object-fit: contain;">
+          </div>
+
+          <!-- Info Pass & Tiket -->
+          <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+            <span class="text-[10px] text-blue-200/80 font-semibold uppercase tracking-wider font-['Poppins']">KODE PASS PESERTA</span>
+            <div id="ticket-modal-pass" class="text-base sm:text-xl font-bold font-['Poppins'] text-white tracking-wide truncate"></div>
+            <div id="ticket-modal-code" class="text-xs text-blue-200/90 font-['Poppins'] mt-0.5"></div>
+            <div class="flex flex-wrap items-center gap-2 mt-1 pt-1.5 border-t border-white/10 text-[11px] text-blue-200/80 font-['Poppins']">
+              <span>Scan saat masuk sesi</span>
+              <span>&bull;</span>
+              <a id="ticket-modal-link" href="#" target="_blank" class="no-print text-blue-300 hover:text-white underline inline-flex items-center gap-1 font-['Poppins'] font-semibold">
+                <span>Buka Presensi Acara</span>
+                <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-[10px] text-slate-400 text-center leading-relaxed">
+        Tiket elektronik ini sah dan terhubung ke sistem registrasi Laboratorium ICT. Tunjukkan kode QR Pass ini kepada panitia untuk presensi.
+      </div>
+    </div>
+
+    <!-- Actions (Hidden in Print) -->
+    <div class="no-print p-4 sm:p-5 border-t border-slate-100 flex items-center justify-end gap-3 bg-slate-50/80">
+      <button type="button" onclick="closePrintTicketModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer">
+        Tutup
+      </button>
+      <button type="button" onclick="window.print()" class="px-5 py-2 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-2 cursor-pointer shadow-xs">
+        <svg class="size-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect width="12" height="8" x="6" y="14"/>
+        </svg>
+        <span>Cetak / Simpan PDF</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #modal-print-ticket,
+  #modal-print-ticket #printable-ticket-content,
+  #modal-print-ticket #printable-ticket-content * {
+    visibility: visible !important;
+  }
+  #modal-print-ticket {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    display: block !important;
+  }
+  #modal-print-ticket > div {
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 auto !important;
+    border-radius: 0 !important;
+  }
+  #printable-ticket-content {
+    border: 2px solid #0f172a !important;
+    border-radius: 16px !important;
+    padding: 24px !important;
+    max-width: 580px !important;
+    margin: 20px auto !important;
+    background: white !important;
+    page-break-inside: avoid !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+</style>
+
 <script src="{{ config('midtrans.snap_url') }}" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
+function filterTickets(status) {
+  const cards = document.querySelectorAll('.ticket-card');
+  const emptyNotice = document.getElementById('ticket-empty-filter');
+  let visibleCount = 0;
+
+  document.querySelectorAll('.ticket-filter-btn').forEach(btn => {
+    btn.className = 'ticket-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer flex items-center gap-1.5';
+    const badge = btn.querySelector('span:last-child');
+    if (badge) badge.className = 'px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 text-slate-700';
+  });
+
+  const activeBtn = document.getElementById('btn-filter-' + status);
+  if (activeBtn) {
+    activeBtn.className = 'ticket-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-950 text-white transition cursor-pointer shadow-2xs flex items-center gap-1.5';
+    const badge = activeBtn.querySelector('span:last-child');
+    if (badge) badge.className = 'px-1.5 py-0.5 rounded-full text-[10px] bg-white/20 text-white';
+  }
+
+  cards.forEach(card => {
+    const cardStatus = card.getAttribute('data-status');
+    if (status === 'all' || cardStatus === status) {
+      card.style.display = 'flex';
+      visibleCount++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+
+  if (emptyNotice) {
+    emptyNotice.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+}
+
+function openPrintTicketModal(data) {
+  document.getElementById('ticket-modal-title').textContent = data.event_title;
+  document.getElementById('ticket-modal-date').textContent = data.event_date;
+  document.getElementById('ticket-modal-time').textContent = data.event_time;
+  document.getElementById('ticket-modal-location').textContent = data.event_location;
+  document.getElementById('ticket-modal-format').textContent = data.event_format;
+  document.getElementById('ticket-modal-name').textContent = data.participant_name;
+  document.getElementById('ticket-modal-nik').textContent = data.participant_nik;
+  document.getElementById('ticket-modal-institution').textContent = data.participant_institution;
+  document.getElementById('ticket-modal-code').textContent = 'No. Tiket: ' + data.registration_code;
+  document.getElementById('ticket-modal-pass').textContent = '#' + data.qr_pass;
+
+  const qrImg = document.getElementById('ticket-modal-qr');
+  if (qrImg) {
+    const qrSource = data.qr_url || ('https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' + encodeURIComponent(data.presence_url || data.qr_pass));
+    qrImg.src = qrSource;
+  }
+  const presenceLink = document.getElementById('ticket-modal-link');
+  if (presenceLink) {
+    if (data.presence_url) {
+      presenceLink.href = data.presence_url;
+      presenceLink.classList.remove('hidden');
+    } else {
+      presenceLink.classList.add('hidden');
+    }
+  }
+  
+  const statusBadge = document.getElementById('ticket-modal-status');
+  if (data.attendance_status === 'attended') {
+    statusBadge.className = 'px-3 py-1 bg-emerald-100 text-emerald-900 text-xs font-bold rounded-full whitespace-nowrap font-[\'Poppins\'] shadow-2xs';
+    statusBadge.textContent = 'Sudah Presensi' + (data.checked_in_at ? ' (' + data.checked_in_at + ')' : '');
+  } else {
+    statusBadge.className = 'px-3 py-1 bg-blue-100 text-blue-950 text-xs font-bold rounded-full whitespace-nowrap font-[\'Poppins\'] shadow-2xs';
+    statusBadge.textContent = 'Siap Check-In (Belum Presensi)';
+  }
+
+  const modal = document.getElementById('modal-print-ticket');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closePrintTicketModal() {
+  const modal = document.getElementById('modal-print-ticket');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
 function payWithSnap(registrationId, existingToken) {
   if (existingToken && existingToken !== '') {
     triggerSnapPay(existingToken, registrationId);
