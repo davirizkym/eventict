@@ -521,10 +521,10 @@
           <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-2">
             <div class="font-semibold text-slate-900 flex items-center gap-2">
               <span class="size-6 rounded-full bg-blue-950 text-white flex items-center justify-center text-[11px] font-bold">2</span>
-              <span>Berdasarkan NIM / NIP Peserta</span>
+              <span>Berdasarkan NIM / NIP / NIS Peserta</span>
             </div>
             <p class="text-slate-600 text-[11px] leading-relaxed">
-              Gunakan nomor NIM atau NIP peserta sebagai nama file dokumen sertifikat.
+              Gunakan nomor NIM, NIP, atau NIS peserta sebagai nama file dokumen sertifikat.
             </p>
             <div class="mt-auto pt-2 font-mono text-[11px] text-blue-950 bg-white p-2 rounded border border-slate-200">
               2210511001.pdf
@@ -612,7 +612,7 @@
       </div>
       <ul class="list-disc list-inside space-y-1 text-slate-700 pl-1 text-[11px]">
         <li><strong>Nomor Registrasi:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">REG-2026-0104.pdf</code></li>
-        <li><strong>Nomor NIM / NIP:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">2210511001.pdf</code></li>
+        <li><strong>Nomor NIM / NIP / NIS:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">2210511001.pdf</code></li>
         <li><strong>Email Peserta:</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-blue-200 font-mono text-blue-950">amanda@rsupcm.co.id.pdf</code></li>
       </ul>
     </div>

@@ -25,8 +25,6 @@ class Event extends Model
         'end_time',
         'quota',
         'price',
-        'skp_points',
-        'sk_number',
         'description',
         'status',
         'organizer_type',
@@ -41,7 +39,7 @@ class Event extends Model
 
     public function isExternal(): bool
     {
-        return ($this->organizer_type === 'partner') || !empty($this->registration_url);
+        return !empty($this->registration_url);
     }
 
     protected function casts(): array
@@ -51,7 +49,6 @@ class Event extends Model
             'end_date' => 'date',
             'quota' => 'integer',
             'price' => 'integer',
-            'skp_points' => 'integer',
             'is_presence_open' => 'boolean',
         ];
     }
@@ -66,11 +63,33 @@ class Event extends Model
         return $this->belongsTo(MediaPartner::class, 'media_partner_id');
     }
 
+    public function mediaPartners(): BelongsToMany
+    {
+        return $this->belongsToMany(MediaPartner::class, 'event_media_partner')->withTimestamps();
+    }
+
     public function speakers(): BelongsToMany
     {
         return $this->belongsToMany(Speaker::class, 'event_speaker')
             ->withPivot(['topic', 'session_time', 'role'])
             ->withTimestamps();
+    }
+
+    public function isPassed(): bool
+    {
+        if ($this->status === 'completed') {
+            return true;
+        }
+
+        $endDate = $this->end_date ? $this->end_date->toDateString() : ($this->start_date ? $this->start_date->toDateString() : null);
+        if (!$endDate) {
+            return false;
+        }
+
+        $endTime = $this->end_time ?: '23:59:59';
+        $endDateTime = \Illuminate\Support\Carbon::parse($endDate . ' ' . $endTime, config('app.timezone', 'Asia/Jakarta'));
+
+        return $endDateTime->isPast();
     }
 
     public function registrations(): HasMany

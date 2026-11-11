@@ -56,9 +56,15 @@
         </div>
         <div>
           @if($registration->payment_status === 'pending')
-            <span class="px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-lg text-xs font-semibold">
-              Menunggu Pembayaran
-            </span>
+            @if($expiresAt->isPast())
+              <span class="px-3 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold">
+                Kedaluwarsa
+              </span>
+            @else
+              <span class="px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-lg text-xs font-semibold">
+                Menunggu Pembayaran
+              </span>
+            @endif
           @elseif($registration->payment_status === 'paid')
             <span class="px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-semibold">
               Lunas
@@ -92,9 +98,15 @@
             </svg>
             <span>Pembayaran terverifikasi</span>
           </div>
-          <span class="font-mono font-semibold text-[11px] text-emerald-800">
-            PASS: #{{ $registration->qr_pass }}
-          </span>
+          @if($registration->event->format === 'offline' && $registration->qr_pass)
+            <span class="font-mono font-semibold text-[11px] text-emerald-800">
+              PASS: #{{ $registration->qr_pass }}
+            </span>
+          @else
+            <span class="font-semibold text-[11px] text-emerald-800">
+              Akses Online Aktif
+            </span>
+          @endif
         </div>
       @endif
 
@@ -109,7 +121,7 @@
             {{ $registration->event->title }}
           </a>
           <div class="text-xs text-slate-500 mt-0.5">
-            Format: <strong class="text-slate-700 font-medium">{{ ucfirst($registration->attendance_mode ?? $registration->event->format) }}</strong> &bull; Lokasi: {{ $registration->event->location }}
+            Format: <strong class="text-slate-700 font-medium">{{ ($registration->attendance_mode ?? $registration->event->format) === 'offline' ? 'Luring' : 'Daring' }}</strong> &bull; Lokasi: {{ $registration->event->location }}
           </div>
         </div>
 
@@ -140,7 +152,10 @@
         </div>
 
         @if($registration->payment_status === 'pending')
-          <div class="flex flex-col gap-2.5 pt-1">
+          @php
+            $isExpired = $expiresAt->isPast();
+          @endphp
+          <div id="payment-active-container" class="{{ $isExpired ? 'hidden' : 'flex' }} flex-col gap-2.5 pt-1">
             <button
               type="button"
               id="pay-action-btn"
@@ -182,6 +197,19 @@
               </form>
             </div>
           </div>
+
+          <div id="payment-expired-container" class="{{ $isExpired ? 'flex' : 'hidden' }} flex-col gap-2.5 pt-1">
+            <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-center text-xs text-rose-800">
+              <span class="font-bold block">Batas Waktu Pembayaran Habis</span>
+              <span class="text-[11px] text-rose-600 mt-0.5 block">Sesi pembayaran 10 menit telah kedaluwarsa. Kuota tiket telah dikembalikan. Silakan daftar ulang.</span>
+            </div>
+            <a
+              href="{{ route('events.register.form', $registration->event->slug) }}"
+              class="w-full py-3 px-4 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition text-center shadow-2xs"
+            >
+              Daftar Ulang Kegiatan &rarr;
+            </a>
+          </div>
         @else
           <div class="flex flex-col gap-2 pt-1">
             <a
@@ -213,6 +241,14 @@ function updateCountdown() {
   if (diff <= 0) {
     display.textContent = 'Kedaluwarsa';
     display.className = 'text-rose-600 font-bold';
+    const activeCont = document.getElementById('payment-active-container');
+    const expiredCont = document.getElementById('payment-expired-container');
+    if (activeCont && expiredCont) {
+      activeCont.classList.add('hidden');
+      activeCont.classList.remove('flex');
+      expiredCont.classList.remove('hidden');
+      expiredCont.classList.add('flex');
+    }
     return;
   }
 

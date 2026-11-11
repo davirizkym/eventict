@@ -87,7 +87,7 @@ class OrganizerController extends Controller
             'type' => 'nullable|string|in:Workshop,Seminar,Webinar,Sertifikasi',
             'category_id' => 'nullable|exists:categories,id',
             'category' => 'nullable|string|max:100',
-            'format' => 'required|in:online,offline,hybrid',
+            'format' => 'required|in:online,offline',
             'location' => 'required|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -101,6 +101,8 @@ class OrganizerController extends Controller
             'registration_url' => 'nullable|url|max:500',
             'poster' => 'nullable|image|max:5120',
             'banner_url' => 'nullable|string|max:500',
+            'media_partner_ids' => 'nullable|array',
+            'media_partner_ids.*' => 'exists:media_partners,id',
             'description' => 'required|string',
             'speaker_ids' => $speakerRequiredRule,
             'speaker_ids.*' => 'nullable|distinct|exists:speakers,id',
@@ -112,7 +114,7 @@ class OrganizerController extends Controller
             'speaker_topic' => 'nullable|string|max:255',
         ], [
             'title.required' => 'Judul kegiatan wajib diisi.',
-            'format.required' => 'Format kegiatan (online/offline/hybrid) wajib dipilih.',
+            'format.required' => 'Format kegiatan (online/offline) wajib dipilih.',
             'location.required' => 'Lokasi atau link platform kegiatan wajib diisi.',
             'start_date.required' => 'Tanggal mulai kegiatan wajib diisi.',
             'start_date.date' => 'Format tanggal mulai kegiatan tidak valid.',
@@ -217,8 +219,11 @@ class OrganizerController extends Controller
             'banner_url' => $bannerUrl,
             'description' => $validated['description'],
             'status' => 'published',
-            'skp_points' => 0,
         ]);
+
+        if ($request->has('media_partner_ids')) {
+            $event->mediaPartners()->sync($request->input('media_partner_ids', []));
+        }
 
         $speakerIds = $request->input('speaker_ids', []);
         $speakerRoles = $request->input('speaker_roles', []);
@@ -280,6 +285,7 @@ class OrganizerController extends Controller
         $event->load(['speakers']);
 
         $totalRegistrations = $event->registrations()->count();
+        $checkedInRegistrations = $event->registrations()->where('is_checked_in', true)->count();
         $attendedRegistrations = $event->registrations()->where('attendance_status', 'attended')->count();
         $attendancePercentage = $totalRegistrations > 0 ? round(($attendedRegistrations / $totalRegistrations) * 100, 1) : 0;
         $certificatesCount = $event->registrations()->whereHas('certificate')->count();
@@ -294,11 +300,16 @@ class OrganizerController extends Controller
                     ->orWhere('qr_pass', 'like', "%{$keyword}%")
                     ->orWhereHas('user', function ($uq) use ($keyword) {
                         $uq->where('name', 'like', "%{$keyword}%")
+                            ->orWhere('nik', 'like', "%{$keyword}%")
                             ->orWhere('institution', 'like', "%{$keyword}%")
                             ->orWhere('email', 'like', "%{$keyword}%")
                             ->orWhere('phone', 'like', "%{$keyword}%");
                     });
             });
+        }
+
+        if ($request->filled('checkin') && $event->format === 'offline') {
+            $query->where('is_checked_in', $request->query('checkin') === 'checked_in');
         }
 
         if ($request->filled('attendance')) {
@@ -324,11 +335,14 @@ class OrganizerController extends Controller
             ->orderBy('start_date', 'asc')
             ->get();
 
+        $event->load('mediaPartners');
+
         return view('organizer.workspace', compact(
             'event',
             'tab',
             'registrations',
             'totalRegistrations',
+            'checkedInRegistrations',
             'attendedRegistrations',
             'attendancePercentage',
             'certificatesCount',
@@ -347,7 +361,7 @@ class OrganizerController extends Controller
             'type' => 'nullable|string|in:Workshop,Seminar,Webinar,Sertifikasi',
             'category_id' => 'nullable|exists:categories,id',
             'category' => 'nullable|string|max:100',
-            'format' => 'required|in:online,offline,hybrid',
+            'format' => 'required|in:online,offline',
             'location' => 'required|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -361,12 +375,14 @@ class OrganizerController extends Controller
             'registration_url' => 'nullable|url|max:500',
             'poster' => 'nullable|image|max:5120',
             'banner_url' => 'nullable|string|max:500',
+            'media_partner_ids' => 'nullable|array',
+            'media_partner_ids.*' => 'exists:media_partners,id',
             'description' => 'required|string',
             'status' => 'required|in:published,draft,completed',
             'virtual_meeting_url' => 'nullable|url|max:255',
         ], [
             'title.required' => 'Judul kegiatan wajib diisi.',
-            'format.required' => 'Format kegiatan (online/offline/hybrid) wajib dipilih.',
+            'format.required' => 'Format kegiatan (online/offline) wajib dipilih.',
             'location.required' => 'Lokasi atau link platform kegiatan wajib diisi.',
             'start_date.required' => 'Tanggal mulai kegiatan wajib diisi.',
             'start_date.date' => 'Format tanggal mulai kegiatan tidak valid.',
@@ -419,6 +435,10 @@ class OrganizerController extends Controller
         }
 
         $event->update($validated);
+
+        if ($request->has('media_partner_ids')) {
+            $event->mediaPartners()->sync($request->input('media_partner_ids', []));
+        }
 
         return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'pengaturan'])
             ->with('success', 'Pengaturan kegiatan berhasil diperbarui.');
@@ -487,6 +507,17 @@ class OrganizerController extends Controller
             'code' => 'required|string|max:100',
         ]);
 
+        if ($event->format !== 'offline') {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Check-in registrasi ulang hanya berlaku untuk kegiatan tatap muka (offline).',
+                ], 422);
+            }
+            return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
+                ->with('error', 'Check-in registrasi ulang hanya berlaku untuk kegiatan tatap muka (offline).');
+        }
+
         $token = trim($request->code);
         $cleanToken = ltrim($token, '#');
 
@@ -497,35 +528,81 @@ class OrganizerController extends Controller
                     ->orWhere('registration_code', $cleanToken)
                     ->orWhere('qr_pass', $token)
                     ->orWhereHas('user', function ($uq) use ($token) {
-                        $uq->where('email', $token);
+                        $uq->where('email', $token)
+                            ->orWhere('nik', $token);
                     });
             })
             ->first();
 
         if (! $registration) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Peserta dengan kode atau email '{$token}' tidak ditemukan pada kegiatan ini.",
+                ], 404);
+            }
             return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
                 ->with('error', "Peserta dengan kode atau email '{$token}' tidak ditemukan pada event ini.");
         }
 
         if ($registration->payment_status === 'pending') {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Peserta {$registration->user->name} ({$registration->registration_code}) belum menyelesaikan pembayaran tiket.",
+                ], 422);
+            }
             return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
                 ->with('error', "Peserta {$registration->user->name} ({$registration->registration_code}) belum menyelesaikan pembayaran tiket.");
         }
 
-        if ($registration->attendance_status === 'attended') {
+        if ($registration->is_checked_in) {
             $time = $registration->checked_in_at ? $registration->checked_in_at->format('H:i') . ' WIB' : 'sebelumnya';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'already_checked_in',
+                    'message' => "Peserta {$registration->user->name} ({$registration->registration_code}) sudah melakukan check-in pada {$time}.",
+                    'registration' => [
+                        'id' => $registration->id,
+                        'name' => $registration->user->name,
+                        'registration_code' => $registration->registration_code,
+                        'qr_pass' => $registration->qr_pass,
+                        'is_checked_in' => true,
+                        'checked_in_at' => $time,
+                        'check_in_gate' => $registration->check_in_gate,
+                    ],
+                ], 200);
+            }
             return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
-                ->with('warning', "Peserta {$registration->user->name} ({$registration->registration_code}) sudah presensi pada {$time}.");
+                ->with('warning', "Peserta {$registration->user->name} ({$registration->registration_code}) sudah check-in pada {$time}.");
         }
 
+        $now = now();
+        $gate = $request->input('source') === 'camera' ? 'Scan QR Pass (Pintu Masuk)' : 'Quick Check-in Lab ICT';
         $registration->update([
-            'attendance_status' => 'attended',
-            'checked_in_at' => now(),
-            'check_in_gate' => 'Quick Check-in Lab ICT',
+            'is_checked_in' => true,
+            'checked_in_at' => $now,
+            'check_in_gate' => $gate,
         ]);
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => "Check-in berhasil! {$registration->user->name} ({$registration->registration_code}) terverifikasi masuk.",
+                'registration' => [
+                    'id' => $registration->id,
+                    'name' => $registration->user->name,
+                    'registration_code' => $registration->registration_code,
+                    'qr_pass' => $registration->qr_pass,
+                    'is_checked_in' => true,
+                    'checked_in_at' => $now->format('H:i') . ' WIB',
+                    'check_in_gate' => $gate,
+                ],
+            ], 200);
+        }
+
         return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta'])
-            ->with('success', "Presensi berhasil! {$registration->user->name} ({$registration->registration_code}) ditandai Hadir.");
+            ->with('success', "Check-in berhasil! {$registration->user->name} ({$registration->registration_code}) terverifikasi masuk.");
     }
 
     public function togglePresence(Request $request, Event $event)
@@ -618,6 +695,7 @@ class OrganizerController extends Controller
                 'No.',
                 'No. Registrasi',
                 'Nama Peserta',
+                'NIM / NIP / NIS',
                 'Email',
                 'Instansi / Universitas',
                 'No. Telepon',
@@ -635,6 +713,7 @@ class OrganizerController extends Controller
                     $index + 1,
                     $reg->registration_code,
                     $reg->user->name ?? '-',
+                    $reg->user->nik ?? '-',
                     $reg->user->email ?? '-',
                     $reg->user->institution ?? '-',
                     $reg->user->phone ?? '-',
@@ -666,15 +745,22 @@ class OrganizerController extends Controller
         foreach ($files as $file) {
             $origName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $cleanCode = trim(str_replace('#', '', $origName));
+            $cleanAlphanumeric = preg_replace('/[^a-zA-Z0-9]/', '', $origName);
 
             $registration = Registration::with('certificate')
                 ->where('event_id', $event->id)
-                ->where(function ($q) use ($cleanCode, $origName) {
+                ->where(function ($q) use ($cleanCode, $origName, $cleanAlphanumeric) {
                     $q->where('registration_code', $origName)
                         ->orWhere('registration_code', $cleanCode)
                         ->orWhere('qr_pass', $origName)
-                        ->orWhereHas('user', function ($uq) use ($origName) {
-                            $uq->where('email', $origName);
+                        ->orWhereHas('user', function ($uq) use ($origName, $cleanCode, $cleanAlphanumeric) {
+                            $uq->where('email', $origName)
+                                ->orWhere('nik', $origName)
+                                ->orWhere('nik', $cleanCode);
+                            if (!empty($cleanAlphanumeric)) {
+                                $uq->orWhere('nik', $cleanAlphanumeric)
+                                   ->orWhereRaw("REPLACE(REPLACE(REPLACE(nik, '.', ''), '-', ''), ' ', '') = ?", [$cleanAlphanumeric]);
+                            }
                         });
                 })
                 ->first();
@@ -701,6 +787,14 @@ class OrganizerController extends Controller
                     'issued_at' => now(),
                 ]
             );
+
+            if ($registration->attendance_status !== 'attended') {
+                $registration->update([
+                    'attendance_status' => 'attended',
+                    'attended_at' => now(),
+                    'attendance_gate' => 'Validasi Sertifikat',
+                ]);
+            }
 
             $uploadedCount++;
         }
@@ -971,6 +1065,7 @@ class OrganizerController extends Controller
                 'No.',
                 'No. Registrasi',
                 'Nama Peserta',
+                'NIM / NIP / NIS',
                 'Email',
                 'Instansi / Universitas',
                 'No. Telepon',
@@ -988,6 +1083,7 @@ class OrganizerController extends Controller
                     $index + 1,
                     $reg->registration_code,
                     $reg->user->name ?? '-',
+                    $reg->user->nik ?? '-',
                     $reg->user->email ?? '-',
                     $reg->user->institution ?? '-',
                     $reg->user->phone ?? '-',
@@ -1025,7 +1121,8 @@ class OrganizerController extends Controller
                 ->orWhere('registration_code', $cleanToken)
                 ->orWhere('qr_pass', $token)
                 ->orWhereHas('user', function ($uq) use ($token) {
-                    $uq->where('email', $token);
+                    $uq->where('email', $token)
+                        ->orWhere('nik', $token);
                 });
         });
 
@@ -1081,6 +1178,14 @@ class OrganizerController extends Controller
             ]
         );
 
+        if ($registration->attendance_status !== 'attended') {
+            $registration->update([
+                'attendance_status' => 'attended',
+                'attended_at' => now(),
+                'attendance_gate' => 'Validasi Sertifikat',
+            ]);
+        }
+
         return redirect()->route('organizer.workspace', ['event' => $registration->event_id, 'tab' => 'sertifikat'])
             ->with('success', "Sertifikat untuk {$registration->user->name} ({$registration->registration_code}) berhasil diunggah.");
     }
@@ -1099,18 +1204,25 @@ class OrganizerController extends Controller
         foreach ($files as $file) {
             $origName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $cleanCode = trim(str_replace('#', '', $origName));
+            $cleanAlphanumeric = preg_replace('/[^a-zA-Z0-9]/', '', $origName);
 
             $query = Registration::with('certificate');
             if ($request->filled('event_id') && $request->event_id !== 'all') {
                 $query->where('event_id', $request->event_id);
             }
 
-            $registration = $query->where(function ($q) use ($cleanCode, $origName) {
+            $registration = $query->where(function ($q) use ($cleanCode, $origName, $cleanAlphanumeric) {
                 $q->where('registration_code', $origName)
                     ->orWhere('registration_code', $cleanCode)
                     ->orWhere('qr_pass', $origName)
-                    ->orWhereHas('user', function ($uq) use ($origName) {
-                        $uq->where('email', $origName);
+                    ->orWhereHas('user', function ($uq) use ($origName, $cleanCode, $cleanAlphanumeric) {
+                        $uq->where('email', $origName)
+                            ->orWhere('nik', $origName)
+                            ->orWhere('nik', $cleanCode);
+                        if (!empty($cleanAlphanumeric)) {
+                            $uq->orWhere('nik', $cleanAlphanumeric)
+                               ->orWhereRaw("REPLACE(REPLACE(REPLACE(nik, '.', ''), '-', ''), ' ', '') = ?", [$cleanAlphanumeric]);
+                        }
                     });
             })->first();
 
@@ -1137,6 +1249,14 @@ class OrganizerController extends Controller
                 ]
             );
 
+            if ($registration->attendance_status !== 'attended') {
+                $registration->update([
+                    'attendance_status' => 'attended',
+                    'attended_at' => now(),
+                    'attendance_gate' => 'Validasi Sertifikat',
+                ]);
+            }
+
             $uploadedCount++;
         }
 
@@ -1158,12 +1278,36 @@ class OrganizerController extends Controller
         $newStatus = $registration->attendance_status === 'attended' ? 'unattended' : 'attended';
         $registration->update([
             'attendance_status' => $newStatus,
-            'checked_in_at' => $newStatus === 'attended' ? now() : null,
-            'check_in_gate' => $newStatus === 'attended' ? 'Manual Panitia' : null,
+            'attended_at' => $newStatus === 'attended' ? now() : null,
+            'attendance_gate' => $newStatus === 'attended' ? 'Manual Panitia' : null,
         ]);
 
-        $statusText = $newStatus === 'attended' ? 'HADIR' : 'BELUM HADIR';
-        return back()->with('success', "Status presensi {$registration->user->name} diubah menjadi {$statusText}.");
+        $statusText = $newStatus === 'attended' ? 'HADIR SESI' : 'BELUM HADIR';
+        $notice = ($newStatus === 'unattended' && $registration->certificate()->exists())
+            ? ' (Akses e-sertifikat peserta otomatis dibekukan karena status presensi diubah menjadi belum hadir)'
+            : '';
+        return back()->with('success', "Status presensi {$registration->user->name} diubah menjadi {$statusText}{$notice}.");
+    }
+
+    public function toggleCheckin(Registration $registration)
+    {
+        if ($registration->event->format !== 'offline') {
+            return back()->with('error', 'Check-in registrasi ulang hanya berlaku untuk kegiatan offline.');
+        }
+
+        if (!$registration->is_checked_in && $registration->payment_status === 'pending') {
+            return back()->with('error', "Peserta {$registration->user->name} belum menyelesaikan pembayaran tiket.");
+        }
+
+        $newCheckedIn = !$registration->is_checked_in;
+        $registration->update([
+            'is_checked_in' => $newCheckedIn,
+            'checked_in_at' => $newCheckedIn ? now() : null,
+            'check_in_gate' => $newCheckedIn ? 'Manual Panitia' : null,
+        ]);
+
+        $statusText = $newCheckedIn ? 'SUDAH CHECK-IN' : 'BATAL CHECK-IN';
+        return back()->with('success', "Status check-in {$registration->user->name} diubah menjadi {$statusText}.");
     }
 
     public function deleteCertificate(Registration $registration)
@@ -1313,16 +1457,32 @@ class OrganizerController extends Controller
             'name' => 'required|string|max:150|unique:media_partners,name',
             'institution' => 'nullable|string|max:200',
             'contact_email' => 'required|email|max:150',
+            'website_url' => 'nullable|url|max:255',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:2048',
         ], [
             'name.required' => 'Nama media partner wajib diisi.',
             'name.unique' => 'Nama media partner sudah terdaftar.',
             'contact_email.required' => 'Kontak email wajib diisi.',
             'contact_email.email' => 'Format kontak email tidak valid.',
+            'website_url.url' => 'Format URL tautan web / media sosial tidak valid.',
+            'logo.image' => 'File logo harus berupa gambar.',
+            'logo.mimes' => 'Format logo harus berupa JPEG, PNG, JPG, WebP, atau SVG.',
+            'logo.max' => 'Ukuran file logo maksimal 2MB.',
         ]);
+
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            $filename = 'mp_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('media-partners', $filename, 'public');
+            $logoPath = 'storage/' . $path;
+        }
 
         $mediaPartner = MediaPartner::create([
             'name' => trim($validated['name']),
             'slug' => Str::slug($validated['name']),
+            'logo' => $logoPath,
+            'website_url' => !empty($validated['website_url']) ? trim($validated['website_url']) : null,
             'institution' => $validated['institution'] ?? null,
             'contact_email' => trim($validated['contact_email']),
         ]);
@@ -1337,16 +1497,36 @@ class OrganizerController extends Controller
             'name' => 'required|string|max:150|unique:media_partners,name,' . $mediaPartner->id,
             'institution' => 'nullable|string|max:200',
             'contact_email' => 'required|email|max:150',
+            'website_url' => 'nullable|url|max:255',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:2048',
         ], [
             'name.required' => 'Nama media partner wajib diisi.',
             'name.unique' => 'Nama media partner sudah terdaftar.',
             'contact_email.required' => 'Kontak email wajib diisi.',
             'contact_email.email' => 'Format kontak email tidak valid.',
+            'website_url.url' => 'Format URL tautan web / media sosial tidak valid.',
+            'logo.image' => 'File logo harus berupa gambar.',
+            'logo.mimes' => 'Format logo harus berupa JPEG, PNG, JPG, WebP, atau SVG.',
+            'logo.max' => 'Ukuran file logo maksimal 2MB.',
         ]);
+
+        $logoPath = $mediaPartner->logo;
+        if ($request->hasFile('logo')) {
+            if ($mediaPartner->logo && str_starts_with($mediaPartner->logo, 'storage/media-partners/')) {
+                $oldPath = str_replace('storage/', '', $mediaPartner->logo);
+                Storage::disk('public')->delete($oldPath);
+            }
+            $file = $request->file('logo');
+            $filename = 'mp_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('media-partners', $filename, 'public');
+            $logoPath = 'storage/' . $path;
+        }
 
         $mediaPartner->update([
             'name' => trim($validated['name']),
             'slug' => Str::slug($validated['name']),
+            'logo' => $logoPath,
+            'website_url' => !empty($validated['website_url']) ? trim($validated['website_url']) : null,
             'institution' => $validated['institution'] ?? null,
             'contact_email' => trim($validated['contact_email']),
         ]);
@@ -1360,6 +1540,10 @@ class OrganizerController extends Controller
     public function mediaPartnersDestroy(MediaPartner $mediaPartner)
     {
         $name = $mediaPartner->name;
+        if ($mediaPartner->logo && str_starts_with($mediaPartner->logo, 'storage/media-partners/')) {
+            $oldPath = str_replace('storage/', '', $mediaPartner->logo);
+            Storage::disk('public')->delete($oldPath);
+        }
         Event::where('media_partner_id', $mediaPartner->id)->update(['media_partner_id' => null]);
         $mediaPartner->delete();
 

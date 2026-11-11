@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->string('category')->default('Teknologi & Rekayasa');
-            $table->enum('format', ['offline', 'online', 'hybrid'])->default('hybrid');
+            $table->enum('format', ['offline', 'online'])->default('offline');
             $table->string('location')->nullable();
             $table->date('start_date');
             $table->date('end_date')->nullable();
@@ -21,8 +21,6 @@ return new class extends Migration
             $table->time('end_time');
             $table->unsignedInteger('quota')->default(100);
             $table->unsignedInteger('price')->default(0);
-            $table->unsignedInteger('skp_points')->default(0);
-            $table->string('sk_number')->nullable();
             $table->text('description')->nullable();
             $table->enum('status', ['draft', 'published', 'completed', 'cancelled'])->default('published');
             $table->string('banner_url')->nullable();

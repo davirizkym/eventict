@@ -211,12 +211,12 @@
                   <span class="px-2.5 py-0.5 rounded-md text-[10px] font-semibold tracking-wider uppercase bg-blue-50 text-blue-950 border border-blue-100">
                     {{ $evt->category }}
                   </span>
-                  <span class="px-2 py-0.5 rounded-md text-[10px] font-medium uppercase bg-slate-100 text-slate-700">
-                    {{ $evt->format }}
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-700">
+                    {{ $evt->format === 'offline' ? 'Luring' : 'Daring' }}
                   </span>
                   @if(($evt->organizer_type ?? 'internal') === 'partner')
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-                      Partner: {{ $evt->organizer_name }}
+                      Penyelenggara: {{ $evt->organizer_name }}
                     </span>
                   @endif
                 </div>
@@ -348,7 +348,6 @@
             <select name="format" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
               <option value="offline" selected>Offline</option>
               <option value="online">Online</option>
-              <option value="hybrid">Hybrid</option>
             </select>
           </div>
         </div>
@@ -358,16 +357,16 @@
             <label class="font-semibold text-slate-700">Penyelenggara Kegiatan <span class="text-rose-500">*</span></label>
             <select name="organizer_type" onchange="toggleCreatePartnerName(this.value)" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
               <option value="internal" selected>Internal (Laboratorium ICT)</option>
-              <option value="partner">Media Partner (Himpunan / BEM / Eksternal)</option>
+              <option value="partner">Mitra Penyelenggara (Himpunan / BEM / Eksternal)</option>
             </select>
           </div>
           <div id="create-partner-name-container" class="hidden flex flex-col gap-1.5">
             <div class="flex items-center justify-between">
-              <label class="font-semibold text-slate-700">Pilih Media Partner <span class="text-rose-500">*</span></label>
+              <label class="font-semibold text-slate-700">Pilih Mitra Penyelenggara <span class="text-rose-500">*</span></label>
               <a href="{{ route('organizer.media_partners.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola Data</a>
             </div>
             <select name="media_partner_id" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-              <option value="" disabled selected>-- Pilih Media Partner --</option>
+              <option value="" disabled selected>-- Pilih Mitra Penyelenggara --</option>
               @foreach($masterMediaPartners as $mp)
                 <option value="{{ $mp->id }}">{{ $mp->name }}</option>
               @endforeach
@@ -391,6 +390,32 @@
             <input type="file" name="poster" accept="image/*" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-950 cursor-pointer file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-950 hover:file:bg-blue-200">
             <span class="text-[10px] text-slate-400">Format gambar JPG, PNG, atau WEBP</span>
           </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <label class="font-semibold text-slate-700">Media Partner Pendukung Acara</label>
+            <a href="{{ route('organizer.media_partners.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola Master Media Partner</a>
+          </div>
+          @if($masterMediaPartners->isNotEmpty())
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-40 overflow-y-auto p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+              @foreach($masterMediaPartners as $mp)
+                <label class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-slate-200/80 hover:border-blue-900 cursor-pointer transition text-xs">
+                  <input type="checkbox" name="media_partner_ids[]" value="{{ $mp->id }}" class="size-4 rounded text-blue-950 focus:ring-blue-950 border-slate-300">
+                  <div class="size-7 rounded-md bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                    @if($mp->logo)
+                      <img src="{{ asset($mp->logo) }}" alt="{{ $mp->name }}" class="size-full object-contain p-0.5">
+                    @else
+                      <span class="text-[10px] font-bold text-slate-400 uppercase">{{ substr($mp->name, 0, 2) }}</span>
+                    @endif
+                  </div>
+                  <span class="font-medium text-slate-800 truncate">{{ $mp->name }}</span>
+                </label>
+              @endforeach
+            </div>
+          @else
+            <p class="text-xs text-slate-400 bg-slate-50 p-3 rounded-xl border border-slate-200">Belum ada data media partner di master. Anda dapat menambahkannya nanti.</p>
+          @endif
         </div>
 
         <div class="flex flex-col gap-1.5">

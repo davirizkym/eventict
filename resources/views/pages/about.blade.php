@@ -16,50 +16,50 @@
 
       <div class="flex flex-col gap-2 pb-6 border-b border-slate-200">
         <h1 class="text-slate-900 text-2xl sm:text-3xl font-semibold font-['Poppins']">
-          Tentang Eventict — Laboratorium ICT
+          Tentang Eventict
         </h1>
         <p class="text-slate-600 text-xs sm:text-sm font-normal font-['Poppins'] max-w-3xl leading-relaxed">
-          Sistem informasi direktori dan administrasi kegiatan workshop, pelatihan komputasi, seminar teknologi, dan sertifikasi Laboratorium ICT.
+          Tempat mencari dan mendaftar berbagai acara, pelatihan komputer, dan seminar seru yang diselenggarakan oleh Laboratorium ICT.
         </p>
       </div>
 
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div class="lg:col-span-2 flex flex-col gap-6">
           <div class="p-8 bg-white rounded-xl border border-slate-200 flex flex-col gap-4 shadow-xs">
-            <h2 class="text-slate-900 text-lg font-semibold font-['Poppins']">Peran & Fungsi Platform</h2>
+            <h2 class="text-slate-900 text-lg font-semibold font-['Poppins']">Mengenal Eventict</h2>
             <p class="text-slate-600 text-xs sm:text-sm leading-relaxed font-['Poppins']">
-              Eventict dikembangkan sebagai pusat publikasi, pendaftaran, dan manajemen kegiatan yang diselenggarakan oleh Laboratorium ICT (ICT Laboratory). Platform ini memfasilitasi mahasiswa, dosen, asisten laboratorium, dan praktisi industri untuk terhubung dalam program peningkatan keterampilan teknologi informasi dan komputasi praktis.
+              Eventict adalah wadah resmi dari Laboratorium ICT untuk membantu Anda menemukan kegiatan bermanfaat seputar dunia teknologi. Siapa pun, baik mahasiswa, pelajar, maupun masyarakat umum, dapat ikut serta untuk belajar dan menambah wawasan baru.
             </p>
             <p class="text-slate-600 text-xs sm:text-sm leading-relaxed font-['Poppins']">
-              Seluruh proses mulai dari pendaftaran peserta, alokasi kuota sesi, presensi terverifikasi di ruang lab komputer maupun sesi daring, hingga penerbitan e-sertifikat digital terkelola secara otomatis dan transparan.
+              Semua proses dibuat praktis dan mudah: Anda cukup memilih acara yang diminati, mendaftar langsung secara online, melakukan absensi saat hadir, dan mengunduh sertifikat resmi setelah acara selesai.
             </p>
           </div>
 
           <div class="p-8 bg-white rounded-xl border border-slate-200 flex flex-col gap-4 shadow-xs">
-            <h2 class="text-slate-900 text-lg font-semibold font-['Poppins']">Fasilitas & Infrastruktur Pendukung</h2>
+            <h2 class="text-slate-900 text-lg font-semibold font-['Poppins']">Apa Saja yang Anda Dapatkan?</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-['Poppins']">
               <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 flex flex-col gap-1.5">
-                <span class="font-semibold text-slate-900">Lab Komputer Terintegrasi</span>
+                <span class="font-semibold text-slate-900">Wawasan Bermanfaat</span>
                 <p class="text-slate-600 leading-relaxed">
-                  Ruang laboratorium komputer dengan spesifikasi perangkat modern untuk kebutuhan praktikum programming, data science, dan simulasi jaringan.
+                  Pahami topik pembahasan lewat penyampaian yang santai, jelas, dan mudah dimengerti.
                 </p>
               </div>
               <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 flex flex-col gap-1.5">
-                <span class="font-semibold text-slate-900">Jaringan & Server Komputasi</span>
+                <span class="font-semibold text-slate-900">Slide Materi Acara</span>
                 <p class="text-slate-600 leading-relaxed">
-                  Koneksi internet gigabit dedicated dan server komputasi lokal yang mendukung lingkungan eksperimen komputasi dan cloud lab.
+                  Dapatkan salinan bahan presentasi untuk kamu pelajari ulang di rumah.
                 </p>
               </div>
               <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 flex flex-col gap-1.5">
-                <span class="font-semibold text-slate-900">Presensi & Validasi Terdata</span>
+                <span class="font-semibold text-slate-900">Koneksi Baru</span>
                 <p class="text-slate-600 leading-relaxed">
-                  Sistem pencatatan kehadiran berbasis pass kode unik guna memastikan keabsahan kehadiran peserta di setiap sesi kegiatan.
+                  Wadah temu dan interaksi bareng audiens lain yang punya minat sama.
                 </p>
               </div>
               <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 flex flex-col gap-1.5">
-                <span class="font-semibold text-slate-900">E-Sertifikat Terverifikasi</span>
+                <span class="font-semibold text-slate-900">Sertifikat Digital</span>
                 <p class="text-slate-600 leading-relaxed">
-                  Dokumen sertifikat pelatihan resmi yang diterbitkan langsung oleh Laboratorium ICT dan tersimpan permanen di akun peserta.
+                  Bisa diunduh langsung lewat web kapan saja tanpa takut hilang atau terselip.
                 </p>
               </div>
             </div>
@@ -68,23 +68,22 @@
 
         <div class="flex flex-col gap-6">
           <div class="p-6 bg-white rounded-xl border border-slate-200 flex flex-col gap-4 shadow-xs">
-            <h2 class="text-slate-900 text-base font-semibold font-['Poppins']">Sekretariat Laboratorium ICT</h2>
+            <h2 class="text-slate-900 text-base font-semibold font-['Poppins']">Kontak & Lokasi Kami</h2>
             <div class="text-xs text-slate-600 flex flex-col gap-3 font-['Poppins']">
               <div>
-                <span class="text-slate-400 block text-[11px]">Lokasi Laboratorium:</span>
+                <span class="text-slate-400 block text-[11px]">Alamat:</span>
                 <span class="text-slate-800 font-medium">Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur</span>
               </div>
               <div>
-                <span class="text-slate-400 block text-[11px]">Email Dukungan:</span>
+                <span class="text-slate-400 block text-[11px]">Email Bantuan:</span>
                 <span class="text-slate-800 font-medium">help@eventict.id</span>
               </div>
               <div>
-                <span class="text-slate-400 block text-[11px]">Jam Operasional:</span>
+                <span class="text-slate-400 block text-[11px]">Jam Layanan:</span>
                 <span class="text-slate-800 font-medium">Senin – Jumat, 08:00 – 17:00 WIB</span>
               </div>
             </div>
           </div>
-
         </div>
       </section>
     </main>
