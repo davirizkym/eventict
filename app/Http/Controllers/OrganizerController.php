@@ -57,6 +57,9 @@ class OrganizerController extends Controller
 
         $totalSpeakers = Speaker::count();
         $masterSpeakers = Speaker::orderBy('name', 'asc')->get();
+        if (Category::count() === 0) {
+            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'CategorySeeder', '--force' => true]);
+        }
         $masterCategories = Category::orderBy('name', 'asc')->get();
         $masterMediaPartners = MediaPartner::orderBy('name', 'asc')->get();
 
@@ -313,6 +316,9 @@ class OrganizerController extends Controller
         $registrations = $query->get();
 
         $allMasterSpeakers = Speaker::orderBy('name', 'asc')->get();
+        if (Category::count() === 0) {
+            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'CategorySeeder', '--force' => true]);
+        }
         $allCategories = Category::orderBy('name', 'asc')->get();
         $allMediaPartners = MediaPartner::orderBy('name', 'asc')->get();
         $otherActiveEvents = Event::where('status', '!=', 'draft')
@@ -1307,6 +1313,9 @@ class OrganizerController extends Controller
 
     public function categoriesIndex(Request $request)
     {
+        if (Category::count() === 0) {
+            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'CategorySeeder', '--force' => true]);
+        }
         $query = Category::withCount('events');
 
         if ($request->filled('q')) {

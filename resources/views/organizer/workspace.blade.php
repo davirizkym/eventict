@@ -186,18 +186,6 @@
           <span>Pengaturan Acara</span>
         </a>
       </nav>
-
-      <div class="bg-blue-950 text-white rounded-2xl p-4 flex flex-col gap-2 shadow-2xs">
-        <div class="flex items-center gap-2">
-          <svg class="size-4 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-          <span class="text-xs font-semibold">Sekretariat Lab ICT</span>
-        </div>
-        <p class="text-[11px] text-slate-300 leading-relaxed">
-          Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur.
-        </p>
-      </div>
     </aside>
 
     <main class="flex-1 flex flex-col gap-6 min-w-0">

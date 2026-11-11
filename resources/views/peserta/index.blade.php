@@ -135,19 +135,6 @@
           </div>
         </a>
       </nav>
-
-      <div class="bg-blue-950 text-white rounded-2xl p-4 flex flex-col gap-2 shadow-2xs">
-        <div class="flex items-center gap-2">
-          <svg class="size-4 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-          <span class="text-xs font-semibold">Pusat Layanan Peserta</span>
-        </div>
-        <p class="text-[11px] text-slate-300 leading-relaxed">
-          Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur.
-        </p>
-        <div class="text-[11px] text-blue-200 font-medium">help@eventict.id</div>
-      </div>
     </aside>
 
     <main class="flex-1 flex flex-col gap-6 min-w-0">
@@ -663,6 +650,31 @@
                       </button>
                     @endif
                   @endif
+                  @if($reg->payment_status !== 'pending')
+                    <button type="button" onclick="openPrintTicketModal({{ json_encode([
+                        'registration_code' => $reg->registration_code,
+                        'qr_pass' => $reg->qr_pass,
+                        'event_title' => $reg->event->title,
+                        'event_date' => $reg->event->start_date ? $reg->event->start_date->translatedFormat('d F Y') : '—',
+                        'event_time' => substr($reg->event->start_time ?? '', 0, 5) . ' - ' . substr($reg->event->end_time ?? '', 0, 5) . ' WIB',
+                        'event_location' => $reg->event->location ?? 'Online via Eventict Platform',
+                        'event_format' => strtoupper($reg->event->format),
+                        'participant_name' => $user->name,
+                        'participant_nik' => $user->nik ?? '-',
+                        'participant_institution' => $user->institution ?? 'Peserta Umum',
+                        'attendance_status' => $reg->attendance_status,
+                        'checked_in_at' => $reg->checked_in_at ? $reg->checked_in_at->format('d M Y, H:i') . ' WIB' : null,
+                        'presence_url' => route('events.presence', $reg->event->slug),
+                        'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' . urlencode(route('events.presence', $reg->event->slug)),
+                    ]) }})" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[11px] font-medium text-slate-700 hover:bg-slate-100 transition shadow-2xs flex items-center gap-1 cursor-pointer" title="Cetak / Simpan Tiket PDF">
+                      <svg class="size-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 6 2 18 2 18 9"/>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                        <rect width="12" height="8" x="6" y="14"/>
+                      </svg>
+                      <span>Tiket</span>
+                    </button>
+                  @endif
                   <a href="{{ route('events.show', $reg->event->slug) }}" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[11px] font-medium text-slate-700 hover:bg-slate-100 transition shadow-2xs">
                     Detail
                   </a>
@@ -933,6 +945,27 @@
             </div>
           </div>
 
+          <!-- Filter Cepat Tiket -->
+          @php
+            $totalCount = $registrations->count();
+            $attendedCount = $registrations->where('attendance_status', 'attended')->count();
+            $unattendedCount = $registrations->where('attendance_status', '!=', 'attended')->count();
+          @endphp
+          <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 pt-1 border-b border-slate-100 pb-3">
+            <button type="button" onclick="filterTickets('all')" id="btn-filter-all" class="ticket-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-950 text-white transition cursor-pointer shadow-2xs flex items-center gap-1.5">
+              <span>Semua</span>
+              <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-white/20 text-white">{{ $totalCount }}</span>
+            </button>
+            <button type="button" onclick="filterTickets('unattended')" id="btn-filter-unattended" class="ticket-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer flex items-center gap-1.5">
+              <span>Belum Hadir</span>
+              <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 text-slate-700">{{ $unattendedCount }}</span>
+            </button>
+            <button type="button" onclick="filterTickets('attended')" id="btn-filter-attended" class="ticket-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer flex items-center gap-1.5">
+              <span>Sudah Presensi</span>
+              <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 text-slate-700">{{ $attendedCount }}</span>
+            </button>
+          </div>
+
           <div class="flex flex-col gap-3">
             @forelse($registrations as $reg)
               @php
@@ -1100,6 +1133,10 @@
                 Anda belum mendaftar kegiatan apapun. Klik tombol di atas untuk melihat katalog kegiatan yang dibuka.
               </div>
             @endforelse
+
+            <div id="ticket-empty-filter" class="hidden p-8 bg-slate-50 rounded-xl text-center text-xs text-slate-500">
+              Tidak ada tiket yang sesuai dengan filter yang dipilih.
+            </div>
           </div>
         </div>
       @endif
@@ -1568,6 +1605,86 @@
 <script src="{{ asset('vendor/html5-qrcode/html5-qrcode.min.js') }}"></script>
 <script src="{{ config('midtrans.snap_url') }}" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
+function filterTickets(status) {
+  const cards = document.querySelectorAll('.ticket-card');
+  const emptyNotice = document.getElementById('ticket-empty-filter');
+  let visibleCount = 0;
+
+  document.querySelectorAll('.ticket-filter-btn').forEach(btn => {
+    btn.className = 'ticket-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer flex items-center gap-1.5';
+    const badge = btn.querySelector('span:last-child');
+    if (badge) badge.className = 'px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 text-slate-700';
+  });
+
+  const activeBtn = document.getElementById('btn-filter-' + status);
+  if (activeBtn) {
+    activeBtn.className = 'ticket-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-950 text-white transition cursor-pointer shadow-2xs flex items-center gap-1.5';
+    const badge = activeBtn.querySelector('span:last-child');
+    if (badge) badge.className = 'px-1.5 py-0.5 rounded-full text-[10px] bg-white/20 text-white';
+  }
+
+  cards.forEach(card => {
+    const cardStatus = card.getAttribute('data-status');
+    if (status === 'all' || cardStatus === status) {
+      card.style.display = 'flex';
+      visibleCount++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+
+  if (emptyNotice) {
+    emptyNotice.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+}
+
+function openPrintTicketModal(data) {
+  document.getElementById('ticket-modal-title').textContent = data.event_title;
+  document.getElementById('ticket-modal-date').textContent = data.event_date;
+  document.getElementById('ticket-modal-time').textContent = data.event_time;
+  document.getElementById('ticket-modal-location').textContent = data.event_location;
+  document.getElementById('ticket-modal-format').textContent = data.event_format;
+  document.getElementById('ticket-modal-name').textContent = data.participant_name;
+  document.getElementById('ticket-modal-nik').textContent = data.participant_nik;
+  document.getElementById('ticket-modal-institution').textContent = data.participant_institution;
+  document.getElementById('ticket-modal-code').textContent = 'No. Tiket: ' + data.registration_code;
+  document.getElementById('ticket-modal-pass').textContent = '#' + data.qr_pass;
+
+  const qrImg = document.getElementById('ticket-modal-qr');
+  if (qrImg) {
+    const qrSource = data.qr_url || ('https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' + encodeURIComponent(data.presence_url || data.qr_pass));
+    qrImg.src = qrSource;
+  }
+  const presenceLink = document.getElementById('ticket-modal-link');
+  if (presenceLink) {
+    if (data.presence_url) {
+      presenceLink.href = data.presence_url;
+      presenceLink.classList.remove('hidden');
+    } else {
+      presenceLink.classList.add('hidden');
+    }
+  }
+  
+  const statusBadge = document.getElementById('ticket-modal-status');
+  if (data.attendance_status === 'attended') {
+    statusBadge.className = 'px-3 py-1 bg-emerald-100 text-emerald-900 text-xs font-bold rounded-full whitespace-nowrap font-[\'Poppins\'] shadow-2xs';
+    statusBadge.textContent = 'Sudah Presensi' + (data.checked_in_at ? ' (' + data.checked_in_at + ')' : '');
+  } else {
+    statusBadge.className = 'px-3 py-1 bg-blue-100 text-blue-950 text-xs font-bold rounded-full whitespace-nowrap font-[\'Poppins\'] shadow-2xs';
+    statusBadge.textContent = 'Siap Check-In (Belum Presensi)';
+  }
+
+  const modal = document.getElementById('modal-print-ticket');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closePrintTicketModal() {
+  const modal = document.getElementById('modal-print-ticket');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
 function payWithSnap(registrationId, existingToken) {
   if (existingToken && existingToken !== '') {
     triggerSnapPay(existingToken, registrationId);

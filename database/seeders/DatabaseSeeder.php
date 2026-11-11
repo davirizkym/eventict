@@ -178,11 +178,13 @@ class DatabaseSeeder extends Seeder
         );
 
         $today = Carbon::today();
+        $categoriesMap = Category::pluck('id', 'name');
 
         $event1 = Event::updateOrCreate(
             ['slug' => 'simposium-nasional-telemedicine-regulasi-medis-2026'],
             [
                 'title' => 'Simposium Nasional Telemedicine & Regulasi Medis 2026',
+                'category_id' => $categoriesMap['Kedokteran & Kesehatan'] ?? null,
                 'category' => 'Kedokteran & Kesehatan',
                 'format' => 'offline',
                 'location' => 'Ruang Rinjani 2, Hotel Borobudur Jakarta',
@@ -204,6 +206,7 @@ class DatabaseSeeder extends Seeder
             ['slug' => 'workshop-machine-learning-intermediate-prediksi-diagnostik'],
             [
                 'title' => 'Workshop Machine Learning Intermediate: Prediksi Diagnostik Klinis',
+                'category_id' => $categoriesMap['Teknologi & Rekayasa'] ?? null,
                 'category' => 'Teknologi & Rekayasa',
                 'format' => 'online',
                 'location' => 'Platform Pembelajaran Virtual Eventict',
@@ -226,6 +229,7 @@ class DatabaseSeeder extends Seeder
             ['slug' => 'konferensi-nasional-transformasi-layanan-primer-rme'],
             [
                 'title' => 'Konferensi Nasional Transformasi Layanan Primer & Rekam Medis Elektronik',
+                'category_id' => $categoriesMap['Kedokteran & Kesehatan'] ?? null,
                 'category' => 'Kedokteran & Kesehatan',
                 'format' => 'offline',
                 'location' => 'Grand Ballroom Pullman Hotel Central Park, Jakarta Barat',
@@ -246,6 +250,7 @@ class DatabaseSeeder extends Seeder
             ['slug' => 'simposium-etika-siber-dan-keamanan-privasi-data-pasien'],
             [
                 'title' => 'Simposium Etika Siber & Keamanan Privasi Data Pasien',
+                'category_id' => $categoriesMap['Hukum & Kebijakan'] ?? null,
                 'category' => 'Hukum & Kebijakan',
                 'format' => 'online',
                 'location' => 'Ruang Webinar Live Stream Studio 1',
@@ -268,6 +273,7 @@ class DatabaseSeeder extends Seeder
             ['slug' => 'masterclass-akselerasi-bisnis-digital-dan-manajemen-produk'],
             [
                 'title' => 'Masterclass Akselerasi Bisnis Digital & Manajemen Produk Startup',
+                'category_id' => $categoriesMap['Ekonomi & Bisnis'] ?? null,
                 'category' => 'Ekonomi & Bisnis',
                 'format' => 'online',
                 'location' => 'Auditorium Virtual Eventict Business Hub',
