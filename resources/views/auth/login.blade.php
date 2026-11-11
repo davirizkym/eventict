@@ -31,24 +31,30 @@
           <p class="text-slate-300 text-xs font-normal font-['Poppins'] leading-relaxed">Kelola tiket, absensi QR presisi, dan sertifikat resmi dalam satu platform terpadu.</p>
         </div>
 
-        <div class="flex flex-col gap-3 pt-2">
-          <div class="flex items-start gap-2.5 text-xs text-slate-200 font-['Poppins']">
-            <svg class="size-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <div class="p-4 bg-white/5 border border-white/10 rounded-xl flex flex-col gap-3">
+          <div class="flex items-center gap-2.5 text-xs text-slate-200 font-['Poppins']">
+            <svg class="size-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            <span>Verifikasi legalitas sertifikat resmi berbasis kode unik</span>
+            <span>Wawasan Bermanfaat</span>
           </div>
-          <div class="flex items-start gap-2.5 text-xs text-slate-200 font-['Poppins']">
-            <svg class="size-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <div class="flex items-center gap-2.5 text-xs text-slate-200 font-['Poppins']">
+            <svg class="size-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            <span>Check-in presensi instan berbasis kode QR unik</span>
+            <span>Slide Materi Acara</span>
           </div>
-          <div class="flex items-start gap-2.5 text-xs text-slate-200 font-['Poppins']">
-            <svg class="size-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <div class="flex items-center gap-2.5 text-xs text-slate-200 font-['Poppins']">
+            <svg class="size-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            <span>Pusat kendali operasional komprehensif bagi panitia</span>
+            <span>Koneksi Baru</span>
+          </div>
+          <div class="flex items-center gap-2.5 text-xs text-slate-200 font-['Poppins']">
+            <svg class="size-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Sertifikat Digital</span>
           </div>
         </div>
       </div>
@@ -151,9 +157,7 @@
     </div>
   </div>
 
-  <div class="text-center text-xs text-slate-400 font-['Poppins'] mt-6">
-    &copy; {{ date('Y') }} Eventict. Sistem Informasi Seminar & Workshop Berstandar Nasional.
-  </div>
+
 </div>
 
 <script>

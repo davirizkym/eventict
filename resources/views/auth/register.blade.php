@@ -32,30 +32,30 @@
         </div>
 
         <div class="p-4 bg-white/5 border border-white/10 rounded-xl flex flex-col gap-3">
-          <span class="text-xs font-semibold text-slate-200 font-['Poppins']">Keuntungan Akun Peserta:</span>
-          <div class="flex items-start gap-2 text-xs text-slate-300 font-['Poppins']">
-            <svg class="size-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="flex items-center gap-2.5 text-xs text-slate-200 font-['Poppins']">
+            <svg class="size-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            <span>Simpan riwayat tiket dan materi workshop secara permanen</span>
+            <span>Wawasan Bermanfaat</span>
           </div>
-          <div class="flex items-start gap-2 text-xs text-slate-300 font-['Poppins']">
-            <svg class="size-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="flex items-center gap-2.5 text-xs text-slate-200 font-['Poppins']">
+            <svg class="size-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            <span>Download e-sertifikat ber-QR resmi kapan saja</span>
+            <span>Slide Materi Acara</span>
           </div>
-          <div class="flex items-start gap-2 text-xs text-slate-300 font-['Poppins']">
-            <svg class="size-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="flex items-center gap-2.5 text-xs text-slate-200 font-['Poppins']">
+            <svg class="size-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            <span>Check-in presensi instan menggunakan QR Pass unik</span>
+            <span>Koneksi Baru</span>
           </div>
-        </div>
-
-        <div class="pt-6 border-t border-white/10 text-xs text-slate-300 font-['Poppins']">
-          Sudah memiliki akun terdaftar?
-          <a href="{{ route('login') }}" class="text-white font-semibold hover:underline block mt-1">Masuk ke Akun Anda &rarr;</a>
+          <div class="flex items-center gap-2.5 text-xs text-slate-200 font-['Poppins']">
+            <svg class="size-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Sertifikat Digital</span>
+          </div>
         </div>
       </div>
     </div>
@@ -115,13 +115,13 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
-            <label for="institution" class="text-xs font-semibold text-slate-700 font-['Poppins']">Asal Instansi / Perusahaan / Kampus</label>
+            <label for="institution" class="text-xs font-semibold text-slate-700 font-['Poppins']">Asal Kampus / Sekolah / Instansi</label>
             <input
               type="text"
               id="institution"
               name="institution"
               value="{{ old('institution') }}"
-              placeholder="Universitas Indonesia / PT Teknologi Maju"
+              placeholder="Universitas Budi Luhur / Nama Sekolah / Instansi"
               class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950 font-['Poppins']"
             >
           </div>
@@ -191,8 +191,6 @@
     </div>
   </div>
 
-  <div class="text-center text-xs text-slate-400 font-['Poppins'] mt-6">
-    &copy; {{ date('Y') }} Eventict. Sistem Informasi Seminar & Workshop Berstandar Nasional.
-  </div>
+
 </div>
 @endsection
