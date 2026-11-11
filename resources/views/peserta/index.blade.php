@@ -7,23 +7,16 @@
   <header class="bg-blue-950 text-white border-b border-blue-900 sticky top-0 z-40 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-        <a href="{{ route('home') }}" class="px-2.5 py-1.5 rounded-lg border border-white/20 text-xs font-semibold text-slate-200 hover:bg-white/10 hover:text-white transition flex items-center gap-1.5 shrink-0" title="Kembali ke Beranda">
-          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-          <span class="hidden sm:inline">Beranda</span>
+        <a href="{{ route('home') }}" class="flex items-center shrink-0">
+          <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-7 sm:h-8 w-auto">
         </a>
 
         <div class="h-6 w-px bg-white/20 hidden sm:block shrink-0"></div>
 
         <div class="flex items-center gap-2 min-w-0">
-          <span class="text-xs text-blue-200 hidden lg:inline shrink-0">Ruang Peserta:</span>
           <div class="bg-blue-900 border border-blue-800 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white truncate max-w-[200px] sm:max-w-[320px]">
             {{ $user->name }}
           </div>
-          <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 shrink-0 hidden md:inline">
-            Aktif
-          </span>
         </div>
       </div>
 
@@ -57,15 +50,15 @@
           <span class="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-slate-100 text-slate-700">
             {{ $user->institution ?? 'Peserta Terdaftar' }}
           </span>
-          @if($user->nik)
+          @if($user->identity_no)
             <span class="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-blue-50 text-blue-900 border border-blue-100">
-              NIM/NIP/NIS: {{ $user->nik }}
+              NIM/NIP/NIS: {{ $user->identity_no }}
             </span>
           @endif
         </div>
       </div>
 
-      <nav class="bg-white rounded-2xl border border-slate-200 p-2 flex flex-row md:flex-col gap-1 shadow-2xs overflow-x-auto">
+      <nav class="bg-white rounded-2xl border border-slate-200 p-2 hidden md:flex flex-col gap-1 shadow-2xs">
         <a href="{{ route('peserta.dashboard', ['tab' => 'dashboard']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between shrink-0 {{ $tab === 'dashboard' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
           <div class="flex items-center gap-2.5">
             <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -137,7 +130,7 @@
       </nav>
     </aside>
 
-    <main class="flex-1 flex flex-col gap-6 min-w-0">
+    <main class="flex-1 flex flex-col gap-6 min-w-0 pb-24 md:pb-8">
       @if (!$user->hasVerifiedEmail())
         <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900">
           <div class="flex items-start gap-3">
@@ -650,22 +643,22 @@
                       </button>
                     @endif
                   @endif
-                  @if($reg->payment_status !== 'pending')
+                  @if($reg->payment_status !== 'pending' && $reg->event->format === 'offline' && $reg->qr_pass)
                     <button type="button" onclick="openPrintTicketModal({{ json_encode([
                         'registration_code' => $reg->registration_code,
                         'qr_pass' => $reg->qr_pass,
                         'event_title' => $reg->event->title,
                         'event_date' => $reg->event->start_date ? $reg->event->start_date->translatedFormat('d F Y') : '—',
                         'event_time' => substr($reg->event->start_time ?? '', 0, 5) . ' - ' . substr($reg->event->end_time ?? '', 0, 5) . ' WIB',
-                        'event_location' => $reg->event->location ?? 'Online via Eventict Platform',
+                        'event_location' => $reg->event->location ?? 'Gedung Laboratorium ICT',
                         'event_format' => strtoupper($reg->event->format),
                         'participant_name' => $user->name,
-                        'participant_nik' => $user->nik ?? '-',
+                        'participant_nik' => $user->identity_no ?? '-',
                         'participant_institution' => $user->institution ?? 'Peserta Umum',
                         'attendance_status' => $reg->attendance_status,
                         'checked_in_at' => $reg->checked_in_at ? $reg->checked_in_at->format('d M Y, H:i') . ' WIB' : null,
                         'presence_url' => route('events.presence', $reg->event->slug),
-                        'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' . urlencode(route('events.presence', $reg->event->slug)),
+                        'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' . urlencode($reg->qr_pass),
                     ]) }})" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[11px] font-medium text-slate-700 hover:bg-slate-100 transition shadow-2xs flex items-center gap-1 cursor-pointer" title="Cetak / Simpan Tiket PDF">
                       <svg class="size-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="6 9 6 2 18 2 18 9"/>
@@ -1145,8 +1138,7 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-5 shadow-2xs">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h3 class="text-sm sm:text-base font-bold text-slate-900">Lemari E-Sertifikat Resmi ({{ $certificates->count() }})</h3>
-              <p class="text-xs text-slate-500">Dokumen digital resmi bertanda tangan dan ber-hash verifikasi integritas Laboratorium ICT.</p>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">E-Sertifikat</h3>
             </div>
             <span class="px-2.5 py-1 bg-blue-50 text-blue-900 border border-blue-200 text-xs font-semibold rounded-md self-start sm:self-auto">
               Terverifikasi Digital
@@ -1362,12 +1354,39 @@
               <h3 class="text-base font-bold text-slate-900">Profil Peserta</h3>
               <p class="text-xs text-slate-500 mt-0.5">Kelola data profil, NIM/NIP/NIS, asal instansi, dan keamanan kata sandi akun Anda.</p>
             </div>
-            <div class="flex items-center gap-2 text-xs">
-              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-900 border border-blue-100">
-                Role: Peserta
-              </span>
-            </div>
           </div>
+
+          @if($user->pending_email)
+            <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900 shadow-2xs">
+              <div class="flex items-start gap-3">
+                <svg class="size-4 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <div class="flex flex-col gap-0.5">
+                  <span class="font-bold">Permintaan Perubahan Email Menunggu Verifikasi</span>
+                  <p class="text-amber-800 text-[11px] leading-relaxed">
+                    Tautan verifikasi telah dikirimkan ke <strong class="font-mono">{{ $user->pending_email }}</strong>. Alamat email login aktif Anda tetap <strong class="font-mono">{{ $user->email }}</strong> sampai email baru berhasil diverifikasi.
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <form method="POST" action="{{ route('peserta.profile.email.resend') }}" class="inline">
+                  @csrf
+                  <button type="submit" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded-lg text-xs font-semibold transition cursor-pointer">
+                    Kirim Ulang
+                  </button>
+                </form>
+                <form method="POST" action="{{ route('peserta.profile.email.cancel') }}" onsubmit="return confirm('Batalkan permintaan perubahan alamat email ini?');" class="inline">
+                  @csrf
+                  <button type="submit" class="px-3 py-1.5 bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 rounded-lg text-xs font-semibold transition cursor-pointer">
+                    Batalkan
+                  </button>
+                </form>
+              </div>
+            </div>
+          @endif
 
           <form action="{{ route('peserta.profile.update') }}" method="POST" class="flex flex-col gap-6">
             @csrf
@@ -1390,12 +1409,13 @@
                 </div>
 
                 <div class="flex flex-col gap-1.5">
-                  <label for="nik" class="text-xs font-semibold text-slate-700">NIM / NIP / NIS</label>
+                  <label for="identity_no" class="text-xs font-semibold text-slate-700">NIM / NIP / NIS <span class="text-rose-500">*</span></label>
                   <input
                     type="text"
-                    id="nik"
-                    name="nik"
-                    value="{{ old('nik', $user->nik) }}"
+                    id="identity_no"
+                    name="identity_no"
+                    value="{{ old('identity_no', $user->identity_no) }}"
+                    required
                     maxlength="20"
                     placeholder="Contoh: 2210511001"
                     class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950 font-mono"
@@ -1406,15 +1426,20 @@
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
-                  <label for="email" class="text-xs font-semibold text-slate-700">Alamat Email</label>
+                  <label for="email" class="text-xs font-semibold text-slate-700">Alamat Email <span class="text-rose-500">*</span></label>
                   <input
                     type="email"
+                    name="email"
                     id="email"
-                    value="{{ $user->email }}"
-                    disabled
-                    class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-500 cursor-not-allowed font-mono"
+                    value="{{ old('email', $user->pending_email ?? $user->email) }}"
+                    required
+                    placeholder="nama@email.com"
+                    class="w-full px-3.5 py-2.5 bg-white border @error('email') border-rose-300 focus:border-rose-500 @else border-slate-300 focus:border-blue-950 focus:ring-1 focus:ring-blue-950 @enderror rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none font-mono transition"
                   >
-                  <span class="text-[10px] text-slate-400">Alamat email terdaftar tidak dapat diubah secara mandiri.</span>
+                  <span class="text-[10px] text-slate-400">Email baru hanya akan aktif dan menggantikan email login setelah tautan verifikasi pada email baru diklik.</span>
+                  @error('email')
+                    <span class="text-[10px] text-rose-600 font-medium">{{ $message }}</span>
+                  @enderror
                 </div>
 
                 <div class="flex flex-col gap-1.5">
@@ -1584,6 +1609,122 @@
     </button>
   </div>
 </div>
+
+<div id="modal-print-ticket" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+  <div class="bg-white rounded-3xl max-w-xl w-full flex flex-col shadow-2xl my-auto overflow-hidden">
+    <div class="no-print p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+      <div class="flex items-center gap-2">
+        <div class="size-8 rounded-lg bg-blue-950 text-white flex items-center justify-center font-bold text-xs">
+          PASS
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">E-Tiket & Boarding Pass</h3>
+          <p class="text-[11px] text-slate-500">Pratinjau tiket digital resmi kegiatan</p>
+        </div>
+      </div>
+      <button type="button" onclick="closePrintTicketModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer">
+        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="printable-ticket-content" class="p-6 sm:p-8 flex flex-col gap-5 bg-white text-slate-900">
+      <div class="flex items-center justify-between pb-4 border-b-2 border-dashed border-slate-200">
+        <div class="flex items-center gap-2.5">
+          <img src="{{ asset('logo_blue.svg') }}" alt="Eventict" class="h-8 w-auto">
+        </div>
+        <div class="text-right">
+          <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-950 border border-blue-200 block">
+            E-Tiket Resmi
+          </span>
+          <span id="ticket-modal-format" class="text-[10px] font-semibold text-slate-500 uppercase mt-1 block"></span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Kegiatan Terdaftar</span>
+        <h2 id="ticket-modal-title" class="text-base sm:text-lg font-bold text-slate-900 leading-snug"></h2>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+        <div class="flex flex-col">
+          <span class="text-[10px] text-slate-500 uppercase font-medium">Tanggal Pelaksanaan</span>
+          <span id="ticket-modal-date" class="font-semibold text-slate-900 mt-0.5"></span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-[10px] text-slate-500 uppercase font-medium">Waktu Sesi</span>
+          <span id="ticket-modal-time" class="font-semibold text-slate-900 mt-0.5"></span>
+        </div>
+        <div class="col-span-2 flex flex-col pt-2 border-t border-slate-200">
+          <span class="text-[10px] text-slate-500 uppercase font-medium">Lokasi / Ruang</span>
+          <span id="ticket-modal-location" class="font-semibold text-slate-900 mt-0.5 truncate"></span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 py-2 text-xs border-y border-slate-100">
+        <div class="flex flex-col">
+          <span class="text-[10px] text-slate-400 font-medium">Nama Peserta</span>
+          <span id="ticket-modal-name" class="font-semibold text-slate-900 truncate"></span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-[10px] text-slate-400 font-medium">NIM / NIP / NIS</span>
+          <span id="ticket-modal-nik" class="font-mono text-slate-800 text-[11px] truncate"></span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-[10px] text-slate-400 font-medium">Instansi</span>
+          <span id="ticket-modal-institution" class="font-medium text-slate-800 truncate"></span>
+        </div>
+      </div>
+
+      <div class="rounded-2xl text-white shadow-md overflow-hidden flex flex-col" style="background-color: #03194a !important; color: #ffffff !important; font-family: 'Poppins', sans-serif !important;">
+        <div class="px-4 sm:px-5 py-3 flex items-center justify-between gap-3" style="background-color: rgba(255, 255, 255, 0.06); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+          <div class="flex items-center gap-2">
+            <svg class="size-4 text-blue-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span class="text-xs font-semibold text-blue-100 uppercase tracking-wider font-['Poppins']">Pass Presensi Resmi</span>
+          </div>
+          <div id="ticket-modal-status"></div>
+        </div>
+
+        <div class="p-4 sm:p-5 flex items-center gap-4">
+          <div class="bg-white p-1.5 rounded-xl flex items-center justify-center shrink-0 shadow-sm" style="width: 76px; height: 76px; min-width: 76px; max-width: 76px; background-color: #ffffff !important;">
+            <img id="ticket-modal-qr" src="" alt="QR Code Presensi Acara" width="68" height="68" style="width: 68px; height: 68px; object-fit: contain;">
+          </div>
+
+          <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+            <span class="text-[10px] text-blue-200/80 font-semibold uppercase tracking-wider font-['Poppins']">KODE PASS PESERTA</span>
+            <div id="ticket-modal-pass" class="text-base sm:text-xl font-bold font-['Poppins'] text-white tracking-wide truncate"></div>
+            <div id="ticket-modal-code" class="text-xs text-blue-200/90 font-['Poppins'] mt-0.5"></div>
+            <div class="flex flex-wrap items-center gap-2 mt-1 pt-1.5 border-t border-white/10 text-[11px] text-blue-200/80 font-['Poppins']">
+              <span>Tunjukkan saat tiba di lokasi</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-[10px] text-slate-400 text-center leading-relaxed">
+        Tiket elektronik ini sah dan terhubung ke sistem registrasi Laboratorium ICT. Tunjukkan kode QR Pass ini kepada panitia untuk presensi check-in.
+      </div>
+    </div>
+
+    <div class="no-print p-4 sm:p-5 border-t border-slate-100 flex items-center justify-end gap-3 bg-slate-50/80">
+      <button type="button" onclick="closePrintTicketModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer">
+        Tutup
+      </button>
+      <button type="button" onclick="window.print()" class="px-5 py-2 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-2 cursor-pointer shadow-xs">
+        <svg class="size-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect width="12" height="8" x="6" y="14"/>
+        </svg>
+        <span>Cetak / Simpan PDF</span>
+      </button>
+    </div>
+  </div>
+</div>
 @endif
 
 <style>
@@ -1636,53 +1777,6 @@ function filterTickets(status) {
   if (emptyNotice) {
     emptyNotice.style.display = visibleCount === 0 ? 'block' : 'none';
   }
-}
-
-function openPrintTicketModal(data) {
-  document.getElementById('ticket-modal-title').textContent = data.event_title;
-  document.getElementById('ticket-modal-date').textContent = data.event_date;
-  document.getElementById('ticket-modal-time').textContent = data.event_time;
-  document.getElementById('ticket-modal-location').textContent = data.event_location;
-  document.getElementById('ticket-modal-format').textContent = data.event_format;
-  document.getElementById('ticket-modal-name').textContent = data.participant_name;
-  document.getElementById('ticket-modal-nik').textContent = data.participant_nik;
-  document.getElementById('ticket-modal-institution').textContent = data.participant_institution;
-  document.getElementById('ticket-modal-code').textContent = 'No. Tiket: ' + data.registration_code;
-  document.getElementById('ticket-modal-pass').textContent = '#' + data.qr_pass;
-
-  const qrImg = document.getElementById('ticket-modal-qr');
-  if (qrImg) {
-    const qrSource = data.qr_url || ('https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' + encodeURIComponent(data.presence_url || data.qr_pass));
-    qrImg.src = qrSource;
-  }
-  const presenceLink = document.getElementById('ticket-modal-link');
-  if (presenceLink) {
-    if (data.presence_url) {
-      presenceLink.href = data.presence_url;
-      presenceLink.classList.remove('hidden');
-    } else {
-      presenceLink.classList.add('hidden');
-    }
-  }
-  
-  const statusBadge = document.getElementById('ticket-modal-status');
-  if (data.attendance_status === 'attended') {
-    statusBadge.className = 'px-3 py-1 bg-emerald-100 text-emerald-900 text-xs font-bold rounded-full whitespace-nowrap font-[\'Poppins\'] shadow-2xs';
-    statusBadge.textContent = 'Sudah Presensi' + (data.checked_in_at ? ' (' + data.checked_in_at + ')' : '');
-  } else {
-    statusBadge.className = 'px-3 py-1 bg-blue-100 text-blue-950 text-xs font-bold rounded-full whitespace-nowrap font-[\'Poppins\'] shadow-2xs';
-    statusBadge.textContent = 'Siap Check-In (Belum Presensi)';
-  }
-
-  const modal = document.getElementById('modal-print-ticket');
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
-}
-
-function closePrintTicketModal() {
-  const modal = document.getElementById('modal-print-ticket');
-  modal.classList.add('hidden');
-  modal.classList.remove('flex');
 }
 
 function payWithSnap(registrationId, existingToken) {
@@ -2010,11 +2104,55 @@ function closeQrPassModal() {
   modal.classList.remove('flex');
 }
 
+function openPrintTicketModal(data) {
+  const modal = document.getElementById('modal-print-ticket');
+  if (!modal) return;
+  document.getElementById('ticket-modal-title').textContent = data.event_title;
+  document.getElementById('ticket-modal-date').textContent = data.event_date;
+  document.getElementById('ticket-modal-time').textContent = data.event_time;
+  document.getElementById('ticket-modal-location').textContent = data.event_location;
+  document.getElementById('ticket-modal-format').textContent = data.event_format;
+  document.getElementById('ticket-modal-name').textContent = data.participant_name;
+  document.getElementById('ticket-modal-nik').textContent = data.participant_nik;
+  document.getElementById('ticket-modal-institution').textContent = data.participant_institution;
+  document.getElementById('ticket-modal-code').textContent = 'No. Tiket: ' + data.registration_code;
+  document.getElementById('ticket-modal-pass').textContent = '#' + data.qr_pass;
+
+  const qrImg = document.getElementById('ticket-modal-qr');
+  if (qrImg) {
+    qrImg.src = data.qr_url || ('https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' + encodeURIComponent(data.qr_pass));
+  }
+
+  const statusBadge = document.getElementById('ticket-modal-status');
+  if (statusBadge) {
+    if (data.attendance_status === 'attended') {
+      statusBadge.className = 'px-3 py-1 bg-emerald-100 text-emerald-900 text-xs font-bold rounded-full whitespace-nowrap font-[\'Poppins\'] shadow-2xs';
+      statusBadge.textContent = 'Sudah Presensi' + (data.checked_in_at ? ' (' + data.checked_in_at + ')' : '');
+    } else {
+      statusBadge.className = 'px-3 py-1 bg-blue-100 text-blue-950 text-xs font-bold rounded-full whitespace-nowrap font-[\'Poppins\'] shadow-2xs';
+      statusBadge.textContent = 'Siap Check-In (Belum Presensi)';
+    }
+  }
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closePrintTicketModal() {
+  const modal = document.getElementById('modal-print-ticket');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     closeQrPassModal();
+    closePrintTicketModal();
   }
 });
 @endif
 </script>
+
+@include('partials.peserta-bottom-nav')
 @endsection

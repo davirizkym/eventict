@@ -962,7 +962,7 @@ class ParticipantQrScanTest extends TestCase
         $organizer = User::factory()->create(['role' => 'penyelenggara']);
         $peserta = User::factory()->create([
             'role' => 'peserta',
-            'nik' => '2210511099',
+            'identity_no' => '2210511099',
         ]);
 
         $event = Event::create([

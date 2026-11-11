@@ -10,17 +10,7 @@
     <div class="flex flex-col justify-start items-start gap-6 shrink-0">
       <div class="w-full px-2 inline-flex justify-between md:justify-start items-center gap-3">
         <a href="{{ route('home') }}" class="inline-flex items-center gap-3 group">
-          <div class="w-10 h-11 bg-white rounded-xl flex justify-center items-center shrink-0 shadow-xs">
-            <svg class="w-5 h-5 text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-              <path d="M6 6h10"/>
-              <path d="M6 10h7"/>
-            </svg>
-          </div>
-          <div class="inline-flex flex-col justify-start items-start gap-0.5">
-            <div class="text-white text-base font-semibold leading-tight font-['Poppins'] group-hover:text-blue-100 transition">Eventict</div>
-            <div class="text-slate-300 text-xs font-normal leading-tight font-['Poppins']">Organizer Suite</div>
-          </div>
+          <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
         </a>
         <button id="sidebar-close" aria-label="Tutup menu navigasi" class="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -54,6 +44,18 @@
           </div>
           <span class="px-2 py-0.5 bg-white/20 text-white text-[10px] font-semibold rounded-md">{{ $pastEventsCount }}</span>
         </a>
+
+        @if(Auth::user()->isAdministrator())
+          <a href="{{ route('admin.users.index') }}" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
+            <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span class="text-xs leading-5">Kelola User</span>
+          </a>
+        @endif
 
         <a href="{{ route('home') }}" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
           <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -124,7 +126,7 @@
       </div>
     </header>
 
-    <main class="flex-1 p-6 lg:p-10 flex flex-col gap-6 overflow-y-auto">
+    <main class="flex-1 p-6 lg:p-10 pb-24 md:pb-10 flex flex-col gap-6 overflow-y-auto">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div class="text-slate-500 text-xs font-normal font-['Poppins']">Arsip Penyelenggaraan / Laboratorium ICT</div>
@@ -137,7 +139,7 @@
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" x2="12" y1="15" y2="3"/>
             </svg>
-            <span>Ekspor Semua Data Peserta (CSV)</span>
+            <span>Ekspor Semua Data Peserta (XLSX)</span>
           </a>
         </div>
       </div>
@@ -204,7 +206,7 @@
                   </svg>
                   <span>Buka Data</span>
                 </a>
-                <a href="{{ route('organizer.export', ['event_id' => $event->id]) }}" title="Unduh Rekap CSV" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition border border-slate-200">
+                <a href="{{ route('organizer.export', ['event_id' => $event->id]) }}" title="Unduh Rekap XLSX" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition border border-slate-200">
                   <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="7 10 12 15 17 10"/>
@@ -228,6 +230,7 @@
     </main>
   </div>
 </div>
+  @include('partials.organizer-bottom-nav')
 @endsection
 
 @push('scripts')

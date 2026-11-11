@@ -10,17 +10,7 @@
     <div class="flex flex-col justify-start items-start gap-6 shrink-0">
       <div class="w-full px-2 inline-flex justify-between md:justify-start items-center gap-3">
         <a href="{{ route('home') }}" class="inline-flex items-center gap-3 group">
-          <div class="w-10 h-11 bg-white rounded-xl flex justify-center items-center shrink-0 shadow-xs">
-            <svg class="w-5 h-5 text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-              <path d="M6 6h10"/>
-              <path d="M6 10h7"/>
-            </svg>
-          </div>
-          <div class="inline-flex flex-col justify-start items-start gap-0.5">
-            <div class="text-white text-base font-semibold leading-tight font-['Poppins'] group-hover:text-blue-100 transition">Eventict</div>
-            <div class="text-slate-300 text-xs font-normal leading-tight font-['Poppins']">Organizer Suite</div>
-          </div>
+          <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
         </a>
         <button id="sidebar-close" aria-label="Tutup menu navigasi" class="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -72,6 +62,18 @@
             <span class="px-2 py-0.5 bg-white/15 text-slate-200 text-[10px] font-semibold rounded-md">{{ $pastEventsCount }}</span>
           @endif
         </a>
+
+        @if(Auth::user()->isAdministrator())
+          <a href="{{ route('admin.users.index') }}" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
+            <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span class="text-xs leading-5">Kelola User</span>
+          </a>
+        @endif
 
         <a href="{{ route('home') }}" class="w-full p-3 rounded-lg inline-flex items-center gap-3 transition min-h-12 text-slate-300 hover:bg-white/10 font-normal">
           <svg class="w-4 h-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -157,7 +159,7 @@
       </div>
     </header>
 
-    <main class="flex-1 p-6 lg:p-10 flex flex-col gap-6 overflow-y-auto">
+    <main class="flex-1 p-6 lg:p-10 pb-24 md:pb-10 flex flex-col gap-6 overflow-y-auto">
       <div class="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <form method="GET" action="{{ route('organizer.dashboard') }}" class="flex-1 flex flex-col sm:flex-row sm:items-center gap-3">
           <div class="flex flex-col">
@@ -247,7 +249,7 @@
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" x2="12" y1="15" y2="3"/>
             </svg>
-            <span>Ekspor CSV</span>
+            <span>Ekspor XLSX</span>
           </a>
           <button type="button" onclick="openBatchUploadModal()" class="px-3.5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer">
             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -340,7 +342,7 @@
           <div class="flex items-center gap-2">
             <a href="{{ route('organizer.export', ['event_id' => $activeEvent ? $activeEvent->id : 'all']) }}" class="px-3.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-lg transition flex items-center gap-1.5 shadow-2xs">
               <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-              <span>Unduh CSV</span>
+              <span>Unduh XLSX</span>
             </a>
             <button type="button" onclick="openBatchUploadModal()" class="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5 shadow-xs">
               <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
@@ -635,6 +637,7 @@
     </form>
   </div>
 </div>
+  @include('partials.organizer-bottom-nav')
 @endsection
 
 @push('scripts')

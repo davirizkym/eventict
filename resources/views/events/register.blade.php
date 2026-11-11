@@ -6,15 +6,8 @@
 <div class="w-full min-h-screen bg-slate-50 flex flex-col justify-start items-center">
   <header class="self-stretch h-16 px-6 lg:px-20 bg-blue-950 border-b border-slate-900 flex justify-between items-center sticky top-0 z-50">
     <div class="w-56 flex justify-start items-center">
-      <a href="{{ route('home') }}" class="flex justify-start items-center gap-2.5 cursor-pointer group">
-        <div class="size-8 bg-white rounded flex items-center justify-center text-blue-950 font-bold text-sm">
-          <svg class="size-5 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-            <path d="M6 6h10"/>
-            <path d="M6 10h7"/>
-          </svg>
-        </div>
-        <span class="text-white text-xl font-semibold font-['Poppins'] leading-7 group-hover:text-blue-100 transition">Eventict</span>
+      <a href="{{ route('home') }}" class="flex items-center cursor-pointer group">
+        <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
       </a>
     </div>
 
@@ -33,7 +26,7 @@
     </div>
   </header>
 
-  <main class="w-full max-w-[1200px] px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+  <main class="w-full max-w-[1200px] px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8 flex flex-col gap-6">
     <div class="flex items-center gap-2 text-xs text-slate-500 font-['Poppins']">
       <a href="{{ route('home') }}" class="hover:text-blue-950 transition">Beranda</a>
       <span>/</span>
@@ -94,14 +87,14 @@
                 </div>
 
                 <div class="flex flex-col gap-1.5">
-                  <label for="nik" class="text-xs font-semibold text-slate-700">
+                  <label for="identity_no" class="text-xs font-semibold text-slate-700">
                     NIM / NIP / NIS <span class="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
-                    id="nik"
-                    name="nik"
-                    value="{{ old('nik', $user->nik) }}"
+                    id="identity_no"
+                    name="identity_no"
+                    value="{{ old('identity_no', $user->identity_no) }}"
                     maxlength="20"
                     placeholder="Contoh: 2210511001"
                     class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950 font-mono"
@@ -309,4 +302,6 @@
     </div>
   </main>
 </div>
+
+@include('partials.public-bottom-nav')
 @endsection

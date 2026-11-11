@@ -50,15 +50,21 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        if ($request->has('nik') && ! $request->has('identity_no')) {
+            $request->merge(['identity_no' => $request->input('nik')]);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'nik' => ['nullable', 'string', 'max:20'],
+            'identity_no' => ['required', 'string', 'max:20', 'unique:users,identity_no'],
             'password' => ['required', 'string', 'confirmed', Password::min(8)],
             'institution' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:25'],
         ], [
-            'nik.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
+            'identity_no.required' => 'NIM / NIP / NIS wajib diisi.',
+            'identity_no.unique' => 'NIM / NIP / NIS ini sudah terdaftar pada akun lain.',
+            'identity_no.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
             'email.unique' => 'Alamat email ini sudah terdaftar sebagai pengguna.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
             'password.min' => 'Kata sandi minimal terdiri dari :min karakter.',
@@ -67,7 +73,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'nik' => $validated['nik'] ?? null,
+            'identity_no' => $validated['identity_no'],
             'password' => Hash::make($validated['password']),
             'role' => 'peserta',
             'institution' => $validated['institution'] ?? null,
@@ -83,7 +89,7 @@ class AuthController extends Controller
             \Illuminate\Support\Facades\Log::warning('Verification email trigger error: ' . $e->getMessage());
         }
 
-        return $this->redirectBasedOnRole($user);
+        return redirect()->route('verification.notice');
     }
 
     public function logout(Request $request)
@@ -98,8 +104,16 @@ class AuthController extends Controller
 
     protected function redirectBasedOnRole(User $user)
     {
-        if ($user->role === 'penyelenggara') {
+        if (in_array($user->role, ['penyelenggara', 'administrator', 'admin'], true)) {
             return redirect()->intended(route('organizer.dashboard'));
+        }
+
+        if (! $user->hasVerifiedEmail()) {
+            $intended = session()->get('url.intended');
+            if ($intended && str_contains($intended, '/email/verifikasi/')) {
+                return redirect()->intended(route('peserta.dashboard'));
+            }
+            return redirect()->route('verification.notice');
         }
 
         return redirect()->intended(route('peserta.dashboard'));

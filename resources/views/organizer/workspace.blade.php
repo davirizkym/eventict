@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $event->title . ' â€” Ruang Kerja Penyelenggara Eventict')
+@section('title', $event->title . ' — Ruang Kerja Penyelenggara Eventict')
 
 @section('content')
 <div class="min-h-screen bg-slate-50 text-slate-800 antialiased font-['Poppins'] flex flex-col">
@@ -8,17 +8,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
       <div class="flex items-center gap-6 sm:gap-8">
         <a href="{{ route('organizer.dashboard') }}" class="flex items-center gap-3 group">
-          <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-950 font-bold shadow-xs">
-            <svg class="w-5 h-5 text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-              <path d="M6 6h10"/>
-              <path d="M6 10h7"/>
-            </svg>
-          </div>
-          <div class="flex flex-col">
-            <span class="text-white text-base font-semibold leading-tight tracking-tight">Eventict</span>
-            <span class="text-blue-200 text-xs font-normal">Organizer Hub</span>
-          </div>
+          <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
         </a>
 
         <nav class="hidden md:flex items-center gap-2">
@@ -52,6 +42,17 @@
             </svg>
             <span>Media Partner</span>
           </a>
+          @if(Auth::user()->isAdministrator())
+            <a href="{{ route('admin.users.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <span>Kelola User</span>
+            </a>
+          @endif
         </nav>
       </div>
 
@@ -94,7 +95,7 @@
     </div>
   </div>
 
-  <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8 flex-1 flex flex-col md:flex-row gap-6">
+  <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-24 md:pb-8 flex-1 flex flex-col md:flex-row gap-6">
     <aside class="w-full md:w-64 shrink-0 flex flex-col gap-4">
       <div class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col gap-2 shadow-2xs">
         <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Kegiatan Terpilih</span>
@@ -346,7 +347,7 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-4 shadow-2xs">
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-bold text-slate-900">Pengisi Acara Sesi Ini ({{ $event->speakers->count() }})</h3>
-            <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber']) }}" class="text-xs font-semibold text-blue-950 hover:underline">Kelola Pengisi Acara â†’</a>
+            <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber']) }}" class="text-xs font-semibold text-blue-950 hover:underline">Kelola Pengisi Acara &rarr;</a>
           </div>
           @if($event->speakers->isEmpty())
             <p class="text-xs text-slate-500">Belum ada pengisi acara yang ditugaskan ke sesi ini. Silakan pilih dari daftar Pengisi Acara.</p>
@@ -392,8 +393,7 @@
                 </svg>
               </div>
               <div>
-                <h3 class="text-sm font-bold text-slate-900">Gerbang Presensi Sesi (Online & Self Check-in)</h3>
-                <p class="text-xs text-slate-500">Kendalikan absensi mandiri untuk peserta online (Zoom/Meet) dan peserta offline (standing banner).</p>
+                <h3 class="text-sm font-bold text-slate-900">Presensi</h3>
               </div>
             </div>
 
@@ -490,7 +490,7 @@
                 <polyline points="7 10 12 15 17 10"/>
                 <line x1="12" x2="12" y1="15" y2="3"/>
               </svg>
-              <span>Ekspor CSV</span>
+              <span>Ekspor XLSX</span>
             </a>
           </div>
         @else
@@ -504,8 +504,8 @@
                 </svg>
               </div>
               <div>
-                <span class="font-semibold text-slate-800 block">Acara Berformat Online / Webinar</span>
-                <span class="text-slate-500 text-[11px]">Tidak memerlukan check-in pintu masuk. Presensi kehadiran sesi dilakukan mandiri oleh peserta saat gerbang presensi dibuka.</span>
+                <span class="font-semibold text-slate-800 block">Acara Online</span>
+                <span class="text-slate-500 text-[11px]">Presensi dilakukan mandiri oleh peserta saat gerbang presensi dibuka.</span>
               </div>
             </div>
             <a href="{{ route('organizer.workspace.export', ['event' => $event->id]) }}" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition flex items-center justify-center gap-2 shadow-2xs shrink-0 self-end sm:self-auto">
@@ -514,7 +514,7 @@
                 <polyline points="7 10 12 15 17 10"/>
                 <line x1="12" x2="12" y1="15" y2="3"/>
               </svg>
-              <span>Ekspor CSV</span>
+              <span>Ekspor XLSX</span>
             </a>
           </div>
         @endif
@@ -584,8 +584,8 @@
                       <div class="flex flex-col">
                         <span class="font-semibold text-slate-900">{{ $reg->user->name ?? '-' }}</span>
                         <span class="text-slate-400 text-[11px]">{{ $reg->user->email ?? '-' }}</span>
-                        @if(!empty($reg->user->nik))
-                          <span class="text-slate-500 font-mono text-[10px]">NIM/NIP/NIS: {{ $reg->user->nik }}</span>
+                        @if(!empty($reg->user->identity_no))
+                          <span class="text-slate-500 font-mono text-[10px]">NIM/NIP/NIS: {{ $reg->user->identity_no }}</span>
                         @endif
                       </div>
                     </td>
@@ -807,8 +807,8 @@
                     <td class="px-4 py-3">
                       <div class="font-bold text-slate-900">{{ $reg->user->name }}</div>
                       <div class="text-[11px] text-slate-500">{{ $reg->user->email }}</div>
-                      @if(!empty($reg->user->nik))
-                        <div class="text-[10px] text-slate-500 font-mono">NIM/NIP/NIS: {{ $reg->user->nik }}</div>
+                      @if(!empty($reg->user->identity_no))
+                        <div class="text-[10px] text-slate-500 font-mono">NIM/NIP/NIS: {{ $reg->user->identity_no }}</div>
                       @endif
                       @if($reg->user->institution)
                         <div class="text-[10px] text-slate-400 mt-0.5 truncate max-w-xs">{{ $reg->user->institution }}</div>
@@ -1258,7 +1258,7 @@
                 $alreadyAssigned = in_array($mspk->id, $assignedSpeakerIds);
               @endphp
               <option value="{{ $mspk->id }}" data-institution="{{ $mspk->institution ?? 'Lab ICT' }}" {{ $alreadyAssigned ? 'disabled class=text-slate-400' : '' }}>
-                {{ $mspk->name }}{{ $alreadyAssigned ? ' â€” (Sudah Ditugaskan)' : '' }}
+                {{ $mspk->name }}{{ $alreadyAssigned ? ' — (Sudah Ditugaskan)' : '' }}
               </option>
             @endforeach
           </select>
@@ -1378,7 +1378,7 @@
           <select id="single-cert-select-reg" onchange="onSingleCertSelectChange(this)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 text-xs font-medium text-slate-800 cursor-pointer">
             <option value="">-- Pilih Peserta --</option>
             @foreach($registrations as $r)
-              <option value="{{ $r->id }}">{{ $r->user->name }}@if(!empty($r->user->nik)) - {{ $r->user->nik }}@endif ({{ $r->registration_code }}) - {{ $r->attendance_status === 'attended' ? 'Hadir' : 'Belum Hadir' }}</option>
+              <option value="{{ $r->id }}">{{ $r->user->name }}@if(!empty($r->user->identity_no)) - {{ $r->user->identity_no }}@endif ({{ $r->registration_code }}) - {{ $r->attendance_status === 'attended' ? 'Hadir' : 'Belum Hadir' }}</option>
             @endforeach
           </select>
         </div>
@@ -1755,4 +1755,6 @@ function showOrganizerScanFeedback(type, title, desc, reg) {
   }
 }
 </script>
+
+@include('partials.organizer-bottom-nav')
 @endsection

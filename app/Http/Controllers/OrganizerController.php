@@ -13,6 +13,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrganizerController extends Controller
@@ -303,7 +306,7 @@ class OrganizerController extends Controller
                     ->orWhere('qr_pass', 'like', "%{$keyword}%")
                     ->orWhereHas('user', function ($uq) use ($keyword) {
                         $uq->where('name', 'like', "%{$keyword}%")
-                            ->orWhere('nik', 'like', "%{$keyword}%")
+                            ->orWhere('identity_no', 'like', "%{$keyword}%")
                             ->orWhere('institution', 'like', "%{$keyword}%")
                             ->orWhere('email', 'like', "%{$keyword}%")
                             ->orWhere('phone', 'like', "%{$keyword}%");
@@ -436,6 +439,10 @@ class OrganizerController extends Controller
         }
 
         if ($request->hasFile('poster')) {
+            if (!empty($event->banner_url) && str_contains($event->banner_url, 'storage/posters/')) {
+                $oldPoster = ltrim(str_replace('/storage/', '', $event->banner_url), '/');
+                Storage::disk('public')->delete($oldPoster);
+            }
             $posterPath = $request->file('poster')->store('posters', 'public');
             $validated['banner_url'] = '/storage/' . $posterPath;
         }
@@ -535,7 +542,7 @@ class OrganizerController extends Controller
                     ->orWhere('qr_pass', $token)
                     ->orWhereHas('user', function ($uq) use ($token) {
                         $uq->where('email', $token)
-                            ->orWhere('nik', $token);
+                            ->orWhere('identity_no', $token);
                     });
             })
             ->first();
@@ -683,58 +690,74 @@ class OrganizerController extends Controller
             ->latest()
             ->get();
 
-        $filename = 'rekap_' . Str::slug($event->title) . '_' . now()->format('Ymd_His') . '.csv';
+        $filename = 'rekap_' . Str::slug($event->title) . '_' . now()->format('Ymd_His') . '.xlsx';
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Peserta');
 
         $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
+            'No.',
+            'No. Registrasi',
+            'Nama Peserta',
+            'NIM / NIP / NIS',
+            'Email',
+            'Instansi / Universitas',
+            'No. Telepon',
+            'Nama Acara',
+            'Format Acara',
+            'Status Pembayaran',
+            'Status Kehadiran',
+            'Waktu Presensi',
+            'Status Sertifikat',
+            'Nomor Sertifikat'
         ];
 
-        return new StreamedResponse(function () use ($registrations) {
-            $handle = fopen('php://output', 'w');
-            fputs($handle, "\xEF\xBB\xBF");
+        $sheet->fromArray([$headers], null, 'A1');
 
-            fputcsv($handle, [
-                'No.',
-                'No. Registrasi',
-                'Nama Peserta',
-                'NIM / NIP / NIS',
-                'Email',
-                'Instansi / Universitas',
-                'No. Telepon',
-                'Nama Acara',
-                'Format Acara',
-                'Status Pembayaran',
-                'Status Kehadiran',
-                'Waktu Presensi',
-                'Status Sertifikat',
-                'Nomor Sertifikat'
-            ]);
+        $rows = [];
+        foreach ($registrations as $index => $reg) {
+            $rows[] = [
+                $index + 1,
+                $reg->registration_code,
+                $reg->user->name ?? '-',
+                $reg->user->identity_no ?? '-',
+                $reg->user->email ?? '-',
+                $reg->user->institution ?? '-',
+                $reg->user->phone ?? '-',
+                $reg->event->title ?? '-',
+                strtoupper($reg->event->format ?? '-'),
+                strtoupper($reg->payment_status ?? '-'),
+                $reg->attendance_status === 'attended' ? 'HADIR' : 'BELUM HADIR',
+                $reg->checked_in_at ? $reg->checked_in_at->format('d/m/Y H:i') . ' WIB' : '-',
+                $reg->certificate ? 'TERBIT' : 'BELUM TERBIT',
+                $reg->certificate->certificate_number ?? '-'
+            ];
+        }
 
-            foreach ($registrations as $index => $reg) {
-                fputcsv($handle, [
-                    $index + 1,
-                    $reg->registration_code,
-                    $reg->user->name ?? '-',
-                    $reg->user->nik ?? '-',
-                    $reg->user->email ?? '-',
-                    $reg->user->institution ?? '-',
-                    $reg->user->phone ?? '-',
-                    $reg->event->title ?? '-',
-                    strtoupper($reg->event->format ?? '-'),
-                    strtoupper($reg->payment_status ?? '-'),
-                    $reg->attendance_status === 'attended' ? 'HADIR' : 'BELUM HADIR',
-                    $reg->checked_in_at ? $reg->checked_in_at->format('d/m/Y H:i') . ' WIB' : '-',
-                    $reg->certificate ? 'TERBIT' : 'BELUM TERBIT',
-                    $reg->certificate->certificate_number ?? '-'
-                ]);
-            }
+        if (!empty($rows)) {
+            $sheet->fromArray($rows, null, 'A2');
+        }
 
-            fclose($handle);
-        }, 200, $headers);
+        foreach (range('A', 'N') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+            ],
+        ];
+        $sheet->getStyle('A1:N1')->applyFromArray($headerStyle);
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+        ]);
     }
 
     public function uploadBatchWorkspace(Request $request, Event $event)
@@ -761,11 +784,11 @@ class OrganizerController extends Controller
                         ->orWhere('qr_pass', $origName)
                         ->orWhereHas('user', function ($uq) use ($origName, $cleanCode, $cleanAlphanumeric) {
                             $uq->where('email', $origName)
-                                ->orWhere('nik', $origName)
-                                ->orWhere('nik', $cleanCode);
+                                ->orWhere('identity_no', $origName)
+                                ->orWhere('identity_no', $cleanCode);
                             if (!empty($cleanAlphanumeric)) {
-                                $uq->orWhere('nik', $cleanAlphanumeric)
-                                   ->orWhereRaw("REPLACE(REPLACE(REPLACE(nik, '.', ''), '-', ''), ' ', '') = ?", [$cleanAlphanumeric]);
+                                $uq->orWhere('identity_no', $cleanAlphanumeric)
+                                   ->orWhereRaw("REPLACE(REPLACE(REPLACE(identity_no, '.', ''), '-', ''), ' ', '') = ?", [$cleanAlphanumeric]);
                             }
                         });
                 })
@@ -957,6 +980,10 @@ class OrganizerController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
+            if (!empty($speaker->photo_url) && str_contains($speaker->photo_url, 'storage/speakers/')) {
+                $oldPhoto = ltrim(str_replace('storage/', '', $speaker->photo_url), '/');
+                Storage::disk('public')->delete($oldPhoto);
+            }
             $file = $request->file('photo');
             $filename = 'speaker_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('speakers', $filename, 'public');
@@ -1006,6 +1033,11 @@ class OrganizerController extends Controller
                 ->with('warning', "Pengisi acara {$speaker->name} masih ditugaskan pada {$eventsCount} kegiatan. Lepaskan penugasan terlebih dahulu sebelum menghapus master data.");
         }
 
+        if (!empty($speaker->photo_url) && str_contains($speaker->photo_url, 'storage/speakers/')) {
+            $oldPhoto = ltrim(str_replace('storage/', '', $speaker->photo_url), '/');
+            Storage::disk('public')->delete($oldPhoto);
+        }
+
         $name = $speaker->name;
         $speaker->delete();
 
@@ -1053,58 +1085,74 @@ class OrganizerController extends Controller
         }
 
         $registrations = Registration::with(['user', 'event', 'certificate'])->latest()->get();
-        $filename = 'rekap_semua_peserta_' . now()->format('Ymd_His') . '.csv';
+        $filename = 'rekap_semua_peserta_' . now()->format('Ymd_His') . '.xlsx';
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Semua Peserta');
 
         $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
+            'No.',
+            'No. Registrasi',
+            'Nama Peserta',
+            'NIM / NIP / NIS',
+            'Email',
+            'Instansi / Universitas',
+            'No. Telepon',
+            'Nama Acara',
+            'Format Acara',
+            'Status Pembayaran',
+            'Status Kehadiran',
+            'Waktu Presensi',
+            'Status Sertifikat',
+            'Nomor Sertifikat'
         ];
 
-        return new StreamedResponse(function () use ($registrations) {
-            $handle = fopen('php://output', 'w');
-            fputs($handle, "\xEF\xBB\xBF");
+        $sheet->fromArray([$headers], null, 'A1');
 
-            fputcsv($handle, [
-                'No.',
-                'No. Registrasi',
-                'Nama Peserta',
-                'NIM / NIP / NIS',
-                'Email',
-                'Instansi / Universitas',
-                'No. Telepon',
-                'Nama Acara',
-                'Format Acara',
-                'Status Pembayaran',
-                'Status Kehadiran',
-                'Waktu Presensi',
-                'Status Sertifikat',
-                'Nomor Sertifikat'
-            ]);
+        $rows = [];
+        foreach ($registrations as $index => $reg) {
+            $rows[] = [
+                $index + 1,
+                $reg->registration_code,
+                $reg->user->name ?? '-',
+                $reg->user->identity_no ?? '-',
+                $reg->user->email ?? '-',
+                $reg->user->institution ?? '-',
+                $reg->user->phone ?? '-',
+                $reg->event->title ?? '-',
+                strtoupper($reg->event->format ?? '-'),
+                strtoupper($reg->payment_status ?? '-'),
+                $reg->attendance_status === 'attended' ? 'HADIR' : 'BELUM HADIR',
+                $reg->checked_in_at ? $reg->checked_in_at->format('d/m/Y H:i') . ' WIB' : '-',
+                $reg->certificate ? 'TERBIT' : 'BELUM TERBIT',
+                $reg->certificate->certificate_number ?? '-'
+            ];
+        }
 
-            foreach ($registrations as $index => $reg) {
-                fputcsv($handle, [
-                    $index + 1,
-                    $reg->registration_code,
-                    $reg->user->name ?? '-',
-                    $reg->user->nik ?? '-',
-                    $reg->user->email ?? '-',
-                    $reg->user->institution ?? '-',
-                    $reg->user->phone ?? '-',
-                    $reg->event->title ?? '-',
-                    strtoupper($reg->event->format ?? '-'),
-                    strtoupper($reg->payment_status ?? '-'),
-                    $reg->attendance_status === 'attended' ? 'HADIR' : 'BELUM HADIR',
-                    $reg->checked_in_at ? $reg->checked_in_at->format('d/m/Y H:i') . ' WIB' : '-',
-                    $reg->certificate ? 'TERBIT' : 'BELUM TERBIT',
-                    $reg->certificate->certificate_number ?? '-'
-                ]);
-            }
+        if (!empty($rows)) {
+            $sheet->fromArray($rows, null, 'A2');
+        }
 
-            fclose($handle);
-        }, 200, $headers);
+        foreach (range('A', 'N') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+            ],
+        ];
+        $sheet->getStyle('A1:N1')->applyFromArray($headerStyle);
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+        ]);
     }
 
     public function quickCheckin(Request $request)
@@ -1128,7 +1176,7 @@ class OrganizerController extends Controller
                 ->orWhere('qr_pass', $token)
                 ->orWhereHas('user', function ($uq) use ($token) {
                     $uq->where('email', $token)
-                        ->orWhere('nik', $token);
+                        ->orWhere('identity_no', $token);
                 });
         });
 
@@ -1223,11 +1271,11 @@ class OrganizerController extends Controller
                     ->orWhere('qr_pass', $origName)
                     ->orWhereHas('user', function ($uq) use ($origName, $cleanCode, $cleanAlphanumeric) {
                         $uq->where('email', $origName)
-                            ->orWhere('nik', $origName)
-                            ->orWhere('nik', $cleanCode);
+                            ->orWhere('identity_no', $origName)
+                            ->orWhere('identity_no', $cleanCode);
                         if (!empty($cleanAlphanumeric)) {
-                            $uq->orWhere('nik', $cleanAlphanumeric)
-                               ->orWhereRaw("REPLACE(REPLACE(REPLACE(nik, '.', ''), '-', ''), ' ', '') = ?", [$cleanAlphanumeric]);
+                            $uq->orWhere('identity_no', $cleanAlphanumeric)
+                               ->orWhereRaw("REPLACE(REPLACE(REPLACE(identity_no, '.', ''), '-', ''), ' ', '') = ?", [$cleanAlphanumeric]);
                         }
                     });
             })->first();

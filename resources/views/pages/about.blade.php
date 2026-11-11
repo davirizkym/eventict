@@ -7,7 +7,7 @@
   <div class="w-full max-w-[1440px] bg-slate-50 flex flex-col justify-start items-start">
     @include('partials.navbar')
 
-    <main class="self-stretch px-6 lg:px-20 py-10 flex flex-col gap-10">
+    <main class="self-stretch px-4 sm:px-6 lg:px-20 py-8 sm:py-10 pb-24 md:pb-12 flex flex-col gap-8 sm:gap-10">
       <div class="flex items-center gap-2 text-xs text-slate-500 font-['Poppins']">
         <a href="{{ route('home') }}" class="hover:text-blue-950 transition">Beranda</a>
         <span>/</span>
@@ -25,7 +25,7 @@
 
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div class="lg:col-span-2 flex flex-col gap-6">
-          <div class="p-8 bg-white rounded-xl border border-slate-200 flex flex-col gap-4 shadow-xs">
+          <div class="p-5 sm:p-8 bg-white rounded-xl border border-slate-200 flex flex-col gap-4 shadow-xs">
             <h2 class="text-slate-900 text-lg font-semibold font-['Poppins']">Mengenal Eventict</h2>
             <p class="text-slate-600 text-xs sm:text-sm leading-relaxed font-['Poppins']">
               Eventict adalah wadah resmi dari Laboratorium ICT untuk membantu Anda menemukan kegiatan bermanfaat seputar dunia teknologi. Siapa pun, baik mahasiswa, pelajar, maupun masyarakat umum, dapat ikut serta untuk belajar dan menambah wawasan baru.
@@ -35,7 +35,7 @@
             </p>
           </div>
 
-          <div class="p-8 bg-white rounded-xl border border-slate-200 flex flex-col gap-4 shadow-xs">
+          <div class="p-5 sm:p-8 bg-white rounded-xl border border-slate-200 flex flex-col gap-4 shadow-xs">
             <h2 class="text-slate-900 text-lg font-semibold font-['Poppins']">Apa Saja yang Anda Dapatkan?</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-['Poppins']">
               <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 flex flex-col gap-1.5">
@@ -67,7 +67,7 @@
         </div>
 
         <div class="flex flex-col gap-6">
-          <div class="p-6 bg-white rounded-xl border border-slate-200 flex flex-col gap-4 shadow-xs">
+          <div class="p-5 sm:p-6 bg-white rounded-xl border border-slate-200 flex flex-col gap-4 shadow-xs">
             <h2 class="text-slate-900 text-base font-semibold font-['Poppins']">Kontak & Lokasi Kami</h2>
             <div class="text-xs text-slate-600 flex flex-col gap-3 font-['Poppins']">
               <div>

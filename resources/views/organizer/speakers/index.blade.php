@@ -9,17 +9,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
       <div class="flex items-center gap-6 sm:gap-8">
         <a href="{{ route('organizer.dashboard') }}" class="flex items-center gap-3 group">
-          <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-950 font-bold shadow-xs">
-            <svg class="w-5 h-5 text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-              <path d="M6 6h10"/>
-              <path d="M6 10h7"/>
-            </svg>
-          </div>
-          <div class="flex flex-col">
-            <span class="text-white text-base font-semibold leading-tight tracking-tight">Eventict</span>
-            <span class="text-blue-200 text-xs font-normal">Organizer Hub</span>
-          </div>
+          <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
         </a>
 
         <nav class="hidden md:flex items-center gap-2">
@@ -53,6 +43,17 @@
             </svg>
             <span>Media Partner</span>
           </a>
+          @if(Auth::user()->isAdministrator())
+            <a href="{{ route('admin.users.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <span>Kelola User</span>
+            </a>
+          @endif
         </nav>
       </div>
 
@@ -89,7 +90,7 @@
     </div>
   </header>
 
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 md:pb-8 flex flex-col gap-6">
     <!-- Breadcrumb & Page Title -->
     <div class="flex items-center gap-2 text-xs text-slate-500">
       <a href="{{ route('organizer.dashboard') }}" class="hover:text-blue-950 font-medium">Portal Pengelola</a>
@@ -279,9 +280,8 @@
 
                 <!-- 7. Riwayat Mengisi Acara (Badge jumlah seminar yang pernah diisi) -->
                 <td class="py-4 px-4 text-center">
-                  <a href="{{ route('organizer.speakers.show', $spk->id) }}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold {{ $spk->events_count > 0 ? 'bg-blue-50 text-blue-950 border border-blue-200 hover:bg-blue-100' : 'bg-slate-100 text-slate-500' }} transition" title="Lihat riwayat seminar">
-                    <svg class="size-3 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>{{ $spk->events_count }} Acara</span>
+                  <a href="{{ route('organizer.speakers.show', $spk->id) }}" class="font-semibold text-slate-700 hover:text-blue-950 hover:underline transition" title="Lihat riwayat seminar">
+                    {{ $spk->events_count }}
                   </a>
                 </td>
 
@@ -508,4 +508,6 @@
   }
 </script>
 @endpush
+
+@include('partials.organizer-bottom-nav')
 @endsection

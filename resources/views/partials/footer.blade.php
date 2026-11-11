@@ -1,15 +1,8 @@
-<footer class="self-stretch px-6 lg:px-20 py-12 bg-blue-950 flex flex-col justify-start items-start gap-12">
+<footer class="self-stretch px-6 lg:px-20 pt-12 pb-24 md:pb-12 bg-blue-950 flex flex-col justify-start items-start gap-12">
   <div class="self-stretch grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
     <div class="flex flex-col gap-4">
-      <div class="flex items-center gap-2.5">
-        <div class="size-8 bg-white rounded flex items-center justify-center text-blue-950 font-bold text-sm">
-          <svg class="size-5 text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-            <path d="M6 6h10"/>
-            <path d="M6 10h7"/>
-          </svg>
-        </div>
-        <span class="text-white text-xl font-semibold font-['Poppins'] leading-7">Eventict</span>
+      <div class="flex items-center">
+        <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
       </div>
       <p class="text-slate-300 text-xs font-normal font-['Poppins'] leading-relaxed">Platform terpadu pendaftaran dan manajemen workshop, seminar teknologi, pelatihan praktikum, dan sertifikasi komputasi Laboratorium ICT.</p>
       <div class="text-slate-400 text-xs font-normal font-['Poppins']">Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur</div>

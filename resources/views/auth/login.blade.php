@@ -5,26 +5,19 @@
 @section('content')
 <div class="w-full min-h-screen bg-slate-50 flex flex-col justify-between items-center py-8 px-4 sm:px-6 lg:px-8">
   <div class="w-full max-w-5xl flex items-center justify-between mb-6">
-    <a href="{{ route('home') }}" class="flex items-center gap-2.5 group">
-      <div class="size-8 bg-blue-950 rounded flex items-center justify-center text-white font-bold text-sm">
-        <svg class="size-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-          <path d="M6 6h10"/>
-          <path d="M6 10h7"/>
-        </svg>
-      </div>
-      <span class="text-blue-950 text-xl font-semibold font-['Poppins'] leading-none group-hover:text-blue-900 transition">Eventict</span>
+    <a href="{{ route('home') }}" class="flex items-center group">
+      <img src="{{ asset('logo_blue.svg') }}" alt="Eventict" class="h-8 sm:h-9 w-auto">
     </a>
     <a href="{{ route('home') }}" class="text-xs font-medium text-slate-500 hover:text-blue-950 font-['Poppins'] flex items-center gap-1.5 transition">
       <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="m15 18-6-6 6-6"/>
       </svg>
-      <span>Kembali ke Beranda</span>
+      <span><span class="hidden sm:inline">Kembali ke Beranda</span><span class="sm:hidden">Beranda</span></span>
     </a>
   </div>
 
   <div class="w-full max-w-5xl bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 shadow-xs flex flex-col md:flex-row overflow-hidden my-auto">
-    <div class="w-full md:w-5/12 bg-blue-950 text-white p-8 lg:p-10 flex flex-col justify-between">
+    <div class="w-full md:w-5/12 bg-blue-950 text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-between">
       <div class="flex flex-col gap-6">
         <div class="flex flex-col gap-2">
           <h2 class="text-2xl font-bold font-['Poppins'] leading-snug">Satu Akun untuk Semua Seminar & Workshop</h2>
@@ -56,7 +49,7 @@
 
     </div>
 
-    <div class="w-full md:w-7/12 p-8 lg:p-12 flex flex-col justify-center">
+    <div class="w-full md:w-7/12 p-6 sm:p-8 lg:p-12 flex flex-col justify-center">
       <div class="flex flex-col gap-2 mb-6">
         <h1 class="text-2xl font-bold font-['Poppins'] text-slate-900">Masuk ke Akun</h1>
         <p class="text-xs text-slate-500 font-normal font-['Poppins']">Masukkan alamat email dan kata sandi akun Eventict Anda.</p>

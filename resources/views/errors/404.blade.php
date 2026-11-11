@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>404 — Halaman Tidak Ditemukan | Eventict</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon_blue.svg') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
@@ -12,15 +13,8 @@
 <body class="bg-slate-50 text-slate-800 font-['Poppins'] min-h-screen flex flex-col justify-between antialiased selection:bg-blue-950 selection:text-white">
 
     <header class="h-16 px-6 lg:px-20 bg-blue-950 border-b border-slate-900 flex justify-between items-center sticky top-0 z-50">
-        <a href="{{ route('home') }}" class="flex items-center gap-2.5">
-            <div class="size-8 bg-white rounded flex items-center justify-center text-blue-950 font-bold text-sm">
-                <svg class="size-5 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-                    <path d="M6 6h10"/>
-                    <path d="M6 10h7"/>
-                </svg>
-            </div>
-            <span class="text-white text-xl font-semibold leading-7">Eventict</span>
+        <a href="{{ route('home') }}" class="flex items-center">
+            <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
         </a>
         <a href="{{ route('home') }}" class="text-xs text-white/80 hover:text-white font-medium transition">
             Kembali ke Beranda

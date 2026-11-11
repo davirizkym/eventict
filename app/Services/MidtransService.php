@@ -182,6 +182,11 @@ class MidtransService
                     'payment_method' => $paymentType,
                     'amount_paid' => (int) $grossAmount,
                 ]);
+                try {
+                    $registration->user->notify(new \App\Notifications\TicketIssuedNotification($registration));
+                } catch (\Throwable $e) {
+                    Log::warning('Ticket notification error: ' . $e->getMessage());
+                }
             }
         } elseif ($transactionStatus === 'settlement') {
             $registration->update([
@@ -190,6 +195,11 @@ class MidtransService
                 'payment_method' => $paymentType,
                 'amount_paid' => (int) $grossAmount,
             ]);
+            try {
+                $registration->user->notify(new \App\Notifications\TicketIssuedNotification($registration));
+            } catch (\Throwable $e) {
+                Log::warning('Ticket notification error: ' . $e->getMessage());
+            }
         } elseif (in_array($transactionStatus, ['pending'])) {
             $registration->update([
                 'payment_status' => 'pending',
@@ -246,6 +256,11 @@ class MidtransService
                             'amount_paid' => $grossAmount > 0 ? $grossAmount : $registration->amount_paid,
                             'midtrans_order_id' => $candidate,
                         ]);
+                        try {
+                            $registration->user->notify(new \App\Notifications\TicketIssuedNotification($registration));
+                        } catch (\Throwable $e) {
+                            Log::warning('Ticket notification error: ' . $e->getMessage());
+                        }
                         return true;
                     }
                 }
