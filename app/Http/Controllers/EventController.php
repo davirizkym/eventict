@@ -103,7 +103,7 @@ class EventController extends Controller
             $query->where('category', $request->query('category'));
         }
 
-        $events = $query->orderBy('start_date', 'asc')->get();
+        $events = $query->orderBy('start_date', 'asc')->paginate(6)->withQueryString();
 
         $allCategories = Category::orderBy('name', 'asc')->pluck('name');
         if ($allCategories->isEmpty()) {
