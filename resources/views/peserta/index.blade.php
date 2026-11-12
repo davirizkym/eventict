@@ -13,21 +13,32 @@
 
         <div class="h-6 w-px bg-white/20 hidden sm:block shrink-0"></div>
 
-        <div class="flex items-center gap-2 min-w-0">
-          <div class="bg-blue-900 border border-blue-800 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white truncate max-w-[200px] sm:max-w-[320px]">
-            {{ $user->name }}
-          </div>
-        </div>
+        <span class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-white/10 text-slate-200">
+          Portal Peserta
+        </span>
       </div>
 
       <div class="flex items-center gap-3 shrink-0">
-        <div class="flex items-center gap-2.5">
+        <a href="{{ route('home') }}" class="px-3 py-1.5 rounded-lg border border-white/20 text-xs font-medium text-slate-200 hover:bg-white/10 hover:text-white transition hidden sm:inline-flex items-center gap-1.5">
+          <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+          <span>Lihat Website</span>
+        </a>
+
+        <div class="flex items-center gap-2.5 pl-2 sm:border-l sm:border-white/15">
           <div class="size-8 rounded-lg bg-blue-900 text-white font-semibold text-xs flex items-center justify-center shrink-0">
             {{ strtoupper(substr($user->name ?? 'P', 0, 2)) }}
           </div>
-          <form method="POST" action="{{ route('logout') }}" class="shrink-0">
+          <div class="hidden lg:flex flex-col min-w-0">
+            <span class="text-white text-xs font-semibold truncate max-w-[180px]">{{ $user->name }}</span>
+            <span class="text-slate-400 text-[11px] truncate max-w-[180px]">{{ $user->institution ?? 'Peserta Terdaftar' }}</span>
+          </div>
+          <form id="logout-form-peserta" method="POST" action="{{ route('logout') }}" class="shrink-0">
             @csrf
-            <button type="submit" title="Keluar" class="p-1.5 text-rose-300 hover:text-white hover:bg-rose-500/20 rounded-lg transition cursor-pointer">
+            <button type="button" onclick="confirmLogout('logout-form-peserta')" title="Keluar" class="p-1.5 text-rose-300 hover:text-white hover:bg-rose-500/20 rounded-lg transition cursor-pointer">
               <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                 <polyline points="16 17 21 12 16 7"/>
@@ -275,10 +286,6 @@
                 @elseif($todayRegistration->attendance_status === 'attended')
                   <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-semibold rounded-md">
                     Presensi Berhasil ({{ $todayRegistration->checked_in_at ? $todayRegistration->checked_in_at->format('H:i') : '' }} WIB)
-                  </span>
-                @else
-                  <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-semibold rounded-md">
-                    Siap Check-In
                   </span>
                 @endif
               </div>
@@ -734,9 +741,6 @@
               <p class="text-xs text-slate-500 mt-0.5">Daftar kegiatan seminar, workshop, dan pelatihan yang telah Anda ikuti dan terdaftar resmi.</p>
             </div>
             <div class="flex items-center gap-2 self-start sm:self-auto">
-              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-900 border border-blue-100">
-                {{ $registrations->count() }} Acara Terdaftar
-              </span>
               <a href="{{ route('peserta.dashboard', ['tab' => 'kegiatan']) }}" class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
                 <span>+ Cari Acara Baru</span>
               </a>
@@ -1205,9 +1209,6 @@
                 <h3 class="text-base font-bold text-slate-900">Jelajahi Kegiatan</h3>
                 <p class="text-xs text-slate-500 mt-0.5">Daftar seminar, workshop teknologi, dan pelatihan praktikum Laboratorium ICT yang belum Anda ikuti.</p>
               </div>
-              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-900 border border-blue-100 self-start sm:self-auto">
-                {{ $availableEvents->count() }} Kegiatan Tersedia
-              </span>
             </div>
 
             <form action="{{ route('peserta.dashboard') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-2 pt-1">
@@ -2130,7 +2131,7 @@ function openPrintTicketModal(data) {
       statusBadge.textContent = 'Sudah Presensi' + (data.checked_in_at ? ' (' + data.checked_in_at + ')' : '');
     } else {
       statusBadge.className = 'px-3 py-1 bg-blue-100 text-blue-950 text-xs font-bold rounded-full whitespace-nowrap font-[\'Poppins\'] shadow-2xs';
-      statusBadge.textContent = 'Siap Check-In (Belum Presensi)';
+      statusBadge.textContent = 'Belum Presensi';
     }
   }
 

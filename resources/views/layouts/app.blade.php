@@ -12,6 +12,9 @@
 </head>
 <body class="bg-white font-['Poppins'] text-slate-900 antialiased min-h-screen">
     @yield('content')
+    @auth
+        @include('partials.logout-modal')
+    @endauth
     @stack('scripts')
 </body>
 </html>

@@ -82,9 +82,9 @@
             <span class="text-slate-400 text-[11px] truncate">{{ Auth::user()->institution ?? 'Laboratorium ICT' }}</span>
           </div>
         </div>
-        <form method="POST" action="{{ route('logout') }}" class="shrink-0">
+        <form id="logout-form-history" method="POST" action="{{ route('logout') }}" class="shrink-0">
           @csrf
-          <button type="submit" title="Keluar" class="p-1.5 text-rose-300 hover:text-white hover:bg-rose-500/20 rounded-md transition cursor-pointer">
+          <button type="button" onclick="confirmLogout('logout-form-history')" title="Keluar" class="p-1.5 text-rose-300 hover:text-white hover:bg-rose-500/20 rounded-md transition cursor-pointer">
             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
               <polyline points="16 17 21 12 16 7"/>

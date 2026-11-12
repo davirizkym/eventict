@@ -24,9 +24,9 @@
           <span class="text-xs font-semibold font-['Poppins'] leading-4"><span class="hidden sm:inline">Portal Peserta</span><span class="sm:hidden">Portal</span></span>
         </a>
       @endif
-      <form method="POST" action="{{ route('logout') }}" class="inline">
+      <form id="logout-form-navbar" method="POST" action="{{ route('logout') }}" class="inline">
         @csrf
-        <button type="submit" class="px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-medium font-['Poppins'] rounded-md transition cursor-pointer">
+        <button type="button" onclick="confirmLogout('logout-form-navbar')" class="px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-medium font-['Poppins'] rounded-md transition cursor-pointer">
           Keluar
         </button>
       </form>
