@@ -1,5 +1,8 @@
+@php
+  $showExtraNav = Auth::check() && !Auth::user()->isPenyelenggara();
+@endphp
 <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] md:hidden px-2 py-1.5 font-['Poppins']" style="padding-bottom: max(0.4rem, env(safe-area-inset-bottom));">
-  <div class="grid {{ Auth::check() ? 'grid-cols-4' : 'grid-cols-3' }} items-center text-center">
+  <div class="grid {{ $showExtraNav ? 'grid-cols-4' : 'grid-cols-3' }} items-center text-center">
     <a
       href="{{ route('home') }}"
       class="flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-lg transition {{ request()->routeIs('home') ? 'text-blue-950 font-bold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
@@ -50,19 +53,7 @@
           </svg>
           <span class="text-[10px] leading-none tracking-tight">Admin</span>
         </a>
-      @elseif(Auth::user()->isPenyelenggara())
-        <a
-          href="{{ route('organizer.dashboard') }}"
-          class="flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-lg transition {{ request()->routeIs('organizer.*') ? 'text-blue-950 font-bold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
-        >
-          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('organizer.*') ? '2.5' : '2' }}">
-            <rect width="18" height="18" x="3" y="3" rx="2"/>
-            <path d="M3 9h18"/>
-            <path d="M9 21V9"/>
-          </svg>
-          <span class="text-[10px] leading-none tracking-tight">Panitia</span>
-        </a>
-      @else
+      @elseif(!Auth::user()->isPenyelenggara())
         <a
           href="{{ route('peserta.dashboard') }}"
           class="flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-lg transition {{ request()->routeIs('peserta.*') ? 'text-blue-950 font-bold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
