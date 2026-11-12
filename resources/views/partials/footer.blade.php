@@ -1,6 +1,16 @@
-<footer class="self-stretch px-6 lg:px-20 pt-12 pb-24 md:pb-12 bg-blue-950 flex flex-col justify-start items-start gap-12">
-  <div class="self-stretch grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-8 lg:gap-x-16">
-    {{-- Baris 1, Kolom 1: Brand Info --}}
+<style>
+  @media (min-width: 768px) {
+    .footer-grid {
+      display: grid !important;
+      grid-template-columns: 1fr auto !important;
+      column-gap: 2rem !important;
+    }
+  }
+</style>
+
+<footer class="self-stretch px-6 lg:px-20 pt-12 pb-24 md:pb-12 bg-blue-950 flex flex-col justify-start items-start">
+  <div class="self-stretch flex flex-col footer-grid">
+    {{-- Row 1, Col 1: Brand Info --}}
     <div class="flex flex-col gap-4 max-w-sm sm:max-w-md">
       <div class="flex items-center">
         <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
@@ -9,8 +19,8 @@
       <div class="text-slate-400 text-xs font-normal font-['Poppins']">Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur</div>
     </div>
 
-    {{-- Baris 1, Kolom 2: Pusat Bantuan & Kontak + Medsos --}}
-    <div class="flex flex-col gap-3 md:justify-self-end w-full max-w-sm">
+    {{-- Row 1, Col 2: Pusat Bantuan & Kontak + Medsos --}}
+    <div class="flex flex-col gap-3 mt-8 md:mt-0">
       <span class="text-white text-sm font-semibold font-['Poppins']">Pusat Bantuan & Kontak</span>
       <a href="mailto:labkom@budiluhur.ac.id" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition flex items-center gap-2">
         <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -51,13 +61,16 @@
       </div>
     </div>
 
-    {{-- Baris 2, Kolom 1: Copyright --}}
-    <div class="text-xs font-normal font-['Poppins'] text-slate-400">
+    {{-- Row 2: Divider Line across both columns --}}
+    <div class="col-span-full border-t border-slate-800/80" style="margin-top: 2.5rem; margin-bottom: 1.5rem;"></div>
+
+    {{-- Row 3, Col 1: Copyright --}}
+    <div class="text-xs font-normal font-['Poppins'] text-slate-400 self-center">
       © 2026 Eventict — Laboratorium ICT. Seluruh hak dilindungi.
     </div>
 
-    {{-- Baris 2, Kolom 2: Sistem Informasi Manajemen --}}
-    <div class="text-xs font-normal font-['Poppins'] text-slate-400 md:justify-self-end w-full max-w-sm">
+    {{-- Row 3, Col 2: Sistem Informasi Manajemen (Sejajar vertikal dengan Pusat Bantuan & Kontak) --}}
+    <div class="text-xs font-normal font-['Poppins'] text-slate-400 self-center whitespace-nowrap mt-3 md:mt-0">
       Sistem Informasi Manajemen Event Laboratorium ICT.
     </div>
   </div>
