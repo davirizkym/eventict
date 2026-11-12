@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Registration;
 use App\Services\MidtransService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -105,7 +106,18 @@ class EventController extends Controller
             $query->where('category', $request->query('category'));
         }
 
-        $events = $query->orderBy('start_date', 'asc')->get()->reject(fn($e) => $e->isPassed())->values();
+        $filtered = $query->orderBy('start_date', 'asc')->get()->reject(fn($e) => $e->isPassed())->values();
+        $perPage = 6;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentItems = $filtered->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $events = new LengthAwarePaginator(
+            $currentItems,
+            $filtered->count(),
+            $perPage,
+            $currentPage,
+            ['path' => LengthAwarePaginator::resolveCurrentPath(), 'query' => $request->query()]
+        );
 
         $allCategories = Category::orderBy('name', 'asc')->pluck('name');
         if ($allCategories->isEmpty()) {

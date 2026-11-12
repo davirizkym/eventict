@@ -249,6 +249,34 @@
             </div>
           @endforelse
         </div>
+
+        {{-- PAGINATION ANGKA (1, 2, 3...) --}}
+        @if($events->total() > 0)
+        <div class="mt-12 pt-6 border-t border-slate-200/90 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="text-xs text-slate-500 font-['Poppins']">
+            Menampilkan <span class="font-semibold text-slate-800">{{ $events->firstItem() ?? 0 }}</span> &ndash; <span class="font-semibold text-slate-800">{{ $events->lastItem() ?? 0 }}</span> dari <span class="font-semibold text-slate-800">{{ $events->total() }}</span> kegiatan
+          </div>
+
+          <div>
+            @if($events->hasPages())
+              {{ $events->links('partials.pagination') }}
+            @else
+              {{-- State 1 Halaman: Tetap menampilkan navigasi angka 1 aktif agar kontrol konsisten --}}
+              <nav role="navigation" aria-label="Pagination Navigation" class="flex items-center gap-1.5 font-['Poppins']">
+                <span class="size-9 rounded-xl border border-slate-200 bg-slate-100 text-slate-400 flex items-center justify-center cursor-not-allowed select-none" aria-disabled="true" aria-label="Sebelumnya">
+                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+                </span>
+                <span aria-current="page" class="size-9 rounded-xl bg-blue-950 text-white text-xs font-bold flex items-center justify-center shadow-xs select-none">
+                  1
+                </span>
+                <span class="size-9 rounded-xl border border-slate-200 bg-slate-100 text-slate-400 flex items-center justify-center cursor-not-allowed select-none" aria-disabled="true" aria-label="Berikutnya">
+                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                </span>
+              </nav>
+            @endif
+          </div>
+        </div>
+        @endif
       </section>
     </main>
 

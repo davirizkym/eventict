@@ -261,113 +261,74 @@
       </section>
       @endif
 
-      @if(isset($categories) && $categories->isNotEmpty())
-<section id="kategori" class="self-stretch px-4 sm:px-6 lg:px-20 py-12 sm:py-16 flex flex-col justify-start items-start gap-8">
-        <div id="category-grid-view" class="self-stretch flex flex-col justify-start items-start gap-8">
-          <div class="self-stretch flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h2 class="text-slate-900 text-2xl lg:text-3xl font-semibold font-['Poppins'] leading-10">Jelajahi Kategori Populer</h2>
-              <p class="text-slate-500 text-xs font-normal font-['Poppins']">Pilih bidang topik yang kamu minati untuk menemukan seminar dan workshop yang sesuai.</p>
-            </div>
+            @if(isset($categories) && $categories->isNotEmpty())
+      @php
+        $categoryChunks = $categories->chunk(6);
+      @endphp
+      <section id="kategori" class="self-stretch px-4 sm:px-6 lg:px-20 py-12 sm:py-16 flex flex-col justify-start items-start gap-8">
+        <div class="self-stretch flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 class="text-slate-900 text-2xl lg:text-3xl font-semibold font-['Poppins'] leading-10">Jelajahi Kategori Populer</h2>
+            <p class="text-slate-500 text-xs font-normal font-['Poppins']">Pilih bidang topik yang kamu minati untuk menemukan seminar dan workshop yang sesuai.</p>
           </div>
 
-          <div class="self-stretch grid grid-cols-1 md:grid-cols-2 gap-4">
-            @foreach($categories->slice(0, 5) as $category)
-            <a href="{{ route('events.index_public', ['category' => $category->name]) }}" class="p-5 sm:p-6 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex items-center justify-between gap-4 group">
-              <div class="flex flex-col gap-1 min-w-0">
-                <span class="text-[11px] font-medium text-slate-400 font-['Poppins'] uppercase tracking-wider">Kategori</span>
-                <h3 class="text-slate-900 group-hover:text-blue-950 font-bold text-lg sm:text-xl font-['Poppins'] leading-tight transition truncate">
-                  {{ $category->name }}
-                </h3>
-                <p class="text-slate-500 text-xs font-normal font-['Poppins'] line-clamp-1 mt-0.5">
-                  {{ $category->description ?: 'Kumpulan seminar dan workshop bidang ' . $category->name }}
-                </p>
-                <div class="flex items-center gap-2 mt-1.5">
-                  <span class="text-[11px] font-medium text-slate-500 group-hover:text-blue-900 bg-slate-100 group-hover:bg-blue-50 px-2.5 py-1 rounded-full transition">
-                    {{ $category->events_count ?? 0 }} Kegiatan
-                  </span>
-                  <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
-                </div>
-              </div>
-
-              <div class="size-14 sm:size-16 rounded-2xl bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center shrink-0 transition-colors duration-200 shadow-xs">
-                @include('partials.category-icon', ['icon' => $category->icon, 'class' => 'size-7 sm:size-8'])
-              </div>
-            </a>
-            @endforeach
-
-            @if($categories->count() > 5)
-            <button type="button" id="btn-show-category-list" onclick="openCategoryListView()" class="p-5 sm:p-6 bg-white hover:bg-slate-50/80 rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex items-center justify-between gap-4 group text-left cursor-pointer w-full">
-              <div class="flex flex-col gap-1 min-w-0">
-                <span class="text-[11px] font-medium text-slate-400 font-['Poppins'] uppercase tracking-wider">Semua Kategori</span>
-                <h3 class="text-slate-900 group-hover:text-blue-950 font-bold text-lg sm:text-xl font-['Poppins'] leading-tight transition truncate">
-                  Lihat Lainnya
-                </h3>
-                <p class="text-slate-500 text-xs font-normal font-['Poppins'] line-clamp-1 mt-0.5">
-                  Buka {{ max(0, $categories->count() - 5) }}+ kategori lainnya di Laboratorium ICT
-                </p>
-                <div class="flex items-center gap-2 mt-1.5">
-                  <span class="text-[11px] font-medium text-slate-500 group-hover:text-blue-900 bg-slate-100 group-hover:bg-blue-50 px-2.5 py-1 rounded-full transition">
-                    +{{ max(0, $categories->count() - 5) }} Kategori Lainnya
-                  </span>
-                  <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
-                </div>
-              </div>
-
-              <div class="size-14 sm:size-16 rounded-2xl bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center shrink-0 transition-colors duration-200 shadow-xs">
-                <svg class="size-7 sm:size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect width="7" height="7" x="3" y="3" rx="1"/>
-                  <rect width="7" height="7" x="14" y="3" rx="1"/>
-                  <rect width="7" height="7" x="14" y="14" rx="1"/>
-                  <rect width="7" height="7" x="3" y="14" rx="1"/>
-                </svg>
-              </div>
+          @if($categoryChunks->count() > 1)
+          <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <button type="button" id="cat-carousel-prev" class="size-9 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-blue-950 hover:border-blue-900 flex items-center justify-center transition shadow-2xs hover:shadow-xs cursor-pointer" aria-label="Kategori Sebelumnya">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="m15 18-6-6 6-6"/>
+              </svg>
             </button>
-            @endif
+            <button type="button" id="cat-carousel-next" class="size-9 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-blue-950 hover:border-blue-900 flex items-center justify-center transition shadow-2xs hover:shadow-xs cursor-pointer" aria-label="Kategori Berikutnya">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </button>
           </div>
+          @endif
         </div>
 
-        <div id="category-list-view" class="hidden self-stretch flex flex-col gap-6">
-          <div class="self-stretch flex items-center justify-between pb-3 border-b border-slate-200">
-            <div class="flex items-center gap-4">
-              <button type="button" onclick="closeCategoryListView()" class="p-2 -ml-2 rounded-xl text-slate-700 hover:text-blue-950 hover:bg-slate-100 transition flex items-center gap-1.5 cursor-pointer" title="Kembali">
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="m15 18-6-6 6-6"/>
-                </svg>
-              </button>
-              <div class="relative pb-2">
-                <span class="text-slate-900 text-lg sm:text-xl font-bold font-['Poppins'] tracking-tight">Kategori</span>
-                <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"></span>
-              </div>
-            </div>
-          </div>
-
-          <div class="self-stretch grid grid-cols-1 md:grid-cols-2 gap-4">
-            @foreach($categories as $category)
-            <a href="{{ route('events.index_public', ['category' => $category->name]) }}" class="p-5 sm:p-6 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex items-center justify-between gap-4 group">
-              <div class="flex flex-col gap-1 min-w-0">
-                <span class="text-[11px] font-medium text-slate-400 font-['Poppins'] uppercase tracking-wider">Kategori</span>
-                <h3 class="text-slate-900 group-hover:text-blue-950 font-bold text-lg sm:text-xl font-['Poppins'] leading-tight transition truncate">
-                  {{ $category->name }}
-                </h3>
-                <p class="text-slate-500 text-xs font-normal font-['Poppins'] line-clamp-1 mt-0.5">
-                  {{ $category->description ?: 'Kumpulan seminar dan workshop bidang ' . $category->name }}
-                </p>
-                <div class="flex items-center gap-2 mt-1.5">
-                  <span class="text-[11px] font-medium text-slate-500 group-hover:text-blue-900 bg-slate-100 group-hover:bg-blue-50 px-2.5 py-1 rounded-full transition">
-                    {{ $category->events_count ?? 0 }} Kegiatan
-                  </span>
-                  <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
+        {{-- CAROUSEL TRACK WRAPPER (MAKSIMAL 6 PANEL PER SLIDE) --}}
+        <div class="w-full relative overflow-hidden" id="category-carousel-container">
+          <div id="category-carousel-track" class="flex transition-transform duration-500 ease-out">
+            @foreach($categoryChunks as $chunkIndex => $chunk)
+            <div class="w-full shrink-0 grid grid-cols-1 md:grid-cols-2 gap-4">
+              @foreach($chunk as $category)
+              <a href="{{ route('events.index_public', ['category' => $category->name]) }}" class="p-5 sm:p-6 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex items-center justify-between gap-4 group">
+                <div class="flex flex-col gap-1 min-w-0">
+                  <span class="text-[11px] font-medium text-slate-400 font-['Poppins'] uppercase tracking-wider">Kategori</span>
+                  <h3 class="text-slate-900 group-hover:text-blue-950 font-bold text-lg sm:text-xl font-['Poppins'] leading-tight transition truncate">
+                    {{ $category->name }}
+                  </h3>
+                  <p class="text-slate-500 text-xs font-normal font-['Poppins'] line-clamp-1 mt-0.5">
+                    {{ $category->description ?: 'Kumpulan seminar dan workshop bidang ' . $category->name }}
+                  </p>
+                  <div class="flex items-center gap-2 mt-1.5">
+                    <span class="text-[11px] font-medium text-slate-500 group-hover:text-blue-900 bg-slate-100 group-hover:bg-blue-50 px-2.5 py-1 rounded-full transition">
+                      {{ $category->events_count ?? 0 }} Kegiatan
+                    </span>
+                    <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
+                  </div>
                 </div>
-              </div>
 
-              <div class="size-14 sm:size-16 rounded-2xl bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center shrink-0 transition-colors duration-200 shadow-xs">
-                @include('partials.category-icon', ['icon' => $category->icon, 'class' => 'size-7 sm:size-8'])
-              </div>
-            </a>
+                <div class="size-14 sm:size-16 rounded-2xl bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center shrink-0 transition-colors duration-200 shadow-xs">
+                  @include('partials.category-icon', ['icon' => $category->icon, 'class' => 'size-7 sm:size-8'])
+                </div>
+              </a>
+              @endforeach
+            </div>
             @endforeach
           </div>
         </div>
+
+        {{-- PAGINATION DOTS (PERSIS SEPERTI GAMBAR 1) --}}
+        @if($categoryChunks->count() > 1)
+        <div class="self-stretch flex items-center justify-center gap-2 pt-2" id="category-carousel-dots">
+          @foreach($categoryChunks as $index => $chunk)
+          <button type="button" data-cat-slide="{{ $index }}" class="category-carousel-dot h-1.5 rounded-full transition-all duration-300 cursor-pointer {{ $index === 0 ? 'w-6 bg-blue-950' : 'w-2 bg-slate-300 hover:bg-slate-400' }}" aria-label="Halaman Kategori {{ $index + 1 }}"></button>
+          @endforeach
+        </div>
+        @endif
       </section>
       @endif
 
@@ -739,31 +700,71 @@ document.addEventListener('DOMContentLoaded', () => {
 
     startTimer();
   }
+
+  // Category Slider with Dots Pagination
+  const catTrack = document.getElementById('category-carousel-track');
+  const catPrevBtn = document.getElementById('cat-carousel-prev');
+  const catNextBtn = document.getElementById('cat-carousel-next');
+  const catDots = document.querySelectorAll('.category-carousel-dot');
+
+  if (catTrack && catDots.length > 1) {
+    let catCurrentIndex = 0;
+    const totalCatSlides = catDots.length;
+
+    function updateCatDots() {
+      catDots.forEach((dot, idx) => {
+        if (idx === catCurrentIndex) {
+          dot.classList.remove('w-2', 'bg-slate-300');
+          dot.classList.add('w-6', 'bg-blue-950');
+        } else {
+          dot.classList.remove('w-6', 'bg-blue-950');
+          dot.classList.add('w-2', 'bg-slate-300');
+        }
+      });
+    }
+
+    function slideCatTo(index) {
+      if (index < 0) index = totalCatSlides - 1;
+      if (index >= totalCatSlides) index = 0;
+      catCurrentIndex = index;
+      catTrack.style.transform = `translateX(-${catCurrentIndex * 100}%)`;
+      updateCatDots();
+    }
+
+    if (catPrevBtn) {
+      catPrevBtn.addEventListener('click', () => {
+        slideCatTo(catCurrentIndex - 1);
+      });
+    }
+
+    if (catNextBtn) {
+      catNextBtn.addEventListener('click', () => {
+        slideCatTo(catCurrentIndex + 1);
+      });
+    }
+
+    catDots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const targetIdx = parseInt(dot.getAttribute('data-cat-slide'), 10);
+        slideCatTo(targetIdx);
+      });
+    });
+
+    let catStartX = 0;
+    catTrack.addEventListener('touchstart', (e) => {
+      catStartX = e.touches[0].clientX;
+    }, { passive: true });
+
+    catTrack.addEventListener('touchend', (e) => {
+      const diffX = e.changedTouches[0].clientX - catStartX;
+      if (diffX > 50) {
+        slideCatTo(catCurrentIndex - 1);
+      } else if (diffX < -50) {
+        slideCatTo(catCurrentIndex + 1);
+      }
+    }, { passive: true });
+  }
 });
-
-window.openCategoryListView = function() {
-  const gridView = document.getElementById('category-grid-view');
-  const listView = document.getElementById('category-list-view');
-
-  if (gridView && listView) {
-    gridView.classList.add('hidden');
-    listView.classList.remove('hidden');
-    const section = document.getElementById('kategori');
-    if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-};
-
-window.closeCategoryListView = function() {
-  const gridView = document.getElementById('category-grid-view');
-  const listView = document.getElementById('category-list-view');
-
-  if (gridView && listView) {
-    listView.classList.add('hidden');
-    gridView.classList.remove('hidden');
-    const section = document.getElementById('kategori');
-    if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-};
 </script>
 @endpush
 @endsection
