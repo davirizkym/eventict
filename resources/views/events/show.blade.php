@@ -3,10 +3,10 @@
 @section('title', $event->title . ' — Eventict')
 
 @section('content')
-<div class="w-full min-h-screen bg-slate-50 flex flex-col justify-start items-center">
+<div class="w-full min-h-screen bg-slate-50 flex flex-col justify-between items-center">
   @include('partials.navbar')
 
-  <main class="w-full max-w-[1280px] px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+  <main class="w-full flex-1 max-w-[1280px] px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
     <div class="flex items-center gap-2 text-xs text-slate-500 font-['Poppins']">
       <a href="{{ route('home') }}" class="hover:text-blue-950 transition">Beranda</a>
       <span>/</span>

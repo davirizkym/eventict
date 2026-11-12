@@ -379,7 +379,7 @@
         <div id="create-capacity-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="flex flex-col gap-1.5">
             <label class="font-semibold text-slate-700">Target Kuota Peserta <span class="text-rose-500">*</span></label>
-            <input type="number" name="quota" value="100" min="1" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+            <input type="number" id="create-quota-input" name="quota" value="100" min="0" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
           </div>
           <div id="create-price-container" class="flex flex-col gap-1.5">
             <label class="font-semibold text-slate-700">Biaya Pendaftaran (Rp, 0 jika gratis) <span class="text-rose-500">*</span></label>
@@ -692,9 +692,10 @@ function toggleCreatePartnerName(val) {
   const priceContainer = document.getElementById('create-price-container');
   const priceInput = document.getElementById('create-price-input');
   const capacityGrid = document.getElementById('create-capacity-grid');
-  const quotaInput = document.querySelector('#modal-create-event input[name="quota"]');
+  const quotaInput = document.getElementById('create-quota-input') || document.querySelector('#modal-create-event input[name="quota"]');
   const regUrlInput = document.getElementById('create-registration-url');
   const speakerSelects = document.querySelectorAll('#speaker-rows-container select[name="speaker_ids[]"]');
+  const partnerSelect = document.querySelector('#create-partner-name-container select[name="media_partner_id"]');
 
   if (val === 'partner') {
     if (container) container.classList.remove('hidden');
@@ -705,12 +706,16 @@ function toggleCreatePartnerName(val) {
     if (capacityGrid) capacityGrid.classList.add('hidden');
     if (quotaInput) {
       quotaInput.required = false;
+      quotaInput.disabled = true;
+      quotaInput.min = '0';
       quotaInput.value = '0';
     }
     if (priceInput) {
       priceInput.required = false;
+      priceInput.disabled = true;
       priceInput.value = '0';
     }
+    if (partnerSelect) partnerSelect.required = true;
     if (regUrlInput) regUrlInput.required = true;
     speakerSelects.forEach(sel => sel.required = false);
   } else {
@@ -725,11 +730,18 @@ function toggleCreatePartnerName(val) {
       capacityGrid.classList.add('sm:grid-cols-2');
     }
     if (quotaInput) {
+      quotaInput.disabled = false;
       quotaInput.required = true;
+      quotaInput.min = '1';
       if (!quotaInput.value || quotaInput.value === '0') quotaInput.value = '100';
     }
     if (priceInput) {
+      priceInput.disabled = false;
       priceInput.required = true;
+    }
+    if (partnerSelect) {
+      partnerSelect.required = false;
+      partnerSelect.value = '';
     }
     if (regUrlInput) regUrlInput.required = false;
     speakerSelects.forEach(sel => sel.required = true);
