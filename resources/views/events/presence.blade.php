@@ -58,7 +58,6 @@
         @endif
         @if($event->is_presence_open)
           <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1.5">
-            <span class="size-1.5 rounded-full bg-emerald-400"></span>
             <span>Gerbang Presensi Terbuka</span>
           </span>
         @else

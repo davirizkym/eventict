@@ -134,21 +134,20 @@
         </div>
 
         @if(!$event->isExternal() || $event->speakers->isNotEmpty())
-        <div class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-6 sm:p-8 flex flex-col gap-6 shadow-xs">
+        <div class="bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 p-4 sm:p-6 lg:p-8 flex flex-col gap-5 sm:gap-6 shadow-xs">
           <div class="flex justify-between items-center">
-            <h2 class="text-slate-900 text-lg font-semibold font-['Poppins']">Daftar Narasumber & Panelis</h2>
-            <span class="text-xs text-slate-500 font-['Poppins']">{{ $event->speakers->count() }} Narasumber</span>
+            <h2 class="text-slate-900 text-lg font-semibold font-['Poppins']">Narasumber</h2>
           </div>
 
-          <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-3 sm:gap-4">
             @forelse($event->speakers as $speaker)
-              <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                  <div class="size-12 rounded-xl bg-blue-950 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-xs">
+              <div class="p-3.5 sm:p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                <div class="flex items-start sm:items-center gap-3 sm:gap-4 w-full min-w-0">
+                  <div class="size-10 sm:size-12 rounded-xl bg-blue-950 text-white font-bold text-xs sm:text-sm flex items-center justify-center shrink-0 shadow-xs mt-0.5 sm:mt-0">
                     {{ strtoupper(substr($speaker->name, 0, 2)) }}
                   </div>
-                  <div>
-                    <div class="flex items-center gap-2">
+                  <div class="flex flex-col min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
                       <h3 class="text-slate-900 text-sm font-semibold font-['Poppins']">{{ $speaker->name }}</h3>
                       @php
                         $spkRole = $speaker->pivot->role ?? 'Pembicara';
@@ -162,18 +161,17 @@
                         {{ $spkRole }}
                       </span>
                     </div>
-                    <div class="text-slate-600 text-xs font-normal font-['Poppins']">{{ $speaker->institution }}</div>
+                    <div class="text-slate-600 text-xs font-normal font-['Poppins'] mt-0.5">{{ $speaker->institution }}</div>
                     @if($speaker->pivot->topic)
                       <div class="text-blue-950 text-xs font-medium font-['Poppins'] mt-1 flex items-center gap-1.5">
-                        <span class="size-1.5 rounded-full bg-blue-950"></span>
-                        <span>{{ $speaker->pivot->topic }}</span>
+                        <span class="break-words">{{ $speaker->pivot->topic }}</span>
                       </div>
                     @endif
                   </div>
                 </div>
 
                 @if($speaker->pivot->session_time)
-                  <span class="px-2.5 py-1 bg-white border border-slate-200 rounded-md text-[11px] font-mono text-slate-700 shrink-0">
+                  <span class="px-2.5 py-1 bg-white border border-slate-200 rounded-md text-[11px] font-mono text-slate-700 shrink-0 self-start sm:self-auto">
                     {{ $speaker->pivot->session_time }}
                   </span>
                 @endif
@@ -257,7 +255,7 @@
                 <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-200 text-slate-800 border border-slate-300">Media Partner</span>
               </div>
               <div class="text-xs text-slate-700 leading-relaxed">
-                Kegiatan ini diselenggarakan langsung oleh <strong class="text-slate-950 font-bold">{{ $event->organizer_name }}</strong>. Laboratorium ICT bertindak sebagai media partner publikasi acara.
+                Kegiatan ini diselenggarakan langsung oleh <strong class="text-slate-950 font-bold">{{ $event->organizer_name }}</strong>.
               </div>
               <div class="pt-2 border-t border-slate-200 text-[11px] text-slate-500">
                 Pendaftaran, pelaksanaan, dan e-sertifikat dikelola oleh pihak <strong class="text-slate-800">{{ $event->organizer_name }}</strong>.
@@ -265,7 +263,7 @@
             </div>
 
             <a href="{{ $event->registration_url ?: '#' }}" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold font-['Poppins'] transition shadow-xs text-center flex items-center justify-center gap-2 cursor-pointer">
-              <span>Daftar Acara ({{ $event->organizer_name }})</span>
+              <span>Daftar Acara</span>
               <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                 <polyline points="15 3 21 3 21 9"/>

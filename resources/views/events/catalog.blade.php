@@ -40,10 +40,10 @@
               </select>
             </div>
             <div class="h-8 w-px bg-slate-200 hidden md:block"></div>
-            <div class="w-full md:w-56 flex flex-col justify-start items-start px-3 py-1">
-              <label class="text-slate-500 text-[10px] uppercase tracking-wider font-semibold font-['Poppins']">Kategori Acara</label>
+            <div class="w-full md:w-52 flex flex-col justify-start items-start px-3 py-1">
+              <label class="text-slate-500 text-[10px] uppercase tracking-wider font-semibold font-['Poppins']">Rumpun Ilmu</label>
               <select name="category" class="w-full bg-transparent border-none outline-none text-slate-900 text-xs font-medium font-['Poppins'] cursor-pointer">
-                <option value="">Semua Kategori</option>
+                <option value="">Semua Rumpun</option>
                 @foreach($allCategories ?? [] as $catOption)
                 <option value="{{ $catOption }}" {{ request('category') === $catOption ? 'selected' : '' }}>{{ $catOption }}</option>
                 @endforeach
@@ -91,7 +91,7 @@
             @endphp
             <div class="bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col justify-between overflow-hidden hover:shadow-lg hover:-translate-y-1 transition duration-200 group">
               <div>
-<div class="self-stretch h-48 sm:h-52 relative bg-gradient-to-br from-[#142D4E] to-[#0A192F] p-4 flex flex-col justify-between overflow-hidden">
+                <div class="self-stretch h-48 sm:h-52 relative bg-gradient-to-br from-[#142D4E] to-[#0A192F] p-4 flex flex-col justify-between overflow-hidden">
                   @if($event->banner_url)
                     <img src="{{ asset($event->banner_url) }}" alt="{{ $event->title }}" class="absolute inset-0 w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/25 to-slate-950/50"></div>
@@ -125,20 +125,6 @@
                         </span>
                       @endif
                     </div>
-                    <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md text-blue-200 text-[11px] font-medium rounded-lg border border-blue-400/20 flex items-center gap-1.5 shrink-0">
-                      <svg class="size-3 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                      <span>Sertifikat</span>
-                    </span>
-                  </div>
-                </div>
-                  <div class="relative z-10 flex items-center justify-between gap-2 text-white/90">
-                    <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md rounded-lg border border-white/15 text-[11px] font-medium">
-                      {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
-                    </span>
-                    <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md text-blue-200 text-[11px] font-medium rounded-lg border border-blue-400/20 flex items-center gap-1.5">
-                      <svg class="size-3 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                      <span>Sertifikat</span>
-                    </span>
                   </div>
                 </div>
 
@@ -199,11 +185,8 @@
               <div class="p-6 border-t border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <div class="flex flex-col">
                   @if($event->isExternal())
-                    <span class="text-slate-900 font-bold text-xs font-['Poppins'] flex items-center gap-1">
-                      <svg class="size-3 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="m3 11 18-5v12L3 14v-3z"/>
-                      </svg>
-                      <span>Media Partner</span>
+                    <span class="text-slate-900 font-bold text-xs font-['Poppins']">
+                      Media Partner
                     </span>
                     <span class="text-slate-600 text-[10px] font-medium font-['Poppins'] truncate max-w-[150px]">
                       {{ $event->organizer_name }}
@@ -244,7 +227,7 @@
                 <path d="m21 21-4.35-4.35"/>
               </svg>
               <div class="text-slate-800 font-semibold text-base font-['Poppins']">Tidak ada kegiatan yang cocok</div>
-              <p class="text-slate-500 text-xs font-normal font-['Poppins'] max-w-md">Coba ubah kata kunci pencarian atau bersihkan filter format dan kategori acara.</p>
+              <p class="text-slate-500 text-xs font-normal font-['Poppins'] max-w-md">Coba ubah kata kunci pencarian atau bersihkan filter format dan rumpun ilmu.</p>
               <a href="{{ route('events.index_public') }}" class="mt-2 px-4 py-2 bg-blue-950 text-white rounded-lg text-xs font-semibold font-['Poppins']">Tampilkan Semua Kegiatan</a>
             </div>
           @endforelse
