@@ -1,5 +1,6 @@
 <footer class="self-stretch px-6 lg:px-20 pt-12 pb-24 md:pb-12 bg-blue-950 flex flex-col justify-start items-start gap-12">
-  <div class="self-stretch flex flex-col md:flex-row justify-between items-start gap-8">
+  <div class="self-stretch grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-8 lg:gap-x-16">
+    {{-- Baris 1, Kolom 1: Brand Info --}}
     <div class="flex flex-col gap-4 max-w-sm sm:max-w-md">
       <div class="flex items-center">
         <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
@@ -8,21 +9,22 @@
       <div class="text-slate-400 text-xs font-normal font-['Poppins']">Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur</div>
     </div>
 
-    <div class="flex flex-col gap-3 md:items-end md:text-right">
+    {{-- Baris 1, Kolom 2: Pusat Bantuan & Kontak + Medsos --}}
+    <div class="flex flex-col gap-3 md:justify-self-end w-full max-w-sm">
       <span class="text-white text-sm font-semibold font-['Poppins']">Pusat Bantuan & Kontak</span>
       <a href="mailto:labkom@budiluhur.ac.id" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition flex items-center gap-2">
-        <span>labkom@budiluhur.ac.id</span>
         <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect width="20" height="16" x="2" y="4" rx="2"/>
           <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
         </svg>
+        <span>labkom@budiluhur.ac.id</span>
       </a>
       <div class="flex flex-col gap-0.5 text-slate-400 text-xs font-normal font-['Poppins']">
         <span>Senin–Jumat: 08:00–20:40 WIB</span>
         <span>Sabtu: 08:00–17:00 WIB</span>
       </div>
 
-      <div class="pt-2 flex flex-col gap-2 md:items-end">
+      <div class="pt-2 flex flex-col gap-2">
         <span class="text-slate-400 text-[11px] font-medium font-['Poppins'] uppercase tracking-wider">Media Sosial &amp; Web</span>
         <div class="flex items-center gap-2">
           <a href="https://www.instagram.com/labictubl?utm_source=ig_web_button_share_sheet&xtok=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" class="size-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition shadow-2xs" title="Instagram @labictubl" aria-label="Instagram">
@@ -48,10 +50,15 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="self-stretch pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-normal font-['Poppins'] text-slate-400">
-    <div>© 2026 Eventict — Laboratorium ICT. Seluruh hak dilindungi.</div>
-    <div>Sistem Informasi Manajemen Event Laboratorium ICT.</div>
+    {{-- Baris 2, Kolom 1: Copyright --}}
+    <div class="text-xs font-normal font-['Poppins'] text-slate-400">
+      © 2026 Eventict — Laboratorium ICT. Seluruh hak dilindungi.
+    </div>
+
+    {{-- Baris 2, Kolom 2: Sistem Informasi Manajemen --}}
+    <div class="text-xs font-normal font-['Poppins'] text-slate-400 md:justify-self-end w-full max-w-sm">
+      Sistem Informasi Manajemen Event Laboratorium ICT.
+    </div>
   </div>
 </footer>
