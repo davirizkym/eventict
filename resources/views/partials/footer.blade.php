@@ -8,10 +8,10 @@
   }
 </style>
 
-<footer class="self-stretch px-6 lg:px-20 pt-12 pb-24 md:pb-12 bg-blue-950 flex flex-col justify-start items-start">
+<footer class="self-stretch px-6 lg:px-20 pt-8 pb-16 md:pb-8 bg-blue-950 flex flex-col justify-start items-start">
   <div class="self-stretch flex flex-col footer-grid">
     {{-- Row 1, Col 1: Brand Info --}}
-    <div class="flex flex-col gap-4 max-w-sm sm:max-w-md">
+    <div class="flex flex-col gap-3 max-w-sm sm:max-w-md">
       <div class="flex items-center">
         <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
       </div>
@@ -20,7 +20,7 @@
     </div>
 
     {{-- Row 1, Col 2: Pusat Bantuan & Kontak + Medsos --}}
-    <div class="flex flex-col gap-3 mt-8 md:mt-0">
+    <div class="flex flex-col gap-2.5 mt-6 md:mt-0">
       <span class="text-white text-sm font-semibold font-['Poppins']">Pusat Bantuan & Kontak</span>
       <a href="mailto:labkom@budiluhur.ac.id" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition flex items-center gap-2">
         <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -34,7 +34,7 @@
         <span>Sabtu: 08:00–17:00 WIB</span>
       </div>
 
-      <div class="pt-2 flex flex-col gap-2">
+      <div class="pt-1.5 flex flex-col gap-1.5">
         <span class="text-slate-400 text-[11px] font-medium font-['Poppins'] uppercase tracking-wider">Media Sosial &amp; Web</span>
         <div class="flex items-center gap-2">
           <a href="https://www.instagram.com/labictubl?utm_source=ig_web_button_share_sheet&xtok=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" class="size-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition shadow-2xs" title="Instagram @labictubl" aria-label="Instagram">
@@ -62,7 +62,7 @@
     </div>
 
     {{-- Row 2: Divider Line across both columns --}}
-    <div class="col-span-full border-t border-slate-800/80" style="margin-top: 2.5rem; margin-bottom: 1.5rem;"></div>
+    <div class="col-span-full border-t border-slate-800/80" style="margin-top: 1.25rem; margin-bottom: 1rem;"></div>
 
     {{-- Row 3, Col 1: Copyright --}}
     <div class="text-xs font-normal font-['Poppins'] text-slate-400 self-center">
@@ -70,7 +70,7 @@
     </div>
 
     {{-- Row 3, Col 2: Sistem Informasi Manajemen (Sejajar vertikal dengan Pusat Bantuan & Kontak) --}}
-    <div class="text-xs font-normal font-['Poppins'] text-slate-400 self-center whitespace-nowrap mt-3 md:mt-0">
+    <div class="text-xs font-normal font-['Poppins'] text-slate-400 self-center whitespace-nowrap mt-2 md:mt-0">
       Sistem Informasi Manajemen Event Laboratorium ICT.
     </div>
   </div>
