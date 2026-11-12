@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Certificate;
 use App\Models\Event;
 use App\Models\Registration;
@@ -60,7 +61,11 @@ class PesertaController extends Controller
             $eventsQuery->where(function ($q) use ($keyword) {
                 $q->where('title', 'like', "%{$keyword}%")
                   ->orWhere('category', 'like', "%{$keyword}%")
-                  ->orWhere('description', 'like', "%{$keyword}%");
+                  ->orWhere('description', 'like', "%{$keyword}%")
+                  ->orWhereHas('speakers', function ($sq) use ($keyword) {
+                      $sq->where('name', 'like', "%{$keyword}%")
+                        ->orWhere('institution', 'like', "%{$keyword}%");
+                  });
             });
         }
 
@@ -72,7 +77,9 @@ class PesertaController extends Controller
             $eventsQuery->where('format', $request->query('format'));
         }
 
-        $allCategories = Event::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category');
+        $catList = Category::orderBy('name', 'asc')->pluck('name');
+        $eventCatList = Event::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category');
+        $allCategories = $catList->concat($eventCatList)->filter()->unique()->sort()->values();
 
         $allAvailable = $eventsQuery->get();
 

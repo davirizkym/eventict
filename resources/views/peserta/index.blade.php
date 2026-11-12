@@ -495,7 +495,7 @@
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-bold text-slate-900">Tiket Kegiatan Terdaftar</h3>
             <a href="{{ route('peserta.dashboard', ['tab' => 'tiket']) }}" class="text-xs font-semibold text-blue-950 hover:underline">
-              Lihat Semua Tiket ({{ $registrations->count() }}) →
+              Lihat Semua Tiket →
             </a>
           </div>
 
@@ -693,7 +693,7 @@
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-bold text-slate-900">E-Sertifikat Resmi Terbaru</h3>
             <a href="{{ route('peserta.dashboard', ['tab' => 'sertifikat']) }}" class="text-xs font-semibold text-blue-950 hover:underline">
-              Buka Lemari Sertifikat ({{ $certificates->count() }}) →
+              Buka Lemari Sertifikat →
             </a>
           </div>
 
@@ -923,7 +923,7 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-5 shadow-2xs">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 class="text-sm sm:text-base font-bold text-slate-900">Tiket & Pendaftaran Saya ({{ $registrations->count() }})</h3>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">Tiket & Pendaftaran Saya</h3>
               <p class="text-xs text-slate-500">Kelola tiket kegiatan, status kehadiran sesi, dan kode pass presensi resmi.</p>
             </div>
             <div class="flex items-center gap-2 self-start sm:self-auto flex-wrap">
@@ -1277,13 +1277,9 @@
                       <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/25 to-slate-950/50"></div>
                     @endif
 
-                    {{-- Top Badges Row --}}
                     <div class="relative z-10 flex justify-between items-start gap-2">
                       @if($isPartnerEvent)
                         <div class="px-2.5 py-1 bg-slate-950/70 backdrop-blur-md rounded-lg border border-white/20 flex items-center gap-1.5 shadow-xs">
-                          <svg class="size-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="m3 11 18-5v12L3 14v-3z"/>
-                          </svg>
                           <span class="text-white text-[10px] font-semibold">Media Partner</span>
                         </div>
                       @else
@@ -1317,10 +1313,8 @@
                       </div>
                     </div>
 
-                    {{-- Bottom Badges Row inside Poster --}}
                     <div class="relative z-10 flex items-center justify-between gap-2">
-                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-950/75 backdrop-blur-md text-slate-100 border border-white/20 text-[10px] font-medium rounded-lg shadow-xs">
-                        <span class="size-1.5 rounded-full {{ $avEvent->format === 'offline' ? 'bg-amber-400' : 'bg-emerald-400' }}"></span>
+                      <span class="inline-flex items-center px-2.5 py-1 bg-slate-950/75 backdrop-blur-md text-slate-100 border border-white/20 text-[10px] font-medium rounded-lg shadow-xs">
                         <span>{{ $avEvent->format === 'offline' ? 'Luring' : 'Daring' }}</span>
                       </span>
 
@@ -1394,15 +1388,11 @@
                   </div>
                 </div>
 
-                {{-- Card Footer --}}
                 <div class="p-4 border-t border-slate-100 flex items-center justify-between gap-2 bg-slate-50/60 rounded-b-2xl">
                   @if($isPartnerEvent)
                     <div class="flex flex-col overflow-hidden">
-                      <span class="text-xs font-bold text-slate-900 flex items-center gap-1">
-                        <svg class="size-3 text-slate-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="m3 11 18-5v12L3 14v-3z"/>
-                        </svg>
-                        <span>Media Partner</span>
+                      <span class="text-xs font-bold text-slate-900">
+                        Media Partner
                       </span>
                       <span class="text-[10px] text-slate-500 truncate max-w-[130px]">
                         {{ $avEvent->organizer_name }}

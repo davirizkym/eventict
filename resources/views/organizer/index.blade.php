@@ -408,8 +408,7 @@
                   <td class="p-3 text-slate-700">{{ $reg->user->institution ?? '-' }}</td>
                   <td class="p-3 text-slate-700 whitespace-nowrap">
                     @if($reg->attendance_status === 'attended')
-                      <span class="inline-flex items-center gap-1.5 text-emerald-800 font-medium">
-                        <span class="size-1.5 rounded-full bg-emerald-600"></span>
+                      <span class="inline-flex items-center text-emerald-800 font-medium">
                         <span>{{ $reg->checked_in_at ? $reg->checked_in_at->format('H:i') . ' WIB' : 'Hadir' }}</span>
                       </span>
                     @else

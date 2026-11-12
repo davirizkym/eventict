@@ -14,6 +14,15 @@
         <span class="text-slate-900 font-medium">Tentang Kami</span>
       </div>
 
+      <div class="flex flex-col gap-2 pb-6 border-b border-slate-200">
+        <h1 class="text-slate-900 text-2xl sm:text-3xl font-semibold font-['Poppins']">
+          Tentang Eventict
+        </h1>
+        <p class="text-slate-600 text-xs sm:text-sm font-normal font-['Poppins'] max-w-3xl leading-relaxed">
+          Tempat mencari dan mendaftar berbagai acara, pelatihan komputer, dan seminar seru yang diselenggarakan oleh Laboratorium ICT.
+        </p>
+      </div>
+
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div class="lg:col-span-2 flex flex-col gap-6">
           <div class="p-5 sm:p-8 bg-white rounded-xl border border-slate-200 flex flex-col gap-4 shadow-xs">
