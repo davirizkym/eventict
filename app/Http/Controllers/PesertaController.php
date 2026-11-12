@@ -48,6 +48,7 @@ class PesertaController extends Controller
                 });
             }])
             ->where('status', '!=', 'draft')
+            ->where('status', '!=', 'completed')
             ->whereNotIn('id', $registeredEventIds);
 
         if ($request->filled('q')) {
@@ -63,18 +64,20 @@ class PesertaController extends Controller
             $eventsQuery->where('category', $request->query('category'));
         }
 
+        if ($request->filled('format')) {
+            $eventsQuery->where('format', $request->query('format'));
+        }
+
+        $allCategories = Event::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category');
+
         $allAvailable = $eventsQuery->get();
 
-        $availableEvents = $allAvailable->sortBy(function ($event) {
-            $isPassed = $event->isPassed();
-            $dateTimestamp = $event->start_date ? $event->start_date->timestamp : 0;
-            return [
-                $isPassed ? 1 : 0,
-                $isPassed ? -$dateTimestamp : $dateTimestamp,
-            ];
-        })->values();
+        $availableEvents = $allAvailable->reject(fn($event) => $event->isPassed())
+            ->sortBy(function ($event) {
+                return $event->start_date ? $event->start_date->timestamp : 0;
+            })->values();
 
-        return view('peserta.index', compact('user', 'registrations', 'todayRegistration', 'certificates', 'availableEvents', 'tab'));
+        return view('peserta.index', compact('user', 'registrations', 'todayRegistration', 'certificates', 'availableEvents', 'allCategories', 'tab'));
     }
 
     public function updateProfile(Request $request)
