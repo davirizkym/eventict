@@ -436,15 +436,8 @@
               Kamu punya seminar, workshop, atau lomba? Eventict siap bantu promosikan acaramu ke ribuan mahasiswa dan peminat teknologi agar makin ramai peserta.
             </p>
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
-              <a href="{{ route('register') }}" class="w-full sm:w-auto px-6 py-3.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs sm:text-sm font-semibold font-['Poppins'] text-center transition shadow-xs hover:shadow-md flex items-center justify-center gap-2">
-                <span>Pasang Acara Sekarang</span>
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M5 12h14"/>
-                  <path d="m12 5 7 7-7 7"/>
-                </svg>
-              </a>
-              <a href="{{ $coopMailLink }}" class="w-full sm:w-auto px-6 py-3.5 bg-white hover:bg-slate-100 text-slate-800 rounded-xl text-xs sm:text-sm font-medium font-['Poppins'] text-center transition border border-slate-300 shadow-2xs flex items-center justify-center gap-2.5">
-                <svg class="size-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <a href="{{ $coopMailLink }}" class="w-full sm:w-auto px-6 py-3.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs sm:text-sm font-semibold font-['Poppins'] text-center transition shadow-xs hover:shadow-md flex items-center justify-center gap-2.5">
+                <svg class="size-4 text-blue-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect width="20" height="16" x="2" y="4" rx="2"/>
                   <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
                 </svg>

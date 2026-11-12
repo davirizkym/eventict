@@ -1,19 +1,11 @@
 <footer class="self-stretch px-6 lg:px-20 pt-12 pb-24 md:pb-12 bg-blue-950 flex flex-col justify-start items-start gap-12">
-  <div class="self-stretch grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+  <div class="self-stretch grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
     <div class="flex flex-col gap-4">
       <div class="flex items-center">
         <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
       </div>
-      <p class="text-slate-300 text-xs font-normal font-['Poppins'] leading-relaxed">Platform terpadu manajemen pendaftaran workshop dan seminar Laboratorium ICT.</p>
+      <p class="text-slate-300 text-xs font-normal font-['Poppins'] leading-relaxed max-w-md">Platform terpadu manajemen pendaftaran workshop dan seminar Laboratorium ICT.</p>
       <div class="text-slate-400 text-xs font-normal font-['Poppins']">Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur</div>
-    </div>
-
-    <div class="flex flex-col gap-3">
-      <span class="text-white text-sm font-semibold font-['Poppins']">Kategori Event</span>
-      <a href="{{ route('events.index_public', ['category' => 'Teknologi & Rekayasa']) }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Workshop Pemrograman & Web/Mobile</a>
-      <a href="{{ route('events.index_public', ['category' => 'Teknologi & Rekayasa']) }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Pelatihan AI, Data & Machine Learning</a>
-      <a href="{{ route('events.index_public', ['category' => 'Teknologi & Rekayasa']) }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Jaringan Komputer & Cyber Security</a>
-      <a href="{{ route('events.index_public') }}" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition">Seminar Teknologi & Tech Talk</a>
     </div>
 
     <div class="flex flex-col gap-3">
