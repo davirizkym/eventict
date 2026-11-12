@@ -1,5 +1,5 @@
 <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] md:hidden px-2 py-1.5 font-['Poppins']" style="padding-bottom: max(0.4rem, env(safe-area-inset-bottom));">
-  <div class="grid grid-cols-4 items-center text-center">
+  <div class="grid {{ Auth::check() ? 'grid-cols-4' : 'grid-cols-3' }} items-center text-center">
     <a
       href="{{ route('home') }}"
       class="flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-lg transition {{ request()->routeIs('home') ? 'text-blue-950 font-bold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
@@ -36,19 +36,7 @@
       <span class="text-[10px] leading-none tracking-tight">Tentang</span>
     </a>
 
-    @guest
-      <a
-        href="{{ route('login') }}"
-        class="flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-lg transition {{ (request()->routeIs('login') || request()->routeIs('register')) ? 'text-blue-950 font-bold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
-      >
-        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ (request()->routeIs('login') || request()->routeIs('register')) ? '2.5' : '2' }}">
-          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-          <polyline points="10 17 15 12 10 7"/>
-          <line x1="15" x2="3" y1="12" y2="12"/>
-        </svg>
-        <span class="text-[10px] leading-none tracking-tight">Masuk</span>
-      </a>
-    @else
+    @auth
       @if(Auth::user()->isAdministrator())
         <a
           href="{{ route('organizer.dashboard') }}"
@@ -88,6 +76,6 @@
           <span class="text-[10px] leading-none tracking-tight">Tiket Saya</span>
         </a>
       @endif
-    @endguest
+    @endauth
   </div>
 </nav>

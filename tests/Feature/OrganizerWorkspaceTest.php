@@ -6,8 +6,10 @@ use App\Models\Certificate;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\User;
+use App\Notifications\CertificateIssuedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -503,5 +505,126 @@ class OrganizerWorkspaceTest extends TestCase
 
         $this->assertEquals('NIM / NIP / NIS', $data[0][3]);
         $this->assertEquals('2210511055', $data[1][3]);
+    }
+
+    public function test_workspace_certificate_batch_upload_notifies_participant(): void
+    {
+        Notification::fake();
+        Storage::fake('public');
+
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+        $event = Event::create([
+            'title' => 'Workshop Cloud Native 2026',
+            'slug' => 'workshop-cloud-native-2026',
+            'category' => 'Workshop',
+            'format' => 'online',
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(3),
+            'start_time' => '09:00:00',
+            'end_time' => '12:00:00',
+            'quota' => 50,
+            'price' => 0,
+            'status' => 'published',
+        ]);
+
+        $peserta = User::factory()->create(['role' => 'peserta', 'email' => 'peserta.notif@example.com']);
+        $reg = Registration::create([
+            'user_id' => $peserta->id,
+            'event_id' => $event->id,
+            'registration_code' => 'REG-NOTIF-001',
+            'payment_status' => 'free',
+            'attendance_status' => 'attended',
+        ]);
+
+        $file = UploadedFile::fake()->create('REG-NOTIF-001.pdf', 250, 'application/pdf');
+
+        $response = $this->actingAs($panitia)->post(route('organizer.workspace.certificate.batch', $event->id), [
+            'certificate_files' => [$file],
+        ]);
+
+        $response->assertRedirect(route('organizer.workspace', ['event' => $event->id, 'tab' => 'sertifikat']));
+
+        Notification::assertSentTo($peserta, CertificateIssuedNotification::class, function ($notification) use ($event) {
+            $mail = $notification->toMail($notification->certificate->user);
+            return str_contains($mail->subject, $event->title);
+        });
+    }
+
+    public function test_single_certificate_upload_notifies_participant(): void
+    {
+        Notification::fake();
+        Storage::fake('public');
+
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+        $event = Event::create([
+            'title' => 'Webinar AI Security 2026',
+            'slug' => 'webinar-ai-security-2026',
+            'category' => 'Webinar',
+            'format' => 'online',
+            'start_date' => now()->addDays(4),
+            'end_date' => now()->addDays(4),
+            'start_time' => '13:00:00',
+            'end_time' => '15:00:00',
+            'quota' => 50,
+            'price' => 0,
+            'status' => 'published',
+        ]);
+
+        $peserta = User::factory()->create(['role' => 'peserta', 'email' => 'peserta.single@example.com']);
+        $reg = Registration::create([
+            'user_id' => $peserta->id,
+            'event_id' => $event->id,
+            'registration_code' => 'REG-SINGLE-001',
+            'payment_status' => 'free',
+            'attendance_status' => 'attended',
+        ]);
+
+        $file = UploadedFile::fake()->create('cert-single.pdf', 200, 'application/pdf');
+
+        $response = $this->actingAs($panitia)->post(route('organizer.certificate.single', $reg->id), [
+            'certificate_file' => $file,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        Notification::assertSentTo($peserta, CertificateIssuedNotification::class);
+    }
+
+    public function test_workspace_renders_mobile_cards_for_participants_and_certificates(): void
+    {
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+        $event = Event::create([
+            'title' => 'Mobile Responsive Check Event',
+            'slug' => 'mobile-responsive-check-event',
+            'category' => 'Workshop',
+            'format' => 'offline',
+            'start_date' => now()->addDays(5),
+            'end_date' => now()->addDays(5),
+            'start_time' => '09:00:00',
+            'end_time' => '12:00:00',
+            'quota' => 50,
+            'price' => 0,
+            'status' => 'published',
+        ]);
+
+        $peserta = User::factory()->create(['role' => 'peserta', 'name' => 'Budi Santoso']);
+        $reg = Registration::create([
+            'user_id' => $peserta->id,
+            'event_id' => $event->id,
+            'registration_code' => 'REG-RESP-123',
+            'qr_pass' => 'PASS-RESP-123',
+            'payment_status' => 'free',
+            'attendance_status' => 'attended',
+        ]);
+
+        $resPeserta = $this->actingAs($panitia)->get(route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta']));
+        $resPeserta->assertStatus(200);
+        $resPeserta->assertSee('id="reg-card-' . $reg->id . '"', false);
+        $resPeserta->assertSee('Semua Sertifikat');
+
+        $resSertifikat = $this->actingAs($panitia)->get(route('organizer.workspace', ['event' => $event->id, 'tab' => 'sertifikat']));
+        $resSertifikat->assertStatus(200);
+        $resSertifikat->assertSee('id="cert-card-' . $reg->id . '"', false);
     }
 }

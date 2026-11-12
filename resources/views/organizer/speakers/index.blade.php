@@ -119,9 +119,8 @@
       </form>
     </div>
 
-    <!-- Tabel Data Pengisi Acara (Ketentuan 1) -->
     <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs">
-      <div class="overflow-x-auto">
+      <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left text-xs text-slate-700">
           <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-[10px] tracking-wider select-none">
             <tr>
@@ -246,7 +245,85 @@
         </table>
       </div>
 
-      <!-- Pagination Links (Ketentuan 1) -->
+      <div class="md:hidden p-4 flex flex-col gap-3.5 bg-slate-50/50">
+        @forelse($speakers as $spk)
+          <div class="p-5 bg-white rounded-2xl border border-slate-200 flex flex-col gap-3.5 shadow-2xs">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="size-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-950 font-bold text-xs flex items-center justify-center shrink-0">
+                  {{ strtoupper(substr($spk->name, 0, 2)) }}
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <a href="{{ route('organizer.speakers.show', $spk->id) }}" class="font-bold text-slate-900 hover:text-blue-950 text-sm truncate">
+                    {{ $spk->name }}
+                  </a>
+                  <span class="text-xs text-slate-500 truncate">{{ $spk->institution ?? 'Afiliasi Independen' }}</span>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-md text-[10px] font-semibold bg-blue-50 text-blue-950 border border-blue-200 shrink-0">
+                {{ $spk->events_count }} Acara
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 gap-2 pt-2 border-t border-slate-100 text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[11px] text-slate-400 font-medium">Email:</span>
+                @if($spk->email)
+                  <a href="mailto:{{ $spk->email }}" class="text-slate-600 hover:text-blue-950 font-mono text-[11px] truncate">{{ $spk->email }}</a>
+                @else
+                  <span class="text-slate-400 italic text-[11px]">-</span>
+                @endif
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[11px] text-slate-400 font-medium">WhatsApp:</span>
+                @if($spk->phone)
+                  @php
+                    $cleanPhone = preg_replace('/[^0-9]/', '', $spk->phone);
+                    if (str_starts_with($cleanPhone, '0')) {
+                      $cleanPhone = '62' . substr($cleanPhone, 1);
+                    }
+                  @endphp
+                  <a href="https://wa.me/{{ $cleanPhone }}" target="_blank" class="text-emerald-700 font-mono text-[11px] hover:underline">{{ $spk->phone }}</a>
+                @else
+                  <span class="text-slate-400 italic text-[11px]">-</span>
+                @endif
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <a href="{{ route('organizer.speakers.show', $spk->id) }}" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition flex items-center gap-1.5">
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>Riwayat</span>
+              </a>
+              <button type="button" onclick="openEditSpeakerModal({{ json_encode($spk) }})" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition flex items-center gap-1.5 cursor-pointer">
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                </svg>
+                <span>Edit</span>
+              </button>
+              <form method="POST" action="{{ route('organizer.speakers.destroy', ['speaker' => $spk->id]) }}" onsubmit="return confirm('Hapus profil pengisi acara {{ $spk->name }}?');" class="inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition flex items-center gap-1.5 cursor-pointer">
+                  <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7c-1 0-2-1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                  <span>Hapus</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        @empty
+          <div class="p-8 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-200">
+            Belum ada data pengisi acara yang terdaftar.
+          </div>
+        @endforelse
+      </div>
+
       @if($speakers->hasPages())
         <div class="p-4 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between">
           <div class="text-xs text-slate-500">

@@ -351,36 +351,36 @@
           </div>
         </div>
 
-        <form method="GET" action="{{ route('organizer.dashboard') }}" class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col md:flex-row items-center gap-3">
+        <form method="GET" action="{{ route('organizer.dashboard') }}" class="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col md:flex-row items-center gap-3">
           <input type="hidden" name="event_id" value="{{ request('event_id', $activeEvent ? $activeEvent->id : '') }}">
-          <div class="flex-1 w-full flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-lg">
+          <div class="flex-1 w-full flex items-center gap-2 px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl">
             <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.35-4.35"/>
             </svg>
             <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama peserta, email, instansi, atau no. registrasi..." class="w-full bg-transparent border-none outline-none text-xs text-slate-800 placeholder:text-slate-400">
           </div>
-          <select name="attendance" onchange="this.form.submit()" class="w-full md:w-44 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 outline-none cursor-pointer">
+          <select name="attendance" onchange="this.form.submit()" class="w-full md:w-auto px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-700 font-medium outline-none focus:border-blue-950 cursor-pointer transition">
             <option value="">Semua Presensi</option>
             <option value="attended" {{ request('attendance') === 'attended' ? 'selected' : '' }}>Hadir</option>
             <option value="unattended" {{ request('attendance') === 'unattended' ? 'selected' : '' }}>Belum Hadir</option>
           </select>
-          <select name="certificate" onchange="this.form.submit()" class="w-full md:w-48 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 outline-none cursor-pointer">
+          <select name="certificate" onchange="this.form.submit()" class="w-full md:w-auto px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-700 font-medium outline-none focus:border-blue-950 cursor-pointer transition">
             <option value="">Semua Sertifikat</option>
             <option value="has_cert" {{ request('certificate') === 'has_cert' ? 'selected' : '' }}>Sudah Ada Sertifikat</option>
             <option value="no_cert" {{ request('certificate') === 'no_cert' ? 'selected' : '' }}>Belum Ada Sertifikat</option>
           </select>
-          <button type="submit" class="px-4 py-2 bg-blue-950 text-white rounded-lg text-xs font-semibold hover:bg-blue-900 transition cursor-pointer">
+          <button type="submit" class="w-full md:w-auto px-5 py-2.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition cursor-pointer">
             Filter
           </button>
           @if(request()->hasAny(['q', 'attendance', 'certificate']))
-            <a href="{{ route('organizer.dashboard', ['event_id' => request('event_id')]) }}" class="px-3 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-medium hover:bg-slate-300 transition">
+            <a href="{{ route('organizer.dashboard', ['event_id' => request('event_id')]) }}" class="w-full md:w-auto text-center px-3.5 py-2.5 bg-slate-200 text-slate-700 rounded-xl text-xs font-medium hover:bg-slate-300 transition">
               Reset
             </a>
           @endif
         </form>
 
-        <div class="overflow-x-auto rounded-xl border border-slate-200">
+        <div class="hidden md:block overflow-x-auto rounded-xl border border-slate-200">
           <table class="w-full min-w-[920px] text-left border-collapse text-xs">
             <thead>
               <tr class="bg-slate-50 text-slate-600 font-semibold font-['Poppins'] border-b border-slate-200">
@@ -486,6 +486,91 @@
               @endforelse
             </tbody>
           </table>
+        </div>
+
+        <div class="md:hidden flex flex-col gap-3">
+          @forelse($registrations as $reg)
+            <div class="p-4 bg-white rounded-xl border border-slate-200 flex flex-col gap-3 shadow-2xs">
+              <div class="flex items-start justify-between gap-2 pb-2.5 border-b border-slate-100">
+                <div class="flex flex-col">
+                  <span class="text-xs font-mono font-bold text-blue-950">#{{ $reg->registration_code }}</span>
+                  <span class="text-[10px] text-slate-500 mt-0.5">
+                    @if($reg->attendance_status === 'attended')
+                      <span class="font-semibold text-emerald-700">Hadir ({{ $reg->checked_in_at ? $reg->checked_in_at->format('H:i') . ' WIB' : 'Sesi' }})</span>
+                    @else
+                      <span class="text-slate-400">Belum Presensi</span>
+                    @endif
+                  </span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="px-2 py-0.5 bg-blue-50 text-blue-950 border border-blue-200 font-semibold rounded text-[10px] uppercase">
+                    {{ $reg->payment_status === 'paid' ? 'LUNAS' : ($reg->payment_status === 'free' ? 'GRATIS' : 'PENDING') }}
+                  </span>
+                  @if($reg->certificate)
+                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold rounded text-[10px]">
+                      TERBIT
+                    </span>
+                  @else
+                    <span class="px-2 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 font-medium rounded text-[10px]">
+                      BELUM
+                    </span>
+                  @endif
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <span class="font-bold text-sm text-slate-900">{{ $reg->user->name }}</span>
+                <span class="text-xs text-slate-500">{{ $reg->user->email }} @if($reg->user->phone) • {{ $reg->user->phone }} @endif</span>
+                <span class="text-xs text-slate-600 mt-0.5">{{ $reg->user->institution ?? '-' }}</span>
+              </div>
+
+              <div class="flex items-center gap-2 pt-2.5 border-t border-slate-100">
+                <button
+                  type="button"
+                  onclick="openSingleUploadModal('{{ $reg->id }}', '{{ addslashes($reg->user->name) }}', '{{ $reg->registration_code }}', '{{ $reg->certificate ? asset($reg->certificate->download_url) : '' }}', '{{ $reg->certificate ? $reg->certificate->certificate_number : '' }}')"
+                  class="flex-1 py-2 px-3 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                >
+                  <svg class="size-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" x2="12" y1="3" y2="15"/>
+                  </svg>
+                  <span>{{ $reg->certificate ? 'Ganti Sertifikat' : 'Upload Sertifikat' }}</span>
+                </button>
+
+                @if($reg->certificate)
+                  <a
+                    href="{{ asset($reg->certificate->download_url) }}"
+                    target="_blank"
+                    title="Lihat Berkas Sertifikat"
+                    class="p-2 hover:bg-slate-100 rounded-lg text-slate-700 cursor-pointer border border-slate-200 transition"
+                  >
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="8" r="6"/>
+                      <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                    </svg>
+                  </a>
+                @endif
+
+                <form method="POST" action="{{ route('organizer.attendance.toggle', $reg->id) }}" class="inline">
+                  @csrf
+                  <button
+                    type="submit"
+                    title="{{ $reg->attendance_status === 'attended' ? 'Batal Hadir' : 'Tandai Hadir' }}"
+                    class="p-2 hover:bg-slate-100 rounded-lg {{ $reg->attendance_status === 'attended' ? 'text-emerald-700 border border-emerald-200 bg-emerald-50' : 'text-slate-400 border border-slate-200' }} cursor-pointer transition"
+                  >
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </button>
+                </form>
+              </div>
+            </div>
+          @empty
+            <div class="p-8 bg-white border border-slate-200 rounded-xl text-center text-slate-400 text-xs">
+              Tidak ada data peserta yang sesuai dengan kriteria pencarian.
+            </div>
+          @endforelse
         </div>
 
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2 text-xs text-slate-500">

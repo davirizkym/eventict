@@ -69,8 +69,8 @@
           <div class="relative w-full overflow-hidden">
             <div id="event-carousel-track" class="flex" style="transform: translateX({{ $events->count() > 1 ? '-100%' : '0%' }});">
               @foreach($carouselEvents as $index => $event)
-              <div class="w-full shrink-0 flex flex-col lg:flex-row justify-between items-stretch px-5 sm:px-10 lg:px-14 py-6 sm:py-10 lg:py-12 pb-14 sm:pb-14 lg:pb-14 gap-8 min-h-[360px] relative">
-                <div class="flex-1 flex flex-col justify-between gap-6 z-10">
+              <div class="w-full shrink-0 flex flex-col lg:flex-row justify-between items-stretch px-5 sm:px-10 lg:px-14 py-6 sm:py-10 lg:py-12 pb-14 sm:pb-14 lg:pb-14 gap-8 min-h-[360px] relative overflow-hidden min-w-0 max-w-full">
+                <div class="flex-1 flex flex-col justify-between gap-6 z-10 min-w-0 max-w-full">
                   <div class="flex flex-col gap-3">
                     <div class="flex flex-wrap items-center gap-2.5">
                       <span class="px-3 py-1 bg-blue-500/20 text-blue-200 border border-blue-400/30 rounded-full text-xs font-semibold font-['Poppins']">
@@ -118,7 +118,7 @@
                       @endif
                     </div>
 
-                    <h2 class="text-white text-2xl sm:text-3xl lg:text-4xl font-bold font-['Poppins'] leading-tight tracking-tight mt-1">
+                    <h2 class="text-white text-2xl sm:text-3xl lg:text-4xl font-bold font-['Poppins'] leading-tight tracking-tight mt-1 break-words">
                       <a href="{{ route('events.show', $event->slug) }}" class="hover:text-blue-200 transition">
                         {{ $event->title }}
                       </a>
@@ -129,9 +129,9 @@
                     </p>
                   </div>
 
-                  <div class="flex flex-wrap items-center gap-6 pt-2 border-t border-white/10 text-slate-300 text-xs font-['Poppins']">
-                    <div class="flex items-center gap-2">
-                      <div class="size-7 rounded-lg bg-white/10 flex items-center justify-center text-blue-300 shrink-0">
+                  <div class="flex flex-wrap items-center gap-x-6 gap-y-3 pt-2 border-t border-white/10 text-slate-300 text-xs font-['Poppins'] min-w-0 max-w-full">
+                    <div class="flex items-start gap-2 min-w-0 max-w-full">
+                      <div class="size-7 rounded-lg bg-white/10 flex items-center justify-center text-blue-300 shrink-0 mt-0.5">
                         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
                           <line x1="16" x2="16" y1="2" y2="6"/>
@@ -139,33 +139,33 @@
                           <line x1="3" x2="21" y1="10" y2="10"/>
                         </svg>
                       </div>
-                      <div class="flex flex-col">
+                      <div class="flex flex-col min-w-0">
                         <span class="text-slate-400 text-[10px] uppercase tracking-wider">Tanggal & Waktu</span>
-                        <span class="text-white font-medium">{{ \Carbon\Carbon::parse($event->start_date)->translatedFormat('d M Y') }} • {{ substr($event->start_time, 0, 5) }} WIB</span>
+                        <span class="text-white font-medium break-words leading-snug">{{ \Carbon\Carbon::parse($event->start_date)->translatedFormat('d M Y') }} • {{ substr($event->start_time, 0, 5) }} WIB</span>
                       </div>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                      <div class="size-7 rounded-lg bg-white/10 flex items-center justify-center text-blue-300 shrink-0">
+                    <div class="flex items-start gap-2 min-w-0 max-w-full">
+                      <div class="size-7 rounded-lg bg-white/10 flex items-center justify-center text-blue-300 shrink-0 mt-0.5">
                         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
                           <circle cx="12" cy="10" r="3"/>
                         </svg>
                       </div>
-                      <div class="flex flex-col">
+                      <div class="flex flex-col min-w-0">
                         <span class="text-slate-400 text-[10px] uppercase tracking-wider">Lokasi Pelaksanaan</span>
-                        <span class="text-white font-medium truncate max-w-xs sm:max-w-sm">{{ $event->location }}</span>
+                        <span class="text-white font-medium break-words leading-snug">{{ $event->location }}</span>
                       </div>
                     </div>
 
                     @if($event->speakers->isNotEmpty())
-                    <div class="flex items-center gap-2">
-                      <div class="size-7 rounded-full bg-blue-400/20 border border-blue-300/40 flex items-center justify-center text-blue-200 font-bold text-xs shrink-0">
+                    <div class="flex items-start gap-2 min-w-0 max-w-full">
+                      <div class="size-7 rounded-full bg-blue-400/20 border border-blue-300/40 flex items-center justify-center text-blue-200 font-bold text-xs shrink-0 mt-0.5">
                         {{ strtoupper(substr($event->speakers->first()->name, 0, 2)) }}
                       </div>
-                      <div class="flex flex-col">
+                      <div class="flex flex-col min-w-0">
                         <span class="text-slate-400 text-[10px] uppercase tracking-wider">Instruktur / Narasumber</span>
-                        <span class="text-white font-medium truncate max-w-xs">{{ $event->speakers->first()->name }}</span>
+                        <span class="text-white font-medium break-words leading-snug">{{ $event->speakers->first()->name }}</span>
                       </div>
                     </div>
                     @endif
