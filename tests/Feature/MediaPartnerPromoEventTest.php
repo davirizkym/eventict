@@ -89,6 +89,45 @@ class MediaPartnerPromoEventTest extends TestCase
         Storage::disk('public')->assertExists($storedPosterPath);
     }
 
+    public function test_penyelenggara_dapat_membuat_acara_media_partner_tanpa_input_quota_dan_price(): void
+    {
+        Storage::fake('public');
+
+        $panitia = User::factory()->create(['role' => 'penyelenggara']);
+        $mediaPartner = MediaPartner::create([
+            'name' => 'BEM Fakultas Teknologi Informasi',
+            'slug' => 'bem-fti',
+            'type' => 'BEM Kampus',
+            'email' => 'bem@campus.ac.id',
+            'status' => 'active',
+        ]);
+
+        // Tidak mengirimkan 'quota' dan 'price' karena input disabled pada antarmuka
+        $response = $this->actingAs($panitia)->post('/penyelenggara/event/create', [
+            'title' => 'Webinar AI BEM FTI',
+            'type' => 'Webinar',
+            'format' => 'online',
+            'location' => 'Zoom Meeting',
+            'start_date' => now()->addDays(7)->toDateString(),
+            'end_date' => now()->addDays(7)->toDateString(),
+            'start_time' => '13:00',
+            'end_time' => '16:00',
+            'description' => 'Webinar kolaborasi promosi bersama BEM FTI.',
+            'organizer_type' => 'partner',
+            'media_partner_id' => $mediaPartner->id,
+            'registration_url' => 'https://forms.gle/sampleBEM123',
+        ]);
+
+        $response->assertRedirect();
+
+        $event = Event::where('title', 'Webinar AI BEM FTI')->first();
+        $this->assertNotNull($event);
+        $this->assertEquals(0, $event->quota);
+        $this->assertEquals(0, $event->price);
+        $this->assertEquals('partner', $event->organizer_type);
+        $this->assertEquals('BEM Fakultas Teknologi Informasi', $event->organizer_name);
+    }
+
     public function test_penyelenggara_dapat_memperbarui_poster_dan_link_pendaftaran_pada_pengaturan_acara(): void
     {
         Storage::fake('public');

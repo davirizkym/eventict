@@ -14,8 +14,8 @@
   }
 </style>
 
-<footer class="self-stretch px-6 lg:px-20 pt-8 pb-16 md:pb-8 bg-blue-950 flex flex-col justify-start items-start">
-  <div class="self-stretch footer-grid">
+<footer class="w-full bg-blue-950 border-t border-slate-900">
+  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 md:pb-8 footer-grid">
     {{-- Row 1, Col 1: Brand Info --}}
     <div class="flex flex-col gap-3 max-w-sm sm:max-w-md">
       <div class="flex items-center">

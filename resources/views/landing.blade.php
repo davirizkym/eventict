@@ -3,11 +3,12 @@
 @section('title', 'Eventict — Platform Event, Seminar & Workshop Laboratorium ICT')
 
 @section('content')
-<div class="w-full min-h-screen bg-white flex justify-center items-start">
-  <div class="w-full max-w-[1440px] bg-white flex flex-col justify-start items-start">
-    @include('partials.navbar')
+<div class="w-full min-h-screen bg-white flex flex-col justify-between">
+  @include('partials.navbar')
 
-    <main class="self-stretch flex flex-col justify-start items-start">
+  <div class="w-full flex-1 flex justify-center items-start">
+    <div class="w-full max-w-[1440px] bg-white flex flex-col justify-start items-start">
+      <main class="self-stretch flex flex-col justify-start items-start">
       <section class="self-stretch px-4 sm:px-6 lg:px-20 pt-10 sm:pt-16 md:pt-24 pb-10 sm:pb-14 flex flex-col justify-start items-center gap-6">
         <h1 class="w-full max-w-[980px] text-center text-blue-950 text-3xl sm:text-4xl lg:text-5xl font-semibold font-['Poppins'] leading-tight lg:leading-[60px] tracking-tight min-h-[96px] sm:min-h-[110px] lg:min-h-[130px] flex items-center justify-center">
           <span><span id="typewriter-text"></span><span class="inline-block w-[3px] h-[0.85em] bg-blue-950 ml-1.5 align-middle"></span></span>
@@ -497,9 +498,10 @@
         </div>
       </section>
     </main>
-
-    @include('partials.footer')
+    </div>
   </div>
+
+  @include('partials.footer')
 </div>
 @push('scripts')
 <script>

@@ -1311,15 +1311,6 @@
                       <span class="inline-flex items-center px-2.5 py-1 bg-slate-950/75 backdrop-blur-md text-slate-100 border border-white/20 text-[10px] font-medium rounded-lg shadow-xs">
                         <span>{{ $avEvent->format === 'offline' ? 'Luring' : 'Daring' }}</span>
                       </span>
-
-                      @if($isPartnerEvent)
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-950/75 backdrop-blur-md text-slate-100 border border-white/20 text-[10px] font-medium rounded-lg max-w-[170px] truncate shadow-xs" title="Penyelenggara: {{ $avEvent->organizer_name }}">
-                          <svg class="size-3 text-slate-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                          </svg>
-                          <span class="truncate">{{ $avEvent->organizer_name }}</span>
-                        </span>
-                      @endif
                     </div>
                   </div>
 
@@ -1346,18 +1337,9 @@
                     </div>
 
                     <div>
-                      @if($isPartnerEvent)
-                        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 text-[10px] font-medium mb-1.5">
-                          <svg class="size-3 text-slate-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                          </svg>
-                          <span class="truncate">Penyelenggara: {{ $avEvent->organizer_name }}</span>
-                        </div>
-                      @else
-                        <div class="text-[10px] font-medium text-slate-500 mb-1">
-                          Penyelenggara: Laboratorium ICT
-                        </div>
-                      @endif
+                      <div class="text-[10px] font-medium text-slate-500 mb-1">
+                        Penyelenggara: {{ $isPartnerEvent ? $avEvent->organizer_name : 'Laboratorium ICT' }}
+                      </div>
 
                       <a href="{{ route('events.show', $avEvent->slug) }}" class="block text-slate-900 hover:text-blue-950 transition">
                         <h4 class="text-sm font-bold leading-snug line-clamp-2 min-h-[2.5rem]">

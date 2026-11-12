@@ -3,11 +3,12 @@
 @section('title', 'Tentang Kami — Laboratorium ICT')
 
 @section('content')
-  <div class="w-full min-h-screen bg-slate-50 flex justify-center items-start">
-    <div class="w-full max-w-[1440px] bg-slate-50 flex flex-col justify-start items-start">
-      @include('partials.navbar')
+<div class="w-full min-h-screen bg-slate-50 flex flex-col justify-between">
+  @include('partials.navbar')
 
-    <main class="self-stretch px-4 sm:px-6 lg:px-20 py-8 sm:py-10 pb-24 md:pb-12 flex flex-col gap-8 sm:gap-10">
+  <div class="w-full flex-1 flex justify-center items-start">
+    <div class="w-full max-w-[1440px] bg-slate-50 flex flex-col justify-start items-start">
+      <main class="self-stretch px-4 sm:px-6 lg:px-20 py-8 sm:py-10 pb-24 md:pb-12 flex flex-col gap-8 sm:gap-10">
       <div class="flex items-center gap-2 text-xs text-slate-500 font-['Poppins']">
         <a href="{{ route('home') }}" class="hover:text-blue-950 transition">Beranda</a>
         <span>/</span>
@@ -88,8 +89,9 @@
         </div>
       </section>
       </main>
-
-      @include('partials.footer')
     </div>
   </div>
+
+  @include('partials.footer')
+</div>
 @endsection

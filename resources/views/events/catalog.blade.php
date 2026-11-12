@@ -3,11 +3,12 @@
 @section('title', 'Jelajahi Kegiatan — Laboratorium ICT')
 
 @section('content')
-<div class="w-full min-h-screen bg-white flex justify-center items-start">
-  <div class="w-full max-w-[1440px] bg-white flex flex-col justify-start items-start">
-    @include('partials.navbar')
+<div class="w-full min-h-screen bg-white flex flex-col justify-between">
+  @include('partials.navbar')
 
-    <main class="self-stretch flex flex-col justify-start items-start">
+  <div class="w-full flex-1 flex justify-center items-start">
+    <div class="w-full max-w-[1440px] bg-white flex flex-col justify-start items-start">
+      <main class="self-stretch flex flex-col justify-start items-start">
       <section class="self-stretch px-4 sm:px-6 lg:px-20 pt-10 pb-6 flex flex-col gap-6">
         <div class="flex items-center gap-2 text-xs text-slate-500 font-['Poppins']">
           <a href="{{ route('home') }}" class="hover:text-blue-950 transition">Beranda</a>
@@ -119,11 +120,6 @@
                       <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md rounded-lg border border-white/15 text-[11px] font-medium shrink-0">
                         {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
                       </span>
-                      @if(($event->organizer_type ?? 'internal') === 'partner')
-                        <span class="px-2 py-0.5 bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold rounded-lg border border-white/15 truncate max-w-[130px]" title="Penyelenggara: {{ $event->organizer_name }}">
-                          {{ $event->organizer_name }}
-                        </span>
-                      @endif
                     </div>
                   </div>
                 </div>
@@ -149,18 +145,9 @@
                   </div>
 
                   <div>
-                    @if(($event->organizer_type ?? 'internal') === 'partner')
-                      <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 text-[10px] font-medium mb-1">
-                        <svg class="size-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                        </svg>
-                        <span>Penyelenggara: {{ $event->organizer_name }}</span>
-                      </span>
-                    @else
-                      <span class="text-[11px] font-medium text-slate-500 font-['Poppins']">
-                        Penyelenggara: Laboratorium ICT
-                      </span>
-                    @endif
+                    <span class="text-[11px] font-medium text-slate-500 font-['Poppins']">
+                      Penyelenggara: {{ ($event->organizer_type ?? 'internal') === 'partner' ? $event->organizer_name : 'Laboratorium ICT' }}
+                    </span>
                     <h3 class="text-slate-900 text-base font-semibold font-['Poppins'] leading-snug line-clamp-2 group-hover:text-blue-900 transition mt-0.5">
                       {{ $event->title }}
                     </h3>
@@ -262,8 +249,9 @@
         @endif
       </section>
     </main>
-
-    @include('partials.footer')
+    </div>
   </div>
+
+  @include('partials.footer')
 </div>
 @endsection

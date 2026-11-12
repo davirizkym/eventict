@@ -1499,17 +1499,23 @@ function toggleEditPartnerName(val) {
   if (quotaInput) {
     if (val === 'partner') {
       quotaInput.required = false;
+      quotaInput.disabled = true;
+      quotaInput.min = '0';
       quotaInput.value = '0';
     } else {
+      quotaInput.disabled = false;
       quotaInput.required = true;
+      quotaInput.min = '1';
       if (!quotaInput.value || quotaInput.value === '0') quotaInput.value = '100';
     }
   }
   if (priceInput) {
     if (val === 'partner') {
       priceInput.required = false;
+      priceInput.disabled = true;
       priceInput.value = '0';
     } else {
+      priceInput.disabled = false;
       priceInput.required = true;
     }
   }
