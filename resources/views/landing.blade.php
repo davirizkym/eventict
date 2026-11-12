@@ -32,10 +32,10 @@
               </select>
             </div>
             <div class="h-8 w-px bg-slate-200 hidden md:block"></div>
-            <div class="w-full md:w-52 flex flex-col justify-start items-start px-3 py-1">
-              <label class="text-slate-500 text-[10px] uppercase tracking-wider font-semibold font-['Poppins']">Rumpun Ilmu</label>
+            <div class="w-full md:w-56 flex flex-col justify-start items-start px-3 py-1">
+              <label class="text-slate-500 text-[10px] uppercase tracking-wider font-semibold font-['Poppins']">Kategori Acara</label>
               <select name="category" class="w-full bg-transparent border-none outline-none text-slate-900 text-xs font-medium font-['Poppins'] cursor-pointer">
-                <option value="">Semua Rumpun</option>
+                <option value="">Semua Kategori</option>
                 @foreach($allCategories ?? [] as $catOption)
                 <option value="{{ $catOption }}" {{ request('category') === $catOption ? 'selected' : '' }}>{{ $catOption }}</option>
                 @endforeach
@@ -263,37 +263,114 @@
 
       @if(isset($categories) && $categories->isNotEmpty())
       <section id="kategori" class="self-stretch px-6 lg:px-20 py-16 flex flex-col justify-start items-start gap-8">
-        <div class="self-stretch flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h2 class="text-slate-900 text-2xl lg:text-3xl font-semibold font-['Poppins'] leading-10">Jelajahi Kategori Populer</h2>
-            <p class="text-slate-500 text-xs font-normal font-['Poppins']">Pilih bidang topik yang kamu minati untuk menemukan seminar dan workshop yang sesuai.</p>
+        {{-- TAMPILAN 1: GRID 6 PANEL (DEFAULT) --}}
+        <div id="category-grid-view" class="self-stretch flex flex-col justify-start items-start gap-8">
+          <div class="self-stretch flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 class="text-slate-900 text-2xl lg:text-3xl font-semibold font-['Poppins'] leading-10">Jelajahi Kategori Populer</h2>
+              <p class="text-slate-500 text-xs font-normal font-['Poppins']">Pilih bidang topik yang kamu minati untuk menemukan seminar dan workshop yang sesuai.</p>
+            </div>
           </div>
-          <a href="{{ route('events.index_public') }}" class="text-blue-950 hover:text-blue-900 text-xs font-semibold font-['Poppins'] hover:underline inline-flex items-center gap-1 shrink-0">
-            <span>Lihat Semua Kegiatan</span>
-            <span>&rarr;</span>
-          </a>
+
+          <div class="self-stretch grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{-- 5 Kategori Pertama --}}
+            @foreach($categories->slice(0, 5) as $category)
+            <a href="{{ route('events.index_public', ['category' => $category->name]) }}" class="p-5 sm:p-6 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex items-center justify-between gap-4 group">
+              <div class="flex flex-col gap-1 min-w-0">
+                <span class="text-[11px] font-medium text-slate-400 font-['Poppins'] uppercase tracking-wider">Kategori</span>
+                <h3 class="text-slate-900 group-hover:text-blue-950 font-bold text-lg sm:text-xl font-['Poppins'] leading-tight transition truncate">
+                  {{ $category->name }}
+                </h3>
+                <p class="text-slate-500 text-xs font-normal font-['Poppins'] line-clamp-1 mt-0.5">
+                  {{ $category->description ?: 'Kumpulan seminar dan workshop bidang ' . $category->name }}
+                </p>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <span class="text-[11px] font-medium text-slate-500 group-hover:text-blue-900 bg-slate-100 group-hover:bg-blue-50 px-2.5 py-1 rounded-full transition">
+                    {{ $category->events_count ?? 0 }} Kegiatan
+                  </span>
+                  <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
+                </div>
+              </div>
+
+              <div class="size-14 sm:size-16 rounded-2xl bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center shrink-0 transition-colors duration-200 shadow-xs">
+                @include('partials.category-icon', ['icon' => $category->icon, 'class' => 'size-7 sm:size-8'])
+              </div>
+            </a>
+            @endforeach
+
+            {{-- Panel ke-6: Tombol Ganti ke List Kategori --}}
+            @if($categories->count() > 5)
+            <button type="button" id="btn-show-category-list" onclick="openCategoryListView()" class="p-5 sm:p-6 bg-white hover:bg-slate-50/80 rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex items-center justify-between gap-4 group text-left cursor-pointer w-full">
+              <div class="flex flex-col gap-1 min-w-0">
+                <span class="text-[11px] font-medium text-slate-400 font-['Poppins'] uppercase tracking-wider">Semua Kategori</span>
+                <h3 class="text-slate-900 group-hover:text-blue-950 font-bold text-lg sm:text-xl font-['Poppins'] leading-tight transition truncate">
+                  Lihat Lainnya
+                </h3>
+                <p class="text-slate-500 text-xs font-normal font-['Poppins'] line-clamp-1 mt-0.5">
+                  Buka {{ max(0, $categories->count() - 5) }}+ kategori lainnya di Laboratorium ICT
+                </p>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <span class="text-[11px] font-medium text-slate-500 group-hover:text-blue-900 bg-slate-100 group-hover:bg-blue-50 px-2.5 py-1 rounded-full transition">
+                    +{{ max(0, $categories->count() - 5) }} Kategori Lainnya
+                  </span>
+                  <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
+                </div>
+              </div>
+
+              <div class="size-14 sm:size-16 rounded-2xl bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center shrink-0 transition-colors duration-200 shadow-xs">
+                <svg class="size-7 sm:size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="7" height="7" x="3" y="3" rx="1"/>
+                  <rect width="7" height="7" x="14" y="3" rx="1"/>
+                  <rect width="7" height="7" x="14" y="14" rx="1"/>
+                  <rect width="7" height="7" x="3" y="14" rx="1"/>
+                </svg>
+              </div>
+            </button>
+            @endif
+          </div>
         </div>
 
-        <div class="self-stretch grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          @foreach($categories as $category)
-          <a href="{{ route('events.index_public', ['category' => $category->name]) }}" class="p-5 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between gap-4 group">
-            <div class="flex items-start justify-between">
-              <div class="size-11 rounded-lg bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center transition-colors duration-200">
-                @include('partials.category-icon', ['icon' => $category->icon, 'class' => 'size-5'])
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] font-medium text-slate-500 group-hover:text-blue-900 bg-slate-100 group-hover:bg-blue-50 px-2.5 py-1 rounded-full transition">
-                  {{ $category->events_count ?? 0 }} Kegiatan
-                </span>
-                <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
+        {{-- TAMPILAN 2: LIST SEMUA KATEGORI DENGAN DESAIN ASLI --}}
+        <div id="category-list-view" class="hidden self-stretch flex flex-col gap-6">
+          <div class="self-stretch flex items-center justify-between pb-3 border-b border-slate-200">
+            <div class="flex items-center gap-4">
+              <button type="button" onclick="closeCategoryListView()" class="p-2 -ml-2 rounded-xl text-slate-700 hover:text-blue-950 hover:bg-slate-100 transition flex items-center gap-1.5 cursor-pointer" title="Kembali">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="m15 18-6-6 6-6"/>
+                </svg>
+              </button>
+              <div class="relative pb-2">
+                <span class="text-slate-900 text-lg sm:text-xl font-bold font-['Poppins'] tracking-tight">Kategori</span>
+                <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"></span>
               </div>
             </div>
-            <div>
-              <h3 class="text-slate-900 group-hover:text-blue-950 font-semibold text-sm font-['Poppins'] transition">{{ $category->name }}</h3>
-              <p class="text-slate-500 text-xs font-normal font-['Poppins'] mt-1">{{ $category->description ?: 'Kumpulan seminar dan workshop bidang ' . $category->name }}</p>
-            </div>
-          </a>
-          @endforeach
+          </div>
+
+          <div class="self-stretch grid grid-cols-1 md:grid-cols-2 gap-4">
+            @foreach($categories as $category)
+            <a href="{{ route('events.index_public', ['category' => $category->name]) }}" class="p-5 sm:p-6 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex items-center justify-between gap-4 group">
+              <div class="flex flex-col gap-1 min-w-0">
+                <span class="text-[11px] font-medium text-slate-400 font-['Poppins'] uppercase tracking-wider">Kategori</span>
+                <h3 class="text-slate-900 group-hover:text-blue-950 font-bold text-lg sm:text-xl font-['Poppins'] leading-tight transition truncate">
+                  {{ $category->name }}
+                </h3>
+                <p class="text-slate-500 text-xs font-normal font-['Poppins'] line-clamp-1 mt-0.5">
+                  {{ $category->description ?: 'Kumpulan seminar dan workshop bidang ' . $category->name }}
+                </p>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <span class="text-[11px] font-medium text-slate-500 group-hover:text-blue-900 bg-slate-100 group-hover:bg-blue-50 px-2.5 py-1 rounded-full transition">
+                    {{ $category->events_count ?? 0 }} Kegiatan
+                  </span>
+                  <span class="text-slate-400 group-hover:text-blue-950 text-xs transition">&rarr;</span>
+                </div>
+              </div>
+
+              <div class="size-14 sm:size-16 rounded-2xl bg-blue-50 group-hover:bg-blue-950 text-blue-900 group-hover:text-white flex items-center justify-center shrink-0 transition-colors duration-200 shadow-xs">
+                @include('partials.category-icon', ['icon' => $category->icon, 'class' => 'size-7 sm:size-8'])
+              </div>
+            </a>
+            @endforeach
+          </div>
         </div>
       </section>
       @endif
@@ -349,6 +426,29 @@
         </div>
       </section>
 
+      @php
+        $coopSubject = rawurlencode('Pengajuan Kerja Sama & Media Partner - [Nama Instansi/Komunitas]');
+        $coopBody = rawurlencode(
+          "Halo Tim Pengelola Laboratorium ICT Universitas Budi Luhur,\r\n\r\n" .
+          "Perkenalkan, saya:\r\n" .
+          "- Nama Lengkap: \r\n" .
+          "- Instansi / Komunitas: \r\n" .
+          "- Kontak WhatsApp / HP: \r\n\r\n" .
+          "Bermaksud untuk mengajukan permohonan Kerja Sama / Media Partner dengan rincian kegiatan:\r\n" .
+          "- Nama Acara: \r\n" .
+          "- Tanggal & Waktu Pelaksanaan: \r\n" .
+          "- Format Acara (Online / Offline / Hybrid): \r\n" .
+          "- Target Peserta: \r\n" .
+          "- Bentuk Kerja Sama yang Diharapkan: \r\n" .
+          "- Tautan Proposal & Media Promosi: \r\n\r\n" .
+          "Mohon informasi dan arahan tindak lanjut mengenai ketentuan kerja sama media partner di Laboratorium ICT Universitas Budi Luhur.\r\n\r\n" .
+          "Terima kasih atas perhatian dan kerja samanya.\r\n\r\n" .
+          "Salam hormat,\r\n" .
+          "[Nama Pengirim]"
+        );
+        $coopMailLink = "mailto:labkom@budiluhur.ac.id?subject={$coopSubject}&body={$coopBody}";
+      @endphp
+
       <section class="self-stretch px-6 lg:px-20 py-16 bg-white flex flex-col justify-start items-center">
         <div class="w-full rounded-2xl bg-slate-50 border border-slate-200/90 p-8 sm:p-10 lg:p-12 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
           <div class="w-full lg:max-w-xl flex flex-col gap-4">
@@ -362,21 +462,22 @@
               Kamu punya seminar, workshop, atau lomba? Eventict siap bantu promosikan acaramu ke ribuan mahasiswa dan peminat teknologi agar makin ramai peserta.
             </p>
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
-              <a href="{{ route('register') }}" class="w-full sm:w-auto px-6 py-3.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold font-['Poppins'] text-center transition shadow-xs flex items-center justify-center gap-2">
-                <span>Pasang Acara Sekarang</span>
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M5 12h14"/>
-                  <path d="m12 5 7 7-7 7"/>
-                </svg>
-              </a>
-              <a href="mailto:help@eventict.id" class="w-full sm:w-auto px-6 py-3.5 bg-white hover:bg-slate-100 text-slate-800 rounded-xl text-xs font-medium font-['Poppins'] text-center transition border border-slate-300 shadow-2xs flex items-center justify-center gap-2">
-                <svg class="size-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <a href="{{ $coopMailLink }}" class="w-full sm:w-auto px-6 py-3.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs sm:text-sm font-semibold font-['Poppins'] text-center transition shadow-xs hover:shadow-md flex items-center justify-center gap-2.5">
+                <svg class="size-4 text-blue-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect width="20" height="16" x="2" y="4" rx="2"/>
                   <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
                 </svg>
                 <span>Tanya Kerja Sama</span>
               </a>
             </div>
+            <p class="text-[11px] text-slate-500 font-['Poppins'] flex items-center gap-1.5">
+              <svg class="size-3.5 text-blue-900 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4"/>
+                <path d="M12 8h.01"/>
+              </svg>
+              <span>Terhubung langsung ke <strong class="text-slate-700 font-medium">labkom@budiluhur.ac.id</strong> dengan draf template siap isi.</span>
+            </p>
           </div>
 
           <div class="w-full lg:w-84 xl:w-96 bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-6 flex flex-col gap-4 shrink-0">
@@ -623,6 +724,30 @@ document.addEventListener('DOMContentLoaded', () => {
     startTimer();
   }
 });
+
+window.openCategoryListView = function() {
+  const gridView = document.getElementById('category-grid-view');
+  const listView = document.getElementById('category-list-view');
+
+  if (gridView && listView) {
+    gridView.classList.add('hidden');
+    listView.classList.remove('hidden');
+    const section = document.getElementById('kategori');
+    if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
+window.closeCategoryListView = function() {
+  const gridView = document.getElementById('category-grid-view');
+  const listView = document.getElementById('category-list-view');
+
+  if (gridView && listView) {
+    listView.classList.add('hidden');
+    gridView.classList.remove('hidden');
+    const section = document.getElementById('kategori');
+    if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
 </script>
 @endpush
 @endsection
