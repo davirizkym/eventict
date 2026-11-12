@@ -1,6 +1,6 @@
 <footer class="self-stretch px-6 lg:px-20 pt-12 pb-24 md:pb-12 bg-blue-950 flex flex-col justify-start items-start gap-12">
-  <div class="self-stretch flex flex-col md:flex-row justify-between items-start gap-8 lg:gap-16">
-    <div class="flex flex-col gap-4 max-w-sm sm:max-w-md">
+  <div class="self-stretch grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
+    <div class="flex flex-col gap-4 md:col-span-6 lg:col-span-6 max-w-md">
       <div class="flex items-center">
         <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
       </div>
@@ -8,7 +8,7 @@
       <div class="text-slate-400 text-xs font-normal font-['Poppins']">Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur</div>
     </div>
 
-    <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-3 md:col-span-6 lg:col-span-5 md:col-start-7 lg:col-start-8">
       <span class="text-white text-sm font-semibold font-['Poppins']">Pusat Bantuan & Kontak</span>
       <a href="mailto:labkom@budiluhur.ac.id" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition flex items-center gap-2">
         <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
