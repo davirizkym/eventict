@@ -496,7 +496,7 @@
 
         <div class="flex flex-col gap-1.5">
           <label for="add-identity" class="font-semibold text-slate-700">NIM / NIP / NIS <span class="text-rose-500">*</span></label>
-          <input type="text" id="add-identity" name="identity_no" required maxlength="20" placeholder="Contoh: 2210511001" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-950 focus:bg-white transition">
+          <input type="text" id="add-identity" name="identity_no" required inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="20" placeholder="Contoh: 2210511001" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-950 focus:bg-white transition">
         </div>
       </div>
 
@@ -578,7 +578,7 @@
 
         <div class="flex flex-col gap-1.5">
           <label for="edit-identity" class="font-semibold text-slate-700">NIM / NIP / NIS <span class="text-rose-500">*</span></label>
-          <input type="text" id="edit-identity" name="identity_no" required maxlength="20" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-950 focus:bg-white transition">
+          <input type="text" id="edit-identity" name="identity_no" required inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="20" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-950 focus:bg-white transition">
         </div>
       </div>
 

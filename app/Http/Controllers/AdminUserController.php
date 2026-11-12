@@ -70,7 +70,7 @@ class AdminUserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
-            'identity_no' => 'required|string|max:20|unique:users,identity_no',
+            'identity_no' => ['required', 'string', 'regex:/^[0-9]+$/', 'max:20', 'unique:users,identity_no'],
             'role' => 'required|string|in:administrator,penyelenggara,peserta',
             'institution' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:25',
@@ -82,6 +82,7 @@ class AdminUserController extends Controller
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Alamat email ini sudah digunakan oleh akun lain.',
             'identity_no.required' => 'NIM / NIP / NIS wajib diisi.',
+            'identity_no.regex' => 'NIM / NIP / NIS hanya boleh berisi angka.',
             'identity_no.unique' => 'NIM / NIP / NIS ini sudah digunakan oleh akun lain.',
             'identity_no.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
             'role.required' => 'Role pengguna wajib dipilih.',
@@ -123,6 +124,7 @@ class AdminUserController extends Controller
             'identity_no' => [
                 'required',
                 'string',
+                'regex:/^[0-9]+$/',
                 'max:20',
                 Rule::unique('users', 'identity_no')->ignore($user->id),
             ],
@@ -137,6 +139,7 @@ class AdminUserController extends Controller
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Alamat email ini sudah digunakan oleh akun lain.',
             'identity_no.required' => 'NIM / NIP / NIS wajib diisi.',
+            'identity_no.regex' => 'NIM / NIP / NIS hanya boleh berisi angka.',
             'identity_no.unique' => 'NIM / NIP / NIS ini sudah digunakan oleh akun lain.',
             'identity_no.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
             'role.required' => 'Role pengguna wajib dipilih.',

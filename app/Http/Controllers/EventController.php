@@ -253,7 +253,7 @@ class EventController extends Controller
         }
 
         $request->validate([
-            'identity_no' => ['nullable', 'string', 'max:20'],
+            'identity_no' => ['nullable', 'string', 'regex:/^[0-9]+$/', 'max:20'],
             'phone' => ['nullable', 'string', 'max:25'],
             'institution' => ['nullable', 'string', 'max:255'],
             'attendance_mode' => ['nullable', 'string', 'in:offline,online'],
@@ -261,6 +261,7 @@ class EventController extends Controller
             'agree_terms' => ['required', 'accepted'],
         ], [
             'agree_terms.accepted' => 'Anda wajib menyetujui syarat & ketentuan kehadiran kegiatan.',
+            'identity_no.regex' => 'NIM / NIP / NIS hanya boleh berisi angka.',
             'identity_no.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
         ]);
 

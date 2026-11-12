@@ -111,6 +111,7 @@ class PesertaController extends Controller
             'identity_no' => [
                 'required',
                 'string',
+                'regex:/^[0-9]+$/',
                 'max:20',
                 Rule::unique('users', 'identity_no')->ignore($user->id),
             ],
@@ -123,6 +124,7 @@ class PesertaController extends Controller
             'email.email' => 'Format alamat email tidak valid.',
             'email.unique' => 'Alamat email ini sudah terdaftar sebagai pengguna lain.',
             'identity_no.required' => 'NIM / NIP / NIS wajib diisi.',
+            'identity_no.regex' => 'NIM / NIP / NIS hanya boleh berisi angka.',
             'identity_no.unique' => 'NIM / NIP / NIS ini sudah terdaftar pada akun lain.',
             'identity_no.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
             'password.min' => 'Kata sandi baru minimal 8 karakter.',

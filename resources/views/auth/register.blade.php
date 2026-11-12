@@ -100,6 +100,9 @@
               name="identity_no"
               value="{{ old('identity_no') }}"
               required
+              inputmode="numeric"
+              pattern="[0-9]*"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '')"
               maxlength="20"
               placeholder="Contoh: 2210511001"
               class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:ring-1 focus:ring-blue-950 font-['Poppins'] font-mono"

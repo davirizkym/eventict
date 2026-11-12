@@ -57,12 +57,13 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'identity_no' => ['required', 'string', 'max:20', 'unique:users,identity_no'],
+            'identity_no' => ['required', 'string', 'regex:/^[0-9]+$/', 'max:20', 'unique:users,identity_no'],
             'password' => ['required', 'string', 'confirmed', Password::min(8)],
             'institution' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:25'],
         ], [
             'identity_no.required' => 'NIM / NIP / NIS wajib diisi.',
+            'identity_no.regex' => 'NIM / NIP / NIS hanya boleh berisi angka.',
             'identity_no.unique' => 'NIM / NIP / NIS ini sudah terdaftar pada akun lain.',
             'identity_no.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
             'email.unique' => 'Alamat email ini sudah terdaftar sebagai pengguna.',

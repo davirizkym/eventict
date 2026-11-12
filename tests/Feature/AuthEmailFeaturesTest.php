@@ -110,6 +110,21 @@ class AuthEmailFeaturesTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'siswa.tanpa.nik@eventict.id']);
     }
 
+    public function test_registration_requires_numeric_identity_no(): void
+    {
+        $response = $this->post(route('register'), [
+            'name' => 'Siswa Test',
+            'email' => 'siswa.invalid.nim@eventict.id',
+            'identity_no' => 'saya ganteng',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'institution' => 'SMK 1 Budi Luhur',
+        ]);
+
+        $response->assertSessionHasErrors(['identity_no']);
+        $this->assertDatabaseMissing('users', ['email' => 'siswa.invalid.nim@eventict.id']);
+    }
+
     public function test_registration_requires_unique_identity_no(): void
     {
         User::factory()->create([
@@ -218,6 +233,26 @@ class AuthEmailFeaturesTest extends TestCase
         $this->assertEquals('peserta.tetap@eventict.id', $fresh->email);
         $this->assertEquals('2210511002', $fresh->identity_no);
         $this->assertNotNull($fresh->email_verified_at);
+    }
+
+    public function test_participant_updating_identity_no_requires_numeric(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'peserta',
+            'email' => 'peserta.numeric@eventict.id',
+            'identity_no' => '2210511001',
+            'email_verified_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->put(route('peserta.profile.update'), [
+            'name' => 'Nama Baru',
+            'email' => 'peserta.numeric@eventict.id',
+            'identity_no' => 'saya ganteng',
+            'institution' => 'Universitas Budi Luhur',
+        ]);
+
+        $response->assertSessionHasErrors(['identity_no']);
+        $this->assertEquals('2210511001', $user->fresh()->identity_no);
     }
 
     public function test_participant_updating_email_requires_reverification(): void

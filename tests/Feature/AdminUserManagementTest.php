@@ -99,6 +99,23 @@ class AdminUserManagementTest extends TestCase
         $this->assertNotNull($user->email_verified_at);
     }
 
+    public function test_administrator_cannot_create_user_with_non_numeric_identity_no(): void
+    {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $response = $this->actingAs($admin)->post(route('admin.users.store'), [
+            'name' => 'Pengguna Alpha NIM',
+            'email' => 'alpha.nim@eventict.id',
+            'identity_no' => 'saya ganteng',
+            'role' => 'peserta',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertSessionHasErrors(['identity_no']);
+        $this->assertDatabaseMissing('users', ['email' => 'alpha.nim@eventict.id']);
+    }
+
     public function test_administrator_can_update_user(): void
     {
         $admin = User::factory()->create(['role' => 'administrator']);
