@@ -75,6 +75,7 @@ Route::middleware(['auth', 'role:penyelenggara'])->group(function () {
     Route::get('/penyelenggara/event/{event}/layar-proyektor', [OrganizerController::class, 'stage'])->name('organizer.workspace.stage');
     Route::get('/penyelenggara/event/{event}/stage-status', [OrganizerController::class, 'stageStatus'])->name('organizer.workspace.stage_status');
     Route::put('/penyelenggara/event/{event}', [OrganizerController::class, 'updateEvent'])->name('organizer.event.update');
+    Route::delete('/penyelenggara/event/{event}', [OrganizerController::class, 'destroyEvent'])->name('organizer.event.destroy');
     Route::post('/penyelenggara/event/{event}/narasumber', [OrganizerController::class, 'assignSpeaker'])->name('organizer.event.speaker.assign');
     Route::delete('/penyelenggara/event/{event}/narasumber/{speaker}', [OrganizerController::class, 'removeSpeaker'])->name('organizer.event.speaker.remove');
     Route::post('/penyelenggara/event/{event}/quick-checkin', [OrganizerController::class, 'quickCheckinWorkspace'])->name('organizer.workspace.quick_checkin');

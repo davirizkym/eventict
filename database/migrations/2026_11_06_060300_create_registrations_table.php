@@ -15,12 +15,9 @@ return new class extends Migration
             $table->string('registration_code')->unique();
             $table->string('qr_pass')->nullable()->unique();
             $table->enum('payment_status', ['free', 'paid', 'pending'])->default('free');
-            $table->boolean('is_checked_in')->default(false);
+            $table->enum('attendance_status', ['unattended', 'attended'])->default('unattended');
             $table->timestamp('checked_in_at')->nullable();
             $table->string('check_in_gate')->nullable();
-            $table->enum('attendance_status', ['unattended', 'attended'])->default('unattended');
-            $table->timestamp('attended_at')->nullable();
-            $table->string('attendance_gate')->nullable();
             $table->enum('evaluation_status', ['pending', 'completed'])->default('pending');
             $table->timestamps();
 

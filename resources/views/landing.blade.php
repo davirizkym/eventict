@@ -107,8 +107,11 @@
                         {{ $event->category }}
                       </span>
                       @if(($event->organizer_type ?? 'internal') === 'partner')
-                        <span class="px-2.5 py-1 bg-white/20 text-white rounded-full text-xs font-semibold font-['Poppins']">
-                          Penyelenggara: {{ $event->organizer_name }}
+                        <span class="px-2.5 py-1 bg-purple-500/30 border border-purple-400/40 text-purple-100 rounded-full text-xs font-semibold font-['Poppins'] flex items-center gap-1.5 shadow-xs">
+                          <svg class="size-3 text-purple-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m3 11 18-5v12L3 14v-3z"/>
+                          </svg>
+                          <span>Penyelenggara: {{ $event->organizer_name }}</span>
                         </span>
                       @else
                         <span class="px-2.5 py-1 bg-white/20 text-white rounded-full text-xs font-semibold font-['Poppins']">
@@ -173,7 +176,9 @@
                   <div class="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-white/10">
                     <div class="flex items-center gap-3">
                       <span class="text-white text-xl sm:text-2xl font-bold font-['Poppins']">
-                        @if($event->price == 0)
+                        @if(($event->organizer_type ?? 'internal') === 'partner')
+                          <span class="text-blue-300">Media Partner</span>
+                        @elseif($event->price == 0)
                           <span class="text-emerald-400">Gratis</span>
                         @else
                           Rp {{ number_format($event->price, 0, ',', '.') }}
@@ -183,6 +188,10 @@
                         <span class="text-slate-400 text-xs font-semibold font-['Poppins']">
                           Kegiatan Selesai
                         </span>
+                      @elseif(($event->organizer_type ?? 'internal') === 'partner')
+                        <span class="text-slate-300 text-xs font-medium font-['Poppins']">
+                          Publikasi Eksternal
+                        </span>
                       @else
                         <span class="text-emerald-300 text-xs font-semibold font-['Poppins']">
                           Pendaftaran Dibuka
@@ -191,7 +200,7 @@
                     </div>
 
                     <div class="flex flex-wrap items-center gap-3">
-                      <a href="{{ route('events.show', $event->slug) }}" class="px-5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white rounded-lg text-xs font-semibold font-['Poppins'] flex items-center gap-2 transition shadow-lg shadow-blue-500/30">
+                      <a href="{{ route('events.show', $event->slug) }}" class="px-5 py-2.5 bg-blue-500 hover:bg-blue-400 shadow-blue-500/30 text-white rounded-lg text-xs font-semibold font-['Poppins'] flex items-center gap-2 transition shadow-lg">
                         <span>Lihat Sesi & Registrasi</span>
                         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M5 12h14"/>
