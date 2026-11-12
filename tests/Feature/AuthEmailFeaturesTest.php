@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
+use App\Notifications\VerifyNewEmailNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
@@ -81,15 +83,68 @@ class AuthEmailFeaturesTest extends TestCase
         $response = $this->post(route('register'), [
             'name' => 'Siswa Baru',
             'email' => 'siswa.baru@eventict.id',
+            'identity_no' => '2210511001',
             'password' => 'password123',
             'password_confirmation' => 'password123',
             'institution' => 'SMK 1 Budi Luhur',
         ]);
 
-        $response->assertRedirect(route('peserta.dashboard'));
+        $response->assertRedirect(route('verification.notice'));
         $user = User::where('email', 'siswa.baru@eventict.id')->first();
         $this->assertNotNull($user);
+        $this->assertEquals('2210511001', $user->identity_no);
         Notification::assertSentTo($user, VerifyEmailNotification::class);
+    }
+
+    public function test_registration_requires_identity_no(): void
+    {
+        $response = $this->post(route('register'), [
+            'name' => 'Siswa Baru',
+            'email' => 'siswa.tanpa.nik@eventict.id',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'institution' => 'SMK 1 Budi Luhur',
+        ]);
+
+        $response->assertSessionHasErrors(['identity_no']);
+        $this->assertDatabaseMissing('users', ['email' => 'siswa.tanpa.nik@eventict.id']);
+    }
+
+    public function test_registration_requires_unique_identity_no(): void
+    {
+        User::factory()->create([
+            'identity_no' => '2210511001',
+        ]);
+
+        $response = $this->post(route('register'), [
+            'name' => 'Siswa Lain',
+            'email' => 'siswa.lain@eventict.id',
+            'identity_no' => '2210511001',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'institution' => 'SMK 1 Budi Luhur',
+        ]);
+
+        $response->assertSessionHasErrors(['identity_no']);
+        $this->assertDatabaseMissing('users', ['email' => 'siswa.lain@eventict.id']);
+    }
+
+    public function test_unverified_participant_cannot_access_peserta_dashboard(): void
+    {
+        $user = User::factory()->unverified()->create(['role' => 'peserta']);
+
+        $response = $this->actingAs($user)->get(route('peserta.dashboard'));
+
+        $response->assertRedirect(route('verification.notice'));
+    }
+
+    public function test_verified_participant_can_access_peserta_dashboard(): void
+    {
+        $user = User::factory()->create(['role' => 'peserta']);
+
+        $response = $this->actingAs($user)->get(route('peserta.dashboard'));
+
+        $response->assertStatus(200);
     }
 
     public function test_email_can_be_verified(): void
@@ -118,5 +173,153 @@ class AuthEmailFeaturesTest extends TestCase
 
         $response->assertSessionHas('status');
         Notification::assertSentTo($user, VerifyEmailNotification::class);
+    }
+
+    public function test_guest_can_verify_email_via_signed_link(): void
+    {
+        $user = User::factory()->unverified()->create(['role' => 'peserta']);
+
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => sha1($user->email)]
+        );
+
+        $response = $this->get($verificationUrl);
+
+        $response->assertRedirect(route('peserta.dashboard'));
+        $this->assertNotNull($user->fresh()->email_verified_at);
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_participant_can_update_profile_without_changing_email(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'peserta',
+            'name' => 'Nama Lama',
+            'email' => 'peserta.tetap@eventict.id',
+            'identity_no' => '2210511001',
+            'email_verified_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->put(route('peserta.profile.update'), [
+            'name' => 'Nama Baru',
+            'email' => 'peserta.tetap@eventict.id',
+            'identity_no' => '2210511002',
+            'institution' => 'Universitas Budi Luhur',
+            'phone' => '08123456789',
+        ]);
+
+        $response->assertRedirect(route('peserta.dashboard', ['tab' => 'profil']));
+        $response->assertSessionHas('success');
+
+        $fresh = $user->fresh();
+        $this->assertEquals('Nama Baru', $fresh->name);
+        $this->assertEquals('peserta.tetap@eventict.id', $fresh->email);
+        $this->assertEquals('2210511002', $fresh->identity_no);
+        $this->assertNotNull($fresh->email_verified_at);
+    }
+
+    public function test_participant_updating_email_requires_reverification(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create([
+            'role' => 'peserta',
+            'email' => 'lama@eventict.id',
+            'identity_no' => '2210511001',
+            'password' => Hash::make('password123'),
+            'email_verified_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->put(route('peserta.profile.update'), [
+            'name' => $user->name,
+            'email' => 'baru@eventict.id',
+            'identity_no' => '2210511001',
+            'institution' => 'FTI Budi Luhur',
+        ]);
+
+        $response->assertRedirect(route('peserta.dashboard', ['tab' => 'profil']));
+        $response->assertSessionHas('status');
+
+        $fresh = $user->fresh();
+        $this->assertEquals('lama@eventict.id', $fresh->email);
+        $this->assertEquals('baru@eventict.id', $fresh->pending_email);
+        $this->assertNotNull($fresh->email_verified_at);
+
+        Notification::assertSentOnDemand(VerifyNewEmailNotification::class, function ($notification, $channels, $notifiable) {
+            return $notifiable->routes['mail'] === 'baru@eventict.id';
+        });
+
+        Auth::logout();
+        $loginWithOldEmail = $this->post(route('login'), [
+            'email' => 'lama@eventict.id',
+            'password' => 'password123',
+        ]);
+        $loginWithOldEmail->assertRedirect(route('peserta.dashboard'));
+        $this->assertAuthenticatedAs($user);
+
+        Auth::logout();
+        $loginWithNewEmailBeforeVerify = $this->post(route('login'), [
+            'email' => 'baru@eventict.id',
+            'password' => 'password123',
+        ]);
+        $loginWithNewEmailBeforeVerify->assertSessionHasErrors(['email']);
+        $this->assertGuest();
+
+        $verificationUrl = URL::temporarySignedRoute(
+            'profile.email.verify',
+            now()->addMinutes(60),
+            ['id' => $fresh->id, 'hash' => sha1('baru@eventict.id')]
+        );
+
+        $verifyResponse = $this->get($verificationUrl);
+        $verifyResponse->assertRedirect(route('peserta.dashboard', ['tab' => 'profil']));
+        $verifyResponse->assertSessionHas('success');
+
+        $afterVerify = $fresh->fresh();
+        $this->assertEquals('baru@eventict.id', $afterVerify->email);
+        $this->assertNull($afterVerify->pending_email);
+        $this->assertNotNull($afterVerify->email_verified_at);
+        $this->assertAuthenticatedAs($afterVerify);
+
+        Auth::logout();
+        $loginWithNewEmailAfterVerify = $this->post(route('login'), [
+            'email' => 'baru@eventict.id',
+            'password' => 'password123',
+        ]);
+        $loginWithNewEmailAfterVerify->assertRedirect(route('peserta.dashboard'));
+    }
+
+    public function test_participant_can_cancel_pending_email(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'peserta',
+            'email' => 'aktif@eventict.id',
+            'pending_email' => 'tertunda@eventict.id',
+        ]);
+
+        $response = $this->actingAs($user)->post(route('peserta.profile.email.cancel'));
+
+        $response->assertRedirect(route('peserta.dashboard', ['tab' => 'profil']));
+        $this->assertNull($user->fresh()->pending_email);
+    }
+
+    public function test_participant_cannot_update_email_to_already_used_email(): void
+    {
+        User::factory()->create(['email' => 'sudah.ada@eventict.id']);
+
+        $user = User::factory()->create([
+            'role' => 'peserta',
+            'email' => 'saya@eventict.id',
+        ]);
+
+        $response = $this->actingAs($user)->put(route('peserta.profile.update'), [
+            'name' => $user->name,
+            'email' => 'sudah.ada@eventict.id',
+        ]);
+
+        $response->assertSessionHasErrors(['email']);
+        $this->assertEquals('saya@eventict.id', $user->fresh()->email);
     }
 }

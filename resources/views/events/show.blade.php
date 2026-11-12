@@ -26,7 +26,7 @@
       </div>
     @endif
 
-    <div class="bg-gradient-to-r from-blue-950 to-slate-900 text-white rounded-2xl p-6 sm:p-8 lg:p-10 shadow-xs flex flex-col gap-5">
+    <div class="bg-gradient-to-r from-blue-950 to-slate-900 text-white rounded-2xl p-5 sm:p-8 lg:p-10 shadow-xs flex flex-col gap-5">
       <div class="flex flex-wrap items-center gap-2.5">
         <span class="px-3 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-semibold rounded-md flex items-center gap-1.5 whitespace-nowrap">
           <svg class="size-3.5 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

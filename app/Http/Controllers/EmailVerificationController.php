@@ -2,32 +2,44 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EmailVerificationController extends Controller
 {
     public function notice(Request $request)
     {
-        if ($request->user()->hasVerifiedEmail()) {
+        if ($request->user() && $request->user()->hasVerifiedEmail()) {
             return $this->redirectBasedOnRole($request->user());
         }
 
         return view('auth.verify-email');
     }
 
-    public function verify(EmailVerificationRequest $request)
+    public function verify(Request $request, $id, $hash)
     {
-        if ($request->user()->hasVerifiedEmail()) {
-            return $this->redirectBasedOnRole($request->user())->with('status', 'Alamat email Anda sudah terverifikasi.');
+        $user = User::findOrFail($id);
+
+        if (! hash_equals(sha1($user->getEmailForVerification()), (string) $hash)) {
+            abort(403, 'Tautan verifikasi tidak valid.');
         }
 
-        if ($request->user()->markEmailAsVerified()) {
-            event(new Verified($request->user()));
+        if (! Auth::check() || Auth::id() !== $user->id) {
+            Auth::login($user);
+            $request->session()->regenerate();
         }
 
-        return $this->redirectBasedOnRole($request->user())->with('status', 'Email berhasil diverifikasi! Selamat datang di Eventict.');
+        if ($user->hasVerifiedEmail()) {
+            return $this->redirectBasedOnRole($user)->with('status', 'Alamat email Anda sudah terverifikasi.');
+        }
+
+        if ($user->markEmailAsVerified()) {
+            event(new Verified($user));
+        }
+
+        return $this->redirectBasedOnRole($user)->with('status', 'Email berhasil diverifikasi! Selamat datang di Eventict.');
     }
 
     public function resend(Request $request)

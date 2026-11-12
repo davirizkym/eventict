@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\EventController;
@@ -32,18 +33,27 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/email/verifikasi', [EmailVerificationController::class, 'notice'])->name('verification.notice');
-    Route::get('/email/verifikasi/{id}/{hash}', [EmailVerificationController::class, 'verify'])->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
     Route::post('/email/verifikasi-ulang', [EmailVerificationController::class, 'resend'])->middleware('throttle:6,1')->name('verification.send');
 });
+
+Route::get('/email/verifikasi/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
+
+Route::get('/profil/verifikasi-email/{id}/{hash}', [PesertaController::class, 'verifyNewEmail'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('profile.email.verify');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 Route::get('/pembayaran/{registrationCode}', [PaymentController::class, 'showInvoice'])->name('payment.invoice')->middleware('auth');
 Route::post('/pembayaran/{registration}/snap-token', [PaymentController::class, 'getSnapToken'])->name('payment.snap_token')->middleware('auth');
 Route::post('/pembayaran/{registration}/check-status', [PaymentController::class, 'checkStatus'])->name('payment.check_status')->middleware('auth');
 
-Route::middleware(['auth', 'role:peserta'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:peserta'])->group(function () {
     Route::get('/peserta', [PesertaController::class, 'dashboard'])->name('peserta.dashboard');
     Route::put('/peserta/profil', [PesertaController::class, 'updateProfile'])->name('peserta.profile.update');
+    Route::post('/peserta/profil/kirim-ulang-verifikasi', [PesertaController::class, 'resendNewEmailVerification'])->name('peserta.profile.email.resend');
+    Route::post('/peserta/profil/batal-ganti-email', [PesertaController::class, 'cancelNewEmail'])->name('peserta.profile.email.cancel');
     Route::get('/kegiatan/{slug}/daftar', [EventController::class, 'showRegistrationForm'])->name('events.register.form');
     Route::post('/kegiatan/{slug}/daftar', [EventController::class, 'registerEvent'])->name('events.register');
     Route::post('/peserta/presensi/scan', [PesertaController::class, 'scanPresence'])->name('peserta.presence.scan');
@@ -91,4 +101,14 @@ Route::middleware(['auth', 'role:penyelenggara'])->group(function () {
     Route::post('/penyelenggara/registrasi/{registration}/presensi', [OrganizerController::class, 'toggleAttendance'])->name('organizer.attendance.toggle');
     Route::post('/penyelenggara/registrasi/{registration}/checkin', [OrganizerController::class, 'toggleCheckin'])->name('organizer.checkin.toggle');
     Route::delete('/penyelenggara/registrasi/{registration}/sertifikat', [OrganizerController::class, 'deleteCertificate'])->name('organizer.certificate.delete');
+});
+
+Route::middleware(['auth', 'role:administrator,admin'])->group(function () {
+    Route::get('/penyelenggara/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::get('/penyelenggara/users/export', [AdminUserController::class, 'exportXlsx'])->name('admin.users.export');
+    Route::post('/penyelenggara/users', [AdminUserController::class, 'store'])->name('admin.users.store');
+    Route::put('/penyelenggara/users/{user}', [AdminUserController::class, 'update'])->name('admin.users.update');
+    Route::delete('/penyelenggara/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
+    Route::post('/penyelenggara/users/{user}/resend-verification', [AdminUserController::class, 'resendVerification'])->name('admin.users.resend_verification');
+    Route::post('/penyelenggara/users/{user}/toggle-verify', [AdminUserController::class, 'toggleVerify'])->name('admin.users.toggle_verify');
 });

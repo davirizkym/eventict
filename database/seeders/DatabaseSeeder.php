@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\Certificate;
 use App\Models\Event;
 use App\Models\MediaPartner;
@@ -22,6 +23,19 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(CategorySeeder::class);
 
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@eventict.id'],
+            [
+                'name' => 'Administrator Eventict',
+                'identity_no' => '1000000000000001',
+                'password' => Hash::make('password123'),
+                'role' => 'administrator',
+                'institution' => 'Laboratorium ICT — Universitas Budi Luhur',
+                'phone' => '081100001111',
+                'email_verified_at' => now(),
+            ]
+        );
+
         $panitia = User::updateOrCreate(
             ['email' => 'panitia@eventict.id'],
             [
@@ -30,6 +44,7 @@ class DatabaseSeeder extends Seeder
                 'role' => 'penyelenggara',
                 'institution' => 'PB Ikatan Dokter Indonesia',
                 'phone' => '081987654321',
+                'email_verified_at' => now(),
             ]
         );
 
@@ -37,11 +52,12 @@ class DatabaseSeeder extends Seeder
             ['email' => 'amanda@eventict.id'],
             [
                 'name' => 'dr. Amanda Putri, Sp.PD',
-                'nik' => '3171012345670001',
+                'identity_no' => '3171012345670001',
                 'password' => Hash::make('password123'),
                 'role' => 'peserta',
                 'institution' => 'RSUP Dr. Cipto Mangunkusumo',
                 'phone' => '081234567890',
+                'email_verified_at' => now(),
             ]
         );
 
@@ -49,11 +65,12 @@ class DatabaseSeeder extends Seeder
             ['email' => 'budi.santoso@eventict.id'],
             [
                 'name' => 'dr. Budi Santoso, Sp.JP',
-                'nik' => '3171012345670002',
+                'identity_no' => '3171012345670002',
                 'password' => Hash::make('password123'),
                 'role' => 'peserta',
                 'institution' => 'RS Jantung dan Pembuluh Darah Harapan Kita',
                 'phone' => '081234567891',
+                'email_verified_at' => now(),
             ]
         );
 
@@ -61,11 +78,12 @@ class DatabaseSeeder extends Seeder
             ['email' => 'nur.aisyah@eventict.id'],
             [
                 'name' => 'dr. Nur Aisyah, M.Kes',
-                'nik' => '3171012345670003',
+                'identity_no' => '3171012345670003',
                 'password' => Hash::make('password123'),
                 'role' => 'peserta',
                 'institution' => 'Dinas Kesehatan Provinsi DKI Jakarta',
                 'phone' => '081234567892',
+                'email_verified_at' => now(),
             ]
         );
 
@@ -73,11 +91,12 @@ class DatabaseSeeder extends Seeder
             ['email' => 'rizky.pratama@eventict.id'],
             [
                 'name' => 'dr. Rizky Pratama, Sp.A',
-                'nik' => '3171012345670004',
+                'identity_no' => '3171012345670004',
                 'password' => Hash::make('password123'),
                 'role' => 'peserta',
                 'institution' => 'RSUP Fatmawati',
                 'phone' => '081234567893',
+                'email_verified_at' => now(),
             ]
         );
 
@@ -85,11 +104,12 @@ class DatabaseSeeder extends Seeder
             ['email' => 'dewi.lestari@eventict.id'],
             [
                 'name' => 'dr. Dewi Lestari, Sp.KK',
-                'nik' => '3171012345670005',
+                'identity_no' => '3171012345670005',
                 'password' => Hash::make('password123'),
                 'role' => 'peserta',
                 'institution' => 'RSUD Pasar Minggu',
                 'phone' => '081234567894',
+                'email_verified_at' => now(),
             ]
         );
 
@@ -97,11 +117,12 @@ class DatabaseSeeder extends Seeder
             ['email' => 'ahmad.fauzi@eventict.id'],
             [
                 'name' => 'dr. Ahmad Fauzi, M.Biomed',
-                'nik' => '3171012345670006',
+                'identity_no' => '3171012345670006',
                 'password' => Hash::make('password123'),
                 'role' => 'peserta',
                 'institution' => 'Fakultas Kedokteran Universitas Indonesia',
                 'phone' => '081234567895',
+                'email_verified_at' => now(),
             ]
         );
 

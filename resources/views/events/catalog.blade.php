@@ -8,7 +8,7 @@
     @include('partials.navbar')
 
     <main class="self-stretch flex flex-col justify-start items-start">
-      <section class="self-stretch px-6 lg:px-20 pt-10 pb-6 flex flex-col gap-6">
+      <section class="self-stretch px-4 sm:px-6 lg:px-20 pt-10 pb-6 flex flex-col gap-6">
         <div class="flex items-center gap-2 text-xs text-slate-500 font-['Poppins']">
           <a href="{{ route('home') }}" class="hover:text-blue-950 transition">Beranda</a>
           <span>/</span>
@@ -65,7 +65,7 @@
         </div>
       </section>
 
-      <section class="self-stretch px-6 lg:px-20 pb-16 flex flex-col justify-start items-start gap-8">
+      <section class="self-stretch px-4 sm:px-6 lg:px-20 pb-16 flex flex-col justify-start items-start gap-8">
         <div class="self-stretch flex justify-between items-center">
           <span class="text-slate-600 text-xs font-medium font-['Poppins']">
             Menampilkan {{ $events->count() }} Kegiatan
@@ -91,42 +91,53 @@
             @endphp
             <div class="bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col justify-between overflow-hidden hover:shadow-lg hover:-translate-y-1 transition duration-200 group">
               <div>
-                <div class="self-stretch h-52 relative bg-gradient-to-br from-[#142D4E] to-[#0A192F] p-5 flex flex-col justify-between overflow-hidden">
+<div class="self-stretch h-48 sm:h-52 relative bg-gradient-to-br from-[#142D4E] to-[#0A192F] p-4 flex flex-col justify-between overflow-hidden">
                   @if($event->banner_url)
                     <img src="{{ asset($event->banner_url) }}" alt="{{ $event->title }}" class="absolute inset-0 w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/25 to-slate-950/50"></div>
                   @endif
-                  <div class="relative z-10 flex justify-between items-center gap-2">
-                    <div class="px-2.5 py-1 bg-blue-500/20 backdrop-blur-md rounded-md border border-blue-400/30 flex items-center gap-1.5 shrink-0">
-                      <span class="text-blue-100 text-xs font-semibold font-['Poppins'] whitespace-nowrap">Sertifikat Resmi</span>
-                    </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                      @if($isPassed)
-                        <span class="px-2.5 py-1 bg-slate-700/80 backdrop-blur-md text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs whitespace-nowrap">
-                          Selesai
-                        </span>
-                      @elseif($isFull)
-                        <span class="px-2.5 py-1 bg-rose-600/90 backdrop-blur-md text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs whitespace-nowrap">
-                          Penuh
-                        </span>
-                      @elseif($remaining <= 5 && $remaining > 0)
-                        <span class="px-2.5 py-1 bg-amber-500/90 backdrop-blur-md text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-xs whitespace-nowrap">
-                          Sisa {{ $remaining }} Tempat
-                        </span>
-                      @endif
-                    </div>
+                  <div class="relative z-10 flex items-start justify-between gap-2">
+                    <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md rounded-lg text-white text-[11px] font-medium border border-white/15 tracking-wide max-w-[65%] truncate" title="{{ $event->category }}">
+                      {{ $event->category }}
+                    </span>
+                    @if($isPassed)
+                      <span class="px-2.5 py-1 bg-slate-800/80 backdrop-blur-md text-slate-300 text-[11px] font-semibold rounded-lg border border-white/10 shrink-0">
+                        Selesai
+                      </span>
+                    @elseif($isFull)
+                      <span class="px-2.5 py-1 bg-rose-600/90 backdrop-blur-md text-white text-[11px] font-semibold rounded-lg border border-rose-400/20 shadow-xs shrink-0">
+                        Penuh
+                      </span>
+                    @elseif($remaining <= 5 && $remaining > 0)
+                      <span class="px-2.5 py-1 bg-amber-500/90 backdrop-blur-md text-white text-[11px] font-semibold rounded-lg border border-amber-300/20 shadow-xs shrink-0">
+                        Sisa {{ $remaining }} Tempat
+                      </span>
+                    @endif
                   </div>
-                  <div class="relative z-10 flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2 min-w-0">
-                      <span class="text-white/80 text-xs font-medium tracking-wider whitespace-nowrap">{{ $event->format === 'offline' ? 'Luring' : 'Daring' }}</span>
+                  <div class="relative z-10 flex items-center justify-between gap-2 text-white/90">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                      <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md rounded-lg border border-white/15 text-[11px] font-medium shrink-0">
+                        {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
+                      </span>
                       @if(($event->organizer_type ?? 'internal') === 'partner')
-                        <span class="px-2 py-0.5 bg-white/20 backdrop-blur-md text-white text-[10px] font-semibold rounded truncate max-w-[130px]" title="Penyelenggara: {{ $event->organizer_name }}">
+                        <span class="px-2 py-0.5 bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold rounded-lg border border-white/15 truncate max-w-[130px]" title="Penyelenggara: {{ $event->organizer_name }}">
                           {{ $event->organizer_name }}
                         </span>
                       @endif
                     </div>
-                    <span class="px-2.5 py-0.5 bg-white/15 backdrop-blur-md text-white/95 text-[10px] font-medium rounded uppercase tracking-wider whitespace-nowrap shrink-0">
-                      {{ $event->category }}
+                    <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md text-blue-200 text-[11px] font-medium rounded-lg border border-blue-400/20 flex items-center gap-1.5 shrink-0">
+                      <svg class="size-3 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>Sertifikat</span>
+                    </span>
+                  </div>
+                </div>
+                  <div class="relative z-10 flex items-center justify-between gap-2 text-white/90">
+                    <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md rounded-lg border border-white/15 text-[11px] font-medium">
+                      {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
+                    </span>
+                    <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md text-blue-200 text-[11px] font-medium rounded-lg border border-blue-400/20 flex items-center gap-1.5">
+                      <svg class="size-3 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>Sertifikat</span>
                     </span>
                   </div>
                 </div>

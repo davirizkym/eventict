@@ -17,7 +17,7 @@ class PaymentController extends Controller
             ->orWhere('id', $registrationCode)
             ->firstOrFail();
 
-        if (Auth::id() !== $registration->user_id && Auth::user()->role !== 'penyelenggara') {
+        if (Auth::id() !== $registration->user_id && !Auth::user()->isPenyelenggara()) {
             abort(403);
         }
 
@@ -39,7 +39,7 @@ class PaymentController extends Controller
 
     public function getSnapToken(Request $request, Registration $registration, MidtransService $midtrans)
     {
-        if (Auth::id() !== $registration->user_id && Auth::user()->role !== 'penyelenggara') {
+        if (Auth::id() !== $registration->user_id && !Auth::user()->isPenyelenggara()) {
             abort(403);
         }
 
@@ -89,7 +89,7 @@ class PaymentController extends Controller
 
     public function checkStatus(Request $request, Registration $registration, MidtransService $midtrans)
     {
-        if (Auth::id() !== $registration->user_id && Auth::user()->role !== 'penyelenggara') {
+        if (Auth::id() !== $registration->user_id && !Auth::user()->isPenyelenggara()) {
             abort(403);
         }
 

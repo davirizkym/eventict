@@ -465,7 +465,7 @@ class OrganizerWorkspaceTest extends TestCase
         $peserta = User::factory()->create([
             'role' => 'peserta',
             'name' => 'Fadhil Pratama',
-            'nik' => '2210511055',
+            'identity_no' => '2210511055',
         ]);
 
         Registration::create([
@@ -490,9 +490,18 @@ class OrganizerWorkspaceTest extends TestCase
 
         ob_start();
         $exportResponse->sendContent();
-        $csvContent = ob_get_clean();
+        $xlsxBinary = ob_get_clean();
 
-        $this->assertStringContainsString('NIM / NIP / NIS', $csvContent);
-        $this->assertStringContainsString('2210511055', $csvContent);
+        $this->assertStringContainsString('.xlsx', $exportResponse->headers->get('Content-Disposition'));
+
+        $temp = tempnam(sys_get_temp_dir(), 'test_xlsx');
+        file_put_contents($temp, $xlsxBinary);
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($temp);
+        $sheet = $spreadsheet->getActiveSheet();
+        $data = $sheet->toArray();
+        @unlink($temp);
+
+        $this->assertEquals('NIM / NIP / NIS', $data[0][3]);
+        $this->assertEquals('2210511055', $data[1][3]);
     }
 }

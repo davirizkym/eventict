@@ -5,15 +5,8 @@
 @section('content')
 <div class="w-full min-h-screen bg-slate-100/70 flex flex-col justify-start items-center font-['Poppins']">
   <header class="self-stretch h-16 px-6 lg:px-20 bg-blue-950 border-b border-slate-900 flex justify-between items-center sticky top-0 z-50">
-    <a href="{{ route('home') }}" class="flex items-center gap-2.5 group">
-      <div class="size-8 bg-white rounded flex items-center justify-center text-blue-950 font-bold text-sm">
-        <svg class="size-5 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-          <path d="M6 6h10"/>
-          <path d="M6 10h7"/>
-        </svg>
-      </div>
-      <span class="text-white text-xl font-semibold leading-7 group-hover:text-blue-100 transition">Eventict</span>
+    <a href="{{ route('home') }}" class="flex items-center group">
+      <img src="{{ asset('logo_white.svg') }}" alt="Eventict" class="h-8 w-auto">
     </a>
 
     <div class="flex items-center gap-3">
@@ -26,7 +19,7 @@
     </div>
   </header>
 
-  <div class="w-full max-w-xl mx-auto px-4 py-8 flex flex-col gap-4">
+  <div class="w-full max-w-xl mx-auto px-4 py-8 pb-24 md:pb-8 flex flex-col gap-4">
     @if(session('success'))
       <div class="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2.5 text-xs text-emerald-900 shadow-2xs">
         <svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -378,4 +371,6 @@ function checkPaymentStatus(showAlert, orderId) {
   });
 }
 </script>
+
+@include('partials.public-bottom-nav')
 @endsection

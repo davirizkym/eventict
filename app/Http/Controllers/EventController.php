@@ -248,8 +248,12 @@ class EventController extends Controller
             return redirect()->route('events.show', $slug)->with('error', 'Mohon maaf, kuota peserta untuk kegiatan ini telah penuh.');
         }
 
+        if ($request->has('nik') && ! $request->has('identity_no')) {
+            $request->merge(['identity_no' => $request->input('nik')]);
+        }
+
         $request->validate([
-            'nik' => ['nullable', 'string', 'max:20'],
+            'identity_no' => ['nullable', 'string', 'max:20'],
             'phone' => ['nullable', 'string', 'max:25'],
             'institution' => ['nullable', 'string', 'max:255'],
             'attendance_mode' => ['nullable', 'string', 'in:offline,online'],
@@ -257,12 +261,12 @@ class EventController extends Controller
             'agree_terms' => ['required', 'accepted'],
         ], [
             'agree_terms.accepted' => 'Anda wajib menyetujui syarat & ketentuan kehadiran kegiatan.',
-            'nik.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
+            'identity_no.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
         ]);
 
         $userUpdates = [];
-        if ($request->filled('nik') && empty($user->nik)) {
-            $userUpdates['nik'] = $request->nik;
+        if ($request->filled('identity_no') && empty($user->identity_no)) {
+            $userUpdates['identity_no'] = $request->identity_no;
         }
         if ($request->filled('phone') && empty($user->phone)) {
             $userUpdates['phone'] = $request->phone;
@@ -319,6 +323,12 @@ class EventController extends Controller
 
             return redirect()->route('payment.invoice', $registration->registration_code)
                 ->with('success', 'Pendaftaran berhasil disimpan! Silakan selesaikan pembayaran tiket Anda.');
+        }
+
+        try {
+            $registration->user->notify(new \App\Notifications\TicketIssuedNotification($registration));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Ticket notification error: ' . $e->getMessage());
         }
 
         return redirect()->route('peserta.dashboard', ['tab' => 'tiket'])

@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Certificate;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Models\User;
+use App\Notifications\VerifyNewEmailNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\Rule;
 
 class PesertaController extends Controller
 {
@@ -84,22 +88,46 @@ class PesertaController extends Controller
     {
         $user = Auth::user();
 
+        if ($request->has('nik') && ! $request->has('identity_no')) {
+            $request->merge(['identity_no' => $request->input('nik')]);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'nik' => 'nullable|string|max:20',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'identity_no' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('users', 'identity_no')->ignore($user->id),
+            ],
             'phone' => 'nullable|string|max:25',
             'institution' => 'nullable|string|max:255',
             'password' => 'nullable|string|min:8|confirmed',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
-            'nik.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format alamat email tidak valid.',
+            'email.unique' => 'Alamat email ini sudah terdaftar sebagai pengguna lain.',
+            'identity_no.required' => 'NIM / NIP / NIS wajib diisi.',
+            'identity_no.unique' => 'NIM / NIP / NIS ini sudah terdaftar pada akun lain.',
+            'identity_no.max' => 'NIM / NIP / NIS maksimal 20 karakter.',
             'password.min' => 'Kata sandi baru minimal 8 karakter.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
+        $newEmail = strtolower(trim($validated['email']));
+        $emailChanged = ($newEmail !== strtolower($user->email));
+
         $updates = [
             'name' => trim($validated['name']),
-            'nik' => !empty($validated['nik']) ? trim($validated['nik']) : null,
+            'identity_no' => trim($validated['identity_no']),
             'phone' => !empty($validated['phone']) ? trim($validated['phone']) : null,
             'institution' => !empty($validated['institution']) ? trim($validated['institution']) : null,
         ];
@@ -108,10 +136,91 @@ class PesertaController extends Controller
             $updates['password'] = $validated['password'];
         }
 
+        if ($emailChanged) {
+            $updates['pending_email'] = $newEmail;
+        } else {
+            $updates['pending_email'] = null;
+        }
+
         $user->update($updates);
+
+        if ($emailChanged) {
+            try {
+                Notification::route('mail', $newEmail)->notify(new VerifyNewEmailNotification($user, $newEmail));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Email verification trigger error on profile update: ' . $e->getMessage());
+            }
+
+            return redirect()->route('peserta.dashboard', ['tab' => 'profil'])
+                ->with('status', 'Permintaan perubahan email diajukan. Tautan verifikasi telah dikirimkan ke ' . $newEmail . '. Alamat email aktif untuk masuk tetap ' . $user->email . ' sampai tautan pada email baru diklik.');
+        }
 
         return redirect()->route('peserta.dashboard', ['tab' => 'profil'])
             ->with('success', 'Profil Anda berhasil diperbarui.');
+    }
+
+    public function resendNewEmailVerification(Request $request)
+    {
+        $user = Auth::user();
+
+        if (empty($user->pending_email)) {
+            return redirect()->route('peserta.dashboard', ['tab' => 'profil']);
+        }
+
+        try {
+            Notification::route('mail', $user->pending_email)->notify(new VerifyNewEmailNotification($user, $user->pending_email));
+            return redirect()->route('peserta.dashboard', ['tab' => 'profil'])
+                ->with('status', 'Tautan verifikasi telah dikirimkan ulang ke ' . $user->pending_email . '.');
+        } catch (\Throwable $e) {
+            return redirect()->route('peserta.dashboard', ['tab' => 'profil'])
+                ->with('error', 'Gagal mengirim email: ' . $e->getMessage());
+        }
+    }
+
+    public function cancelNewEmail(Request $request)
+    {
+        $user = Auth::user();
+
+        $user->update(['pending_email' => null]);
+
+        return redirect()->route('peserta.dashboard', ['tab' => 'profil'])
+            ->with('info', 'Permintaan perubahan alamat email telah dibatalkan.');
+    }
+
+    public function verifyNewEmail(Request $request, $id, $hash)
+    {
+        $user = User::findOrFail($id);
+
+        if (empty($user->pending_email)) {
+            return redirect()->route('peserta.dashboard', ['tab' => 'profil'])
+                ->with('info', 'Tidak ada permintaan perubahan email yang aktif atau email sudah pernah diverifikasi.');
+        }
+
+        if (! hash_equals(sha1($user->pending_email), (string) $hash)) {
+            abort(403, 'Tautan verifikasi email baru tidak valid atau telah kedaluwarsa.');
+        }
+
+        if (User::where('email', $user->pending_email)->where('id', '!=', $user->id)->exists()) {
+            $user->update(['pending_email' => null]);
+            return redirect()->route('peserta.dashboard', ['tab' => 'profil'])
+                ->with('error', 'Alamat email baru tersebut sudah digunakan oleh akun lain. Permintaan perubahan email dibatalkan.');
+        }
+
+        $newEmail = $user->pending_email;
+
+        $user->forceFill([
+            'email' => $newEmail,
+            'pending_email' => null,
+            'email_verified_at' => now(),
+        ])->save();
+
+        if (! Auth::check() || Auth::id() !== $user->id) {
+            Auth::login($user);
+            $request->session()->regenerate();
+        }
+
+        return redirect()->route('peserta.dashboard', ['tab' => 'profil'])
+            ->with('success', 'Alamat email berhasil diverifikasi dan diperbarui menjadi ' . $newEmail . '. Anda sekarang dapat menggunakan email ini untuk masuk.');
     }
 
     public function cancelRegistration(Registration $registration)

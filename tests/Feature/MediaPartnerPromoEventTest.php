@@ -35,7 +35,6 @@ class MediaPartnerPromoEventTest extends TestCase
             'organizer_type' => 'internal',
             'organizer_name' => 'Laboratorium ICT',
             'description' => 'Deskripsi kegiatan workshop.',
-            'skp_points' => 0,
         ];
 
         return Event::create(array_merge($defaults, $overrides));
