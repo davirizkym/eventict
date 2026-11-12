@@ -154,7 +154,7 @@
         </button>
       </div>
 
-      <div class="overflow-x-auto">
+      <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left text-xs text-slate-700">
           <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-[10px] tracking-wider select-none">
             <tr>
@@ -257,6 +257,68 @@
             @endforelse
           </tbody>
         </table>
+      </div>
+
+      <div class="md:hidden p-4 flex flex-col gap-3.5 bg-slate-50/50">
+        @forelse($speaker->events as $ev)
+          @php
+            $role = $ev->pivot->role ?? 'Pemateri';
+            $roleColor = match(strtolower($role)) {
+              'moderator' => 'bg-purple-100 text-purple-900 border-purple-200',
+              'pemateri utama', 'keynote speaker' => 'bg-amber-100 text-amber-900 border-amber-200',
+              default => 'bg-blue-100 text-blue-950 border-blue-200',
+            };
+          @endphp
+          <div class="p-5 bg-white rounded-2xl border border-slate-200 flex flex-col gap-3.5 shadow-2xs">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded-md text-[10px] font-semibold tracking-wider uppercase bg-blue-50 text-blue-950 border border-blue-100">
+                  {{ $ev->category }}
+                </span>
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-medium uppercase {{ $ev->format === 'online' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700' }}">
+                  {{ $ev->format }}
+                </span>
+              </div>
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border {{ $roleColor }} shrink-0">
+                {{ $role }}
+              </span>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <a href="{{ route('organizer.workspace', ['event' => $ev->id]) }}" class="text-sm font-semibold text-slate-900 hover:text-blue-950 transition leading-snug">
+                {{ $ev->title }}
+              </a>
+              <span class="text-slate-500 text-xs flex items-center gap-1.5 mt-1">
+                <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <span>{{ $ev->start_date ? $ev->start_date->format('d M Y') : '-' }}</span>
+              </span>
+            </div>
+
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-1 text-xs">
+              <span class="font-bold text-slate-900 leading-snug">{{ $ev->pivot->topic ?? 'Sesi Pemaparan Materi' }}</span>
+              <span class="text-slate-500 text-[11px]">{{ $ev->pivot->session_time ?? ($ev->start_time . ' - ' . $ev->end_time . ' WIB') }}</span>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+              <span class="text-[11px] text-slate-400 font-mono">No. {{ $loop->iteration }}</span>
+              <a href="{{ route('organizer.workspace', ['event' => $ev->id]) }}" class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition inline-flex items-center gap-1.5 shadow-2xs">
+                <span>Buka Workspace</span>
+                <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        @empty
+          <div class="p-8 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-200">
+            Belum ada riwayat partisipasi untuk pengisi acara ini.
+          </div>
+        @endforelse
       </div>
     </div>
   </main>

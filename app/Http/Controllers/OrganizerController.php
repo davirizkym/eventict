@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\MediaPartner;
 use App\Models\Registration;
 use App\Models\Speaker;
+use App\Notifications\CertificateIssuedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -855,7 +856,7 @@ class OrganizerController extends Controller
 
             $certNumber = 'ICT-CERT/' . date('Y') . '/' . str_pad($registration->id, 5, '0', STR_PAD_LEFT);
 
-            Certificate::updateOrCreate(
+            $cert = Certificate::updateOrCreate(
                 ['registration_id' => $registration->id],
                 [
                     'user_id' => $registration->user_id,
@@ -874,6 +875,10 @@ class OrganizerController extends Controller
                     'attendance_gate' => 'Validasi Sertifikat',
                 ]);
             }
+
+            try {
+                $registration->user?->notify(new CertificateIssuedNotification($cert));
+            } catch (\Throwable $e) {}
 
             $uploadedCount++;
         }
@@ -1270,7 +1275,7 @@ class OrganizerController extends Controller
             ? $request->certificate_number
             : 'ICT-CERT/' . date('Y') . '/' . str_pad($registration->id, 5, '0', STR_PAD_LEFT);
 
-        Certificate::updateOrCreate(
+        $cert = Certificate::updateOrCreate(
             ['registration_id' => $registration->id],
             [
                 'user_id' => $registration->user_id,
@@ -1289,6 +1294,10 @@ class OrganizerController extends Controller
                 'attendance_gate' => 'Validasi Sertifikat',
             ]);
         }
+
+        try {
+            $registration->user?->notify(new CertificateIssuedNotification($cert));
+        } catch (\Throwable $e) {}
 
         return redirect()->route('organizer.workspace', ['event' => $registration->event_id, 'tab' => 'sertifikat'])
             ->with('success', "Sertifikat untuk {$registration->user->name} ({$registration->registration_code}) berhasil diunggah.");
@@ -1341,7 +1350,7 @@ class OrganizerController extends Controller
 
             $certNumber = 'ICT-CERT/' . date('Y') . '/' . str_pad($registration->id, 5, '0', STR_PAD_LEFT);
 
-            Certificate::updateOrCreate(
+            $cert = Certificate::updateOrCreate(
                 ['registration_id' => $registration->id],
                 [
                     'user_id' => $registration->user_id,
@@ -1360,6 +1369,10 @@ class OrganizerController extends Controller
                     'attendance_gate' => 'Validasi Sertifikat',
                 ]);
             }
+
+            try {
+                $registration->user?->notify(new CertificateIssuedNotification($cert));
+            } catch (\Throwable $e) {}
 
             $uploadedCount++;
         }

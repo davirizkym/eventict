@@ -149,7 +149,7 @@
         </div>
       </form>
 
-      <div class="overflow-x-auto rounded-xl border border-slate-200">
+      <div class="hidden md:block overflow-x-auto rounded-xl border border-slate-200">
         <table class="w-full text-left text-xs text-slate-700">
           <thead class="bg-slate-50/80 text-[11px] font-semibold uppercase text-slate-500 border-b border-slate-200 tracking-wider">
             <tr>
@@ -310,6 +310,150 @@
             @endforelse
           </tbody>
         </table>
+      </div>
+
+      <div class="md:hidden flex flex-col gap-3.5">
+        @forelse($users as $u)
+          <div class="p-5 bg-white rounded-2xl border border-slate-200 flex flex-col gap-3.5 shadow-2xs {{ $u->id === Auth::id() ? 'ring-1 ring-purple-200' : '' }}">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="size-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 {{ in_array($u->role, ['administrator', 'admin']) ? 'bg-purple-100 text-purple-900 border border-purple-200' : ($u->role === 'penyelenggara' ? 'bg-blue-100 text-blue-950 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200') }}">
+                  {{ strtoupper(substr($u->name, 0, 2)) }}
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-slate-900 text-sm truncate">{{ $u->name }}</span>
+                    @if($u->id === Auth::id())
+                      <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200 shrink-0">Anda</span>
+                    @endif
+                  </div>
+                  <span class="text-xs text-slate-500 truncate">{{ $u->email }}</span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-1 shrink-0">
+                @if(in_array($u->role, ['administrator', 'admin']))
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-purple-50 text-purple-800 border border-purple-200">
+                    Administrator
+                  </span>
+                @elseif($u->role === 'penyelenggara')
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-900 border border-blue-200">
+                    Panitia
+                  </span>
+                @else
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    Peserta
+                  </span>
+                @endif
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-2 pt-2 border-t border-slate-100 text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[11px] text-slate-400 font-medium">NIM / NIP / NIS:</span>
+                <span class="text-slate-700 font-mono text-[11px] font-medium">{{ $u->identity_no ?? '-' }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[11px] text-slate-400 font-medium">Instansi:</span>
+                <span class="text-slate-700 font-medium truncate">{{ $u->institution ?? '—' }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[11px] text-slate-400 font-medium">Telepon:</span>
+                <span class="text-slate-600 font-mono text-[11px]">{{ $u->phone ?? '—' }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[11px] text-slate-400 font-medium">Status Email:</span>
+                @if($u->hasVerifiedEmail())
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
+                    <svg class="size-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Terverifikasi</span>
+                  </span>
+                @else
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700">
+                    <svg class="size-3 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="8" x2="12" y2="12"/>
+                      <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span>Belum Verifikasi</span>
+                  </span>
+                @endif
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[11px] text-slate-400 font-medium">Terdaftar:</span>
+                <span class="text-slate-500 text-[11px]">{{ $u->created_at ? $u->created_at->format('d/m/Y') : '—' }}</span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+              <div class="flex items-center gap-1">
+                @if(! $u->hasVerifiedEmail())
+                  <form method="POST" action="{{ route('admin.users.resend_verification', $u->id) }}" class="inline">
+                    @csrf
+                    <button type="submit" class="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-900 transition cursor-pointer" title="Kirim ulang verifikasi email">
+                      <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect width="20" height="16" x="2" y="4" rx="2"/>
+                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                      </svg>
+                    </button>
+                  </form>
+                @endif
+                <form method="POST" action="{{ route('admin.users.toggle_verify', $u->id) }}" class="inline">
+                  @csrf
+                  <button type="submit" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer" title="{{ $u->hasVerifiedEmail() ? 'Batalkan status verifikasi' : 'Tandai terverifikasi manual' }}">
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 6 9 17l-5-5"/>
+                    </svg>
+                  </button>
+                </form>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  onclick="openEditUserModal({{ json_encode([
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'identity_no' => $u->identity_no,
+                    'role' => $u->role,
+                    'institution' => $u->institution,
+                    'phone' => $u->phone,
+                    'is_verified' => $u->hasVerifiedEmail(),
+                    'is_self' => ($u->id === Auth::id()),
+                  ]) }})"
+                  class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer"
+                >
+                  Edit
+                </button>
+
+                @if($u->id === Auth::id())
+                  <button
+                    type="button"
+                    disabled
+                    class="px-3 py-1.5 bg-slate-100 text-slate-300 rounded-lg text-xs font-semibold cursor-not-allowed"
+                  >
+                    Hapus
+                  </button>
+                @else
+                  <button
+                    type="button"
+                    onclick="openDeleteUserModal({{ $u->id }}, '{{ addslashes($u->name) }}', '{{ $u->role }}')"
+                    class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold transition cursor-pointer"
+                  >
+                    Hapus
+                  </button>
+                @endif
+              </div>
+            </div>
+          </div>
+        @empty
+          <div class="p-8 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-200">
+            Tidak ada data pengguna yang sesuai dengan pencarian atau filter.
+          </div>
+        @endforelse
       </div>
 
       <div class="mt-2">

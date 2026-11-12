@@ -1623,8 +1623,33 @@
             <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
           </svg>
           <span id="scanner-loading-text" class="text-slate-300 text-[11px]">Menyiapkan kamera...</span>
+          <button type="button" id="scanner-request-permission-btn" onclick="startCameraScanner()" class="hidden mt-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold cursor-pointer">
+            Coba Minta Izin Kamera
+          </button>
         </div>
       </div>
+
+      <div id="scanner-insecure-alert" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-[11px] leading-relaxed">
+        <div class="font-semibold flex items-center gap-1.5 mb-1">
+          <svg class="size-3.5 text-amber-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span>Kamera Langsung Memerlukan HTTPS</span>
+        </div>
+        Browser ponsel membatasi izin live stream kamera pada koneksi HTTP. Silakan gunakan tombol <strong>Ambil Foto QR / Unggah File</strong> di bawah untuk membuka kamera ponsel secara langsung.
+      </div>
+
+      <input type="file" id="scanner-qr-file-input" accept="image/*" capture="environment" class="hidden" onchange="handleQrFileSelected(event)">
+
+      <button type="button" onclick="document.getElementById('scanner-qr-file-input').click()" class="w-full py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-200 transition cursor-pointer shadow-2xs">
+        <svg class="size-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <span>Ambil Foto QR / Unggah File</span>
+      </button>
     </div>
 
     <div id="scanner-processing" class="hidden flex-col items-center justify-center gap-3 py-8 text-center">
@@ -2019,11 +2044,25 @@ function resetScannerUI() {
   document.getElementById('scanner-loading').classList.remove('hidden');
   document.getElementById('scanner-retry-btn').classList.add('hidden');
   document.getElementById('scanner-loading-text').textContent = 'Menyiapkan kamera...';
+  const reqBtn = document.getElementById('scanner-request-permission-btn');
+  if (reqBtn) reqBtn.classList.add('hidden');
+  const alertEl = document.getElementById('scanner-insecure-alert');
+  if (alertEl) alertEl.classList.add('hidden');
 }
 
 function startCameraScanner() {
   if (typeof Html5Qrcode === 'undefined') {
     document.getElementById('scanner-loading-text').textContent = 'Pustaka pemindai belum siap. Silakan muat ulang halaman.';
+    return;
+  }
+
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const isSecure = window.isSecureContext || window.location.protocol === 'https:' || isLocalhost;
+
+  if (!isSecure && !isLocalhost) {
+    const alertEl = document.getElementById('scanner-insecure-alert');
+    if (alertEl) alertEl.classList.remove('hidden');
+    document.getElementById('scanner-loading-text').textContent = 'Browser ponsel membatasi live stream kamera tanpa HTTPS. Gunakan tombol "Ambil Foto QR / Unggah File" di bawah.';
     return;
   }
 
@@ -2037,27 +2076,112 @@ function startCameraScanner() {
 }
 
 function initAndStartScanner() {
-  html5QrCode = new Html5Qrcode("qr-reader");
+  const loadingElem = document.getElementById('scanner-loading');
+  const loadingText = document.getElementById('scanner-loading-text');
+  const reqBtn = document.getElementById('scanner-request-permission-btn');
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    const alertEl = document.getElementById('scanner-insecure-alert');
+    if (alertEl) alertEl.classList.remove('hidden');
+    if (loadingText) loadingText.textContent = 'Browser ponsel membatasi live stream kamera tanpa HTTPS. Gunakan tombol "Ambil Foto QR / Unggah File" di bawah.';
+    return;
+  }
+
+  if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("qr-reader");
+  }
+
   const config = {
     fps: 10,
     qrbox: { width: 250, height: 250 }
   };
 
-  html5QrCode.start(
-    { facingMode: "environment" },
-    config,
-    onQrCodeSuccess,
-    onQrCodeError
-  ).then(() => {
-    isScanning = true;
-    const loadingElem = document.getElementById('scanner-loading');
-    if (loadingElem) loadingElem.classList.add('hidden');
-  }).catch(err => {
-    const loadingText = document.getElementById('scanner-loading-text');
-    if (loadingText) {
-      loadingText.textContent = 'Akses kamera tidak tersedia atau izin belum diberikan.';
-    }
-  });
+  if (loadingText) loadingText.textContent = 'Meminta izin kamera...';
+
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } } })
+    .then(stream => {
+      stream.getTracks().forEach(t => t.stop());
+
+      return Html5Qrcode.getCameras().then(devices => {
+        let cameraId = null;
+        if (devices && devices.length) {
+          const rear = devices.find(d => {
+            const label = (d.label || '').toLowerCase();
+            return label.includes('back') || label.includes('rear') || label.includes('environment');
+          });
+          cameraId = rear ? rear.id : devices[devices.length - 1].id;
+        }
+
+        const cameraSource = cameraId ? cameraId : { facingMode: { ideal: "environment" } };
+
+        return html5QrCode.start(
+          cameraSource,
+          config,
+          onQrCodeSuccess,
+          onQrCodeError
+        );
+      });
+    })
+    .then(() => {
+      isScanning = true;
+      if (loadingElem) loadingElem.classList.add('hidden');
+    })
+    .catch(err => {
+      let message = 'Akses kamera tidak dapat diaktifkan.';
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        message = 'Izin kamera belum diberikan. Izinkan akses kamera pada pengaturan browser, atau gunakan tombol "Ambil Foto QR / Unggah File" di bawah.';
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        message = 'Kamera tidak ditemukan pada perangkat Anda.';
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        message = 'Kamera sedang dipakai oleh aplikasi lain.';
+      } else if (err.name === 'OverconstrainedError') {
+        return html5QrCode.start(
+          { facingMode: "user" },
+          config,
+          onQrCodeSuccess,
+          onQrCodeError
+        ).then(() => {
+          isScanning = true;
+          if (loadingElem) loadingElem.classList.add('hidden');
+        }).catch(() => {
+          if (loadingText) loadingText.textContent = 'Kamera belakang tidak kompatibel. Gunakan tombol "Ambil Foto QR / Unggah File" di bawah.';
+          if (reqBtn) reqBtn.classList.remove('hidden');
+        });
+      }
+
+      if (loadingText) loadingText.textContent = message;
+      if (reqBtn) reqBtn.classList.remove('hidden');
+    });
+}
+
+function handleQrFileSelected(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("qr-reader");
+  }
+
+  const loadingElem = document.getElementById('scanner-loading');
+  const loadingText = document.getElementById('scanner-loading-text');
+  if (loadingElem) loadingElem.classList.remove('hidden');
+  if (loadingText) loadingText.textContent = 'Memindai foto QR Code...';
+
+  html5QrCode.scanFile(file, true)
+    .then(decodedText => {
+      if (loadingElem) loadingElem.classList.add('hidden');
+      onQrCodeSuccess(decodedText);
+    })
+    .catch(err => {
+      if (loadingElem) loadingElem.classList.add('hidden');
+      showScannerResult(false, {
+        status: 'error',
+        message: 'QR Code tidak terdeteksi pada foto. Pastikan foto QR Code fokus dan jelas, lalu coba lagi.'
+      });
+    })
+    .finally(() => {
+      event.target.value = '';
+    });
 }
 
 function stopCameraScanner() {

@@ -99,7 +99,7 @@ $presetIcons = [
     </div>
 
     <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs">
-      <div class="overflow-x-auto">
+      <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left border-collapse text-xs">
           <thead>
             <tr class="border-b border-slate-200 bg-slate-50/75 text-slate-500 font-semibold text-[11px] uppercase tracking-wider">
@@ -176,6 +176,59 @@ $presetIcons = [
             @endforelse
           </tbody>
         </table>
+      </div>
+
+      <div class="md:hidden p-4 flex flex-col gap-3.5 bg-slate-50/50">
+        @forelse($categories as $index => $cat)
+          <div class="p-5 bg-white rounded-2xl border border-slate-200 flex flex-col gap-3.5 shadow-2xs">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="size-9 rounded-xl bg-blue-50 border border-blue-200/60 flex items-center justify-center text-blue-900 shrink-0 overflow-hidden">
+                  @include('partials.category-icon', ['icon' => $cat->icon, 'class' => 'size-4'])
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="font-bold text-slate-900 text-sm truncate">{{ $cat->name }}</span>
+                  <span class="text-[10px] font-mono text-slate-400 truncate">{{ $cat->slug }}</span>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-md text-[10px] font-semibold bg-blue-50 text-blue-950 border border-blue-200 shrink-0">
+                {{ $cat->events_count }} Kegiatan
+              </span>
+            </div>
+
+            <div class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+              {{ $cat->description ?: 'Tidak ada deskripsi untuk kategori ini.' }}
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+              <span class="text-[11px] text-slate-400 font-mono">No. {{ $categories->firstItem() + $index }}</span>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="openEditCategoryModal({{ json_encode($cat) }})" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition flex items-center gap-1.5 cursor-pointer">
+                  <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                  </svg>
+                  <span>Edit</span>
+                </button>
+
+                <form method="POST" action="{{ route('organizer.categories.destroy', $cat->id) }}" onsubmit="return confirm('Hapus kategori {{ $cat->name }}? Kegiatan yang terhubung tidak akan terhapus.');" class="inline">
+                  @csrf
+                  @method('DELETE')
+                  <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition flex items-center gap-1.5 cursor-pointer">
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7c-1 0-2-1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    <span>Hapus</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        @empty
+          <div class="p-8 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-200">
+            Belum ada data kategori.
+          </div>
+        @endforelse
       </div>
 
       @if($categories->hasPages())
