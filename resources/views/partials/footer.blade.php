@@ -1,15 +1,21 @@
 <style>
+  .footer-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
   @media (min-width: 768px) {
     .footer-grid {
       display: grid !important;
       grid-template-columns: 1fr auto !important;
       column-gap: 2rem !important;
+      row-gap: 2rem !important;
     }
   }
 </style>
 
 <footer class="self-stretch px-6 lg:px-20 pt-8 pb-16 md:pb-8 bg-blue-950 flex flex-col justify-start items-start">
-  <div class="self-stretch flex flex-col footer-grid">
+  <div class="self-stretch footer-grid">
     {{-- Row 1, Col 1: Brand Info --}}
     <div class="flex flex-col gap-3 max-w-sm sm:max-w-md">
       <div class="flex items-center">
@@ -20,7 +26,7 @@
     </div>
 
     {{-- Row 1, Col 2: Pusat Bantuan & Kontak + Medsos --}}
-    <div class="flex flex-col gap-2.5 mt-6 md:mt-0">
+    <div class="flex flex-col gap-2.5">
       <span class="text-white text-sm font-semibold font-['Poppins']">Pusat Bantuan & Kontak</span>
       <a href="mailto:labkom@budiluhur.ac.id" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition flex items-center gap-2">
         <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -61,16 +67,13 @@
       </div>
     </div>
 
-    {{-- Row 2: Divider Line across both columns --}}
-    <div class="col-span-full border-t border-slate-800/80" style="margin-top: 1.25rem; margin-bottom: 1rem;"></div>
-
-    {{-- Row 3, Col 1: Copyright --}}
+    {{-- Row 2, Col 1: Copyright --}}
     <div class="text-xs font-normal font-['Poppins'] text-slate-400 self-center">
       © 2026 Eventict — Laboratorium ICT. Seluruh hak dilindungi.
     </div>
 
-    {{-- Row 3, Col 2: Sistem Informasi Manajemen (Sejajar vertikal dengan Pusat Bantuan & Kontak) --}}
-    <div class="text-xs font-normal font-['Poppins'] text-slate-400 self-center whitespace-nowrap mt-2 md:mt-0">
+    {{-- Row 2, Col 2: Sistem Informasi Manajemen (Sejajar vertikal dengan Pusat Bantuan & Kontak) --}}
+    <div class="text-xs font-normal font-['Poppins'] text-slate-400 self-center whitespace-nowrap">
       Sistem Informasi Manajemen Event Laboratorium ICT.
     </div>
   </div>
