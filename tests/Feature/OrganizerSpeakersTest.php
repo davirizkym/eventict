@@ -49,7 +49,7 @@ class OrganizerSpeakersTest extends TestCase
         $response->assertSee('Dosen Teknik Informatika');
         $response->assertSee('budi.santoso@budiluhur.ac.id');
         $response->assertSee('081234567890');
-        $response->assertSee('0 Acara');
+        $response->assertSee(route('organizer.speakers.show', $speaker->id));
     }
 
     public function test_store_pengisi_acara_with_validation_and_photo_upload(): void

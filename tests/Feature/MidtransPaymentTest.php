@@ -66,6 +66,8 @@ class MidtransPaymentTest extends TestCase
 
     public function test_registration_for_free_event_sets_status_free(): void
     {
+        \Illuminate\Support\Facades\Notification::fake();
+
         $peserta = User::factory()->create(['role' => 'peserta']);
         $event = Event::create([
             'title' => 'Webinar Gratis RME',
@@ -93,6 +95,8 @@ class MidtransPaymentTest extends TestCase
             'payment_status' => 'free',
             'amount_paid' => 0,
         ]);
+
+        \Illuminate\Support\Facades\Notification::assertSentTo($peserta, \App\Notifications\TicketIssuedNotification::class);
     }
 
     public function test_get_snap_token_endpoint_returns_json_token(): void

@@ -6,7 +6,7 @@
 <div class="min-h-screen bg-slate-50 text-slate-800 antialiased font-['Poppins'] flex flex-col justify-between">
   @include('partials.navbar')
 
-  <main class="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-6">
+  <main class="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-12 pb-24 md:pb-12 flex flex-col gap-6">
     <div class="flex items-center gap-2 text-xs text-slate-500">
       <a href="{{ route('home') }}" class="hover:text-blue-950 font-medium">Beranda</a>
       <span>/</span>

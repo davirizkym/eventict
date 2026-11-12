@@ -8,7 +8,7 @@
     @include('partials.navbar')
 
     <main class="self-stretch flex flex-col justify-start items-start">
-      <section class="self-stretch px-6 lg:px-20 pt-16 md:pt-24 pb-14 flex flex-col justify-start items-center gap-6">
+      <section class="self-stretch px-4 sm:px-6 lg:px-20 pt-10 sm:pt-16 md:pt-24 pb-10 sm:pb-14 flex flex-col justify-start items-center gap-6">
         <h1 class="w-full max-w-[980px] text-center text-blue-950 text-3xl sm:text-4xl lg:text-5xl font-semibold font-['Poppins'] leading-tight lg:leading-[60px] tracking-tight min-h-[96px] sm:min-h-[110px] lg:min-h-[130px] flex items-center justify-center">
           <span><span id="typewriter-text"></span><span class="inline-block w-[3px] h-[0.85em] bg-blue-950 ml-1.5 align-middle"></span></span>
         </h1>
@@ -63,12 +63,12 @@
           ? collect([$events->last()])->concat($events)->concat([$events->first()])
           : $events;
       @endphp
-      <section class="self-stretch px-6 lg:px-20 py-4">
+      <section class="self-stretch px-4 sm:px-6 lg:px-20 py-4">
         <div class="w-full relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#071326] via-[#0B1E38] to-[#142D4E] border border-slate-800 shadow-xl" id="event-carousel-container">
           <div class="relative w-full overflow-hidden">
             <div id="event-carousel-track" class="flex" style="transform: translateX({{ $events->count() > 1 ? '-100%' : '0%' }});">
               @foreach($carouselEvents as $index => $event)
-              <div class="w-full shrink-0 flex flex-col lg:flex-row justify-between items-stretch px-8 sm:px-12 lg:px-14 py-6 sm:py-10 lg:py-12 pb-14 sm:pb-14 lg:pb-14 gap-8 min-h-[360px] relative">
+              <div class="w-full shrink-0 flex flex-col lg:flex-row justify-between items-stretch px-5 sm:px-10 lg:px-14 py-6 sm:py-10 lg:py-12 pb-14 sm:pb-14 lg:pb-14 gap-8 min-h-[360px] relative">
                 <div class="flex-1 flex flex-col justify-between gap-6 z-10">
                   <div class="flex flex-col gap-3">
                     <div class="flex flex-wrap items-center gap-2.5">
@@ -262,8 +262,7 @@
       @endif
 
       @if(isset($categories) && $categories->isNotEmpty())
-      <section id="kategori" class="self-stretch px-6 lg:px-20 py-16 flex flex-col justify-start items-start gap-8">
-        {{-- TAMPILAN 1: GRID 6 PANEL (DEFAULT) --}}
+<section id="kategori" class="self-stretch px-4 sm:px-6 lg:px-20 py-12 sm:py-16 flex flex-col justify-start items-start gap-8">
         <div id="category-grid-view" class="self-stretch flex flex-col justify-start items-start gap-8">
           <div class="self-stretch flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
@@ -273,7 +272,6 @@
           </div>
 
           <div class="self-stretch grid grid-cols-1 md:grid-cols-2 gap-4">
-            {{-- 5 Kategori Pertama --}}
             @foreach($categories->slice(0, 5) as $category)
             <a href="{{ route('events.index_public', ['category' => $category->name]) }}" class="p-5 sm:p-6 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex items-center justify-between gap-4 group">
               <div class="flex flex-col gap-1 min-w-0">
@@ -298,7 +296,6 @@
             </a>
             @endforeach
 
-            {{-- Panel ke-6: Tombol Ganti ke List Kategori --}}
             @if($categories->count() > 5)
             <button type="button" id="btn-show-category-list" onclick="openCategoryListView()" class="p-5 sm:p-6 bg-white hover:bg-slate-50/80 rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 hover:outline-blue-900 hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex items-center justify-between gap-4 group text-left cursor-pointer w-full">
               <div class="flex flex-col gap-1 min-w-0">
@@ -330,7 +327,6 @@
           </div>
         </div>
 
-        {{-- TAMPILAN 2: LIST SEMUA KATEGORI DENGAN DESAIN ASLI --}}
         <div id="category-list-view" class="hidden self-stretch flex flex-col gap-6">
           <div class="self-stretch flex items-center justify-between pb-3 border-b border-slate-200">
             <div class="flex items-center gap-4">
@@ -375,7 +371,7 @@
       </section>
       @endif
 
-      <section class="self-stretch px-6 lg:px-20 py-16 flex flex-col justify-start items-start gap-10">
+      <section class="self-stretch px-4 sm:px-6 lg:px-20 py-12 sm:py-16 flex flex-col justify-start items-start gap-10">
         <div class="self-stretch flex flex-col justify-start items-start gap-2">
           <h2 class="text-slate-900 text-2xl lg:text-3xl font-semibold font-['Poppins'] leading-tight">Kenapa Mengikuti Seminar & Workshop di Eventict?</h2>
           <p class="text-slate-600 text-sm font-normal font-['Poppins'] leading-5">Temukan beragam seminar, workshop, dan event kolaborasi untuk tingkatkan wawasan serta keahlian kamu.</p>
@@ -429,28 +425,48 @@
       @php
         $coopSubject = rawurlencode('Pengajuan Kerja Sama & Media Partner - [Nama Instansi/Komunitas]');
         $coopBody = rawurlencode(
-          "Halo Tim Pengelola Laboratorium ICT Universitas Budi Luhur,\r\n\r\n" .
-          "Perkenalkan, saya:\r\n" .
-          "- Nama Lengkap: \r\n" .
-          "- Instansi / Komunitas: \r\n" .
-          "- Kontak WhatsApp / HP: \r\n\r\n" .
-          "Bermaksud untuk mengajukan permohonan Kerja Sama / Media Partner dengan rincian kegiatan:\r\n" .
-          "- Nama Acara: \r\n" .
-          "- Tanggal & Waktu Pelaksanaan: \r\n" .
-          "- Format Acara (Online / Offline / Hybrid): \r\n" .
-          "- Target Peserta: \r\n" .
-          "- Bentuk Kerja Sama yang Diharapkan: \r\n" .
-          "- Tautan Proposal & Media Promosi: \r\n\r\n" .
-          "Mohon informasi dan arahan tindak lanjut mengenai ketentuan kerja sama media partner di Laboratorium ICT Universitas Budi Luhur.\r\n\r\n" .
-          "Terima kasih atas perhatian dan kerja samanya.\r\n\r\n" .
-          "Salam hormat,\r\n" .
+          "Halo Tim Pengelola Laboratorium ICT Universitas Budi Luhur,
+
+" .
+          "Perkenalkan, saya:
+" .
+          "- Nama Lengkap: 
+" .
+          "- Instansi / Komunitas: 
+" .
+          "- Kontak WhatsApp / HP: 
+
+" .
+          "Bermaksud untuk mengajukan permohonan Kerja Sama / Media Partner dengan rincian kegiatan:
+" .
+          "- Nama Acara: 
+" .
+          "- Tanggal & Waktu Pelaksanaan: 
+" .
+          "- Format Acara (Online / Offline / Hybrid): 
+" .
+          "- Target Peserta: 
+" .
+          "- Bentuk Kerja Sama yang Diharapkan: 
+" .
+          "- Tautan Proposal & Media Promosi: 
+
+" .
+          "Mohon informasi dan arahan tindak lanjut mengenai ketentuan kerja sama media partner di Laboratorium ICT Universitas Budi Luhur.
+
+" .
+          "Terima kasih atas perhatian dan kerja samanya.
+
+" .
+          "Salam hormat,
+" .
           "[Nama Pengirim]"
         );
         $coopMailLink = "mailto:labkom@budiluhur.ac.id?subject={$coopSubject}&body={$coopBody}";
       @endphp
 
-      <section class="self-stretch px-6 lg:px-20 py-16 bg-white flex flex-col justify-start items-center">
-        <div class="w-full rounded-2xl bg-slate-50 border border-slate-200/90 p-8 sm:p-10 lg:p-12 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
+      <section class="self-stretch px-4 sm:px-6 lg:px-20 py-12 sm:py-16 bg-white flex flex-col justify-start items-center">
+        <div class="w-full rounded-2xl bg-slate-50 border border-slate-200/90 p-6 sm:p-10 lg:p-12 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 sm:gap-10">
           <div class="w-full lg:max-w-xl flex flex-col gap-4">
             <span class="self-start px-3 py-1 bg-blue-100/70 text-blue-900 border border-blue-200/80 rounded-full text-xs font-semibold font-['Poppins']">
               Kerja Sama &amp; Media Partner

@@ -5,15 +5,8 @@
 @section('content')
 <div class="w-full min-h-screen bg-slate-50 flex flex-col justify-between items-center py-8 px-4 sm:px-6 lg:px-8">
   <div class="w-full max-w-5xl flex items-center justify-between mb-6">
-    <a href="{{ route('home') }}" class="flex items-center gap-2.5 group">
-      <div class="size-8 bg-blue-950 rounded flex items-center justify-center text-white font-bold text-sm">
-        <svg class="size-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-          <path d="M6 6h10"/>
-          <path d="M6 10h7"/>
-        </svg>
-      </div>
-      <span class="text-blue-950 text-xl font-semibold font-['Poppins'] leading-none group-hover:text-blue-900 transition">Eventict</span>
+    <a href="{{ route('home') }}" class="flex items-center group">
+      <img src="{{ asset('logo_blue.svg') }}" alt="Eventict" class="h-8 sm:h-9 w-auto">
     </a>
     <form method="POST" action="{{ route('logout') }}">
       @csrf

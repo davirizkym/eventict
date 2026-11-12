@@ -4,92 +4,9 @@
 
 @section('content')
 <div class="min-h-screen bg-slate-50 text-slate-800 antialiased font-['Poppins'] flex flex-col">
-  <!-- Top Navigation Bar -->
-  <header class="bg-blue-950 text-white border-b border-blue-900 sticky top-0 z-30 shadow-xs">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-6 sm:gap-8">
-        <a href="{{ route('organizer.dashboard') }}" class="flex items-center gap-3 group">
-          <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-950 font-bold shadow-xs">
-            <svg class="w-5 h-5 text-blue-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-              <path d="M6 6h10"/>
-              <path d="M6 10h7"/>
-            </svg>
-          </div>
-          <div class="flex flex-col">
-            <span class="text-white text-base font-semibold leading-tight tracking-tight">Eventict</span>
-            <span class="text-blue-200 text-xs font-normal">Organizer Hub</span>
-          </div>
-        </a>
+  @include('partials.organizer-header')
 
-        <nav class="hidden md:flex items-center gap-2">
-          <a href="{{ route('organizer.dashboard') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
-            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect width="18" height="18" x="3" y="3" rx="2"/>
-              <path d="M3 9h18"/>
-              <path d="M9 21V9"/>
-            </svg>
-            <span>Semua Kegiatan</span>
-          </a>
-          <a href="{{ route('organizer.categories.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
-            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 6h16M4 12h16M4 18h7"/>
-            </svg>
-            <span>Kategori</span>
-          </a>
-          <a href="{{ route('organizer.speakers.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-white/10 text-white transition flex items-center gap-2">
-            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            <span>Pengisi Acara</span>
-          </a>
-          <a href="{{ route('organizer.media_partners.index') }}" class="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-2">
-            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m3 11 18-5v12L3 14v-3z"/>
-              <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
-            </svg>
-            <span>Media Partner</span>
-          </a>
-        </nav>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <a href="{{ route('home') }}" class="px-3 py-1.5 rounded-lg border border-white/20 text-xs font-medium text-slate-200 hover:bg-white/10 hover:text-white transition hidden sm:inline-flex items-center gap-1.5">
-          <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-            <polyline points="15 3 21 3 21 9"/>
-            <line x1="10" y1="14" x2="21" y2="3"/>
-          </svg>
-          <span>Lihat Website</span>
-        </a>
-
-        <div class="flex items-center gap-2.5 pl-2 sm:border-l sm:border-white/15">
-          <div class="size-8 rounded-lg bg-blue-900 text-white font-semibold text-xs flex items-center justify-center shrink-0">
-            {{ strtoupper(substr(Auth::user()->name ?? 'P', 0, 2)) }}
-          </div>
-          <div class="hidden lg:flex flex-col min-w-0">
-            <span class="text-white text-xs font-semibold truncate">{{ Auth::user()->name ?? 'Sekretariat Panitia' }}</span>
-            <span class="text-slate-400 text-[11px] truncate">Laboratorium ICT</span>
-          </div>
-          <form method="POST" action="{{ route('logout') }}" class="shrink-0">
-            @csrf
-            <button type="submit" title="Keluar" class="p-1.5 text-rose-300 hover:text-white hover:bg-rose-500/20 rounded-lg transition cursor-pointer">
-              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" x2="9" y1="12" y2="12"/>
-              </svg>
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 md:pb-8 flex flex-col gap-6">
     <!-- Breadcrumb & Page Title -->
     <div class="flex items-center gap-2 text-xs text-slate-500">
       <a href="{{ route('organizer.dashboard') }}" class="hover:text-blue-950 font-medium">Portal Pengelola</a>
@@ -138,12 +55,7 @@
     <!-- Top Action Header (Sesuai Ketentuan 1: Tombol Aksi Atas) -->
     <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-2xs">
       <div class="flex flex-col gap-1">
-        <div class="flex items-center gap-2.5">
-          <h1 class="text-xl sm:text-2xl font-bold text-slate-900 font-['Poppins']">Tabel Daftar Pengisi Acara</h1>
-          <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-950 border border-blue-200">
-            {{ $speakers->total() }} Total Terdaftar
-          </span>
-        </div>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 font-['Poppins']">Tabel Daftar Pengisi Acara</h1>
         <p class="text-xs text-slate-500 leading-relaxed max-w-2xl">
           Bank data master pemateri, instruktur workshop, dan moderator seminar Lab ICT. Klik nama atau tombol Detail untuk melihat riwayat partisipasi acara.
         </p>
@@ -279,9 +191,8 @@
 
                 <!-- 7. Riwayat Mengisi Acara (Badge jumlah seminar yang pernah diisi) -->
                 <td class="py-4 px-4 text-center">
-                  <a href="{{ route('organizer.speakers.show', $spk->id) }}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold {{ $spk->events_count > 0 ? 'bg-blue-50 text-blue-950 border border-blue-200 hover:bg-blue-100' : 'bg-slate-100 text-slate-500' }} transition" title="Lihat riwayat seminar">
-                    <svg class="size-3 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>{{ $spk->events_count }} Acara</span>
+                  <a href="{{ route('organizer.speakers.show', $spk->id) }}" class="font-semibold text-slate-700 hover:text-blue-950 hover:underline transition" title="Lihat riwayat seminar">
+                    {{ $spk->events_count }}
                   </a>
                 </td>
 
@@ -508,4 +419,6 @@
   }
 </script>
 @endpush
+
+@include('partials.organizer-bottom-nav')
 @endsection
