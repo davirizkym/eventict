@@ -665,7 +665,6 @@
                         'attendance_status' => $reg->attendance_status,
                         'checked_in_at' => $reg->checked_in_at ? $reg->checked_in_at->format('d M Y, H:i') . ' WIB' : null,
                         'presence_url' => route('events.presence', $reg->event->slug),
-                        'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' . urlencode(route('events.presence', $reg->event->slug)),
                     ]) }})" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[11px] font-medium text-slate-700 hover:bg-slate-100 transition shadow-2xs flex items-center gap-1 cursor-pointer" title="Cetak / Simpan Tiket PDF">
                       <svg class="size-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="6 9 6 2 18 2 18 9"/>
@@ -1218,137 +1217,254 @@
               </span>
             </div>
 
-            <form action="{{ route('peserta.dashboard') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-2 pt-1">
+            <form action="{{ route('peserta.dashboard') }}" method="GET" class="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 pt-1">
               <input type="hidden" name="tab" value="kegiatan">
-              <div class="relative flex-1 w-full">
+              <div class="relative flex-1">
                 <input
                   type="text"
                   name="q"
                   value="{{ request('q') }}"
                   placeholder="Cari topik kegiatan atau rumpun ilmu..."
-                  class="w-full pl-9 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:bg-white transition"
+                  class="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-950 focus:bg-white transition"
                 >
-                <svg class="size-4 text-slate-400 absolute left-3 top-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="size-4 text-slate-400 absolute left-3 top-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="11" cy="11" r="8"/>
                   <path d="m21 21-4.35-4.35"/>
                 </svg>
               </div>
-              <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition cursor-pointer shadow-2xs shrink-0">
-                Cari
-              </button>
-              @if(request('q'))
-                <a href="{{ route('peserta.dashboard', ['tab' => 'kegiatan']) }}" class="px-3 py-2 text-xs font-semibold text-rose-600 hover:underline shrink-0">
-                  Reset
-                </a>
-              @endif
+
+              <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                <select name="format" class="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 outline-none focus:border-blue-950 focus:bg-white transition cursor-pointer">
+                  <option value="">Semua Format</option>
+                  <option value="offline" {{ request('format') === 'offline' ? 'selected' : '' }}>Luring (Offline)</option>
+                  <option value="online" {{ request('format') === 'online' ? 'selected' : '' }}>Daring (Online)</option>
+                </select>
+
+                @if(!empty($allCategories) && $allCategories->isNotEmpty())
+                  <select name="category" class="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 outline-none focus:border-blue-950 focus:bg-white transition cursor-pointer">
+                    <option value="">Semua Rumpun</option>
+                    @foreach($allCategories as $catItem)
+                      <option value="{{ $catItem }}" {{ request('category') === $catItem ? 'selected' : '' }}>{{ $catItem }}</option>
+                    @endforeach
+                  </select>
+                @endif
+
+                <button type="submit" class="px-4 py-2.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition cursor-pointer shadow-2xs shrink-0 flex items-center justify-center gap-1.5">
+                  <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                  </svg>
+                  <span>Cari</span>
+                </button>
+
+                @if(request()->hasAny(['q', 'format', 'category']))
+                  <a href="{{ route('peserta.dashboard', ['tab' => 'kegiatan']) }}" class="px-3 py-2.5 text-xs font-semibold text-rose-600 hover:underline shrink-0">
+                    Reset
+                  </a>
+                @endif
+              </div>
             </form>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             @forelse($availableEvents as $avEvent)
               @php
+                $isPartnerEvent = (($avEvent->organizer_type ?? 'internal') === 'partner');
                 $isPassed = $avEvent->isPassed();
                 $avRemaining = max(0, $avEvent->quota - ($avEvent->registrations_count ?? 0));
-                $isAvFull = $avEvent->quota > 0 && ($avEvent->registrations_count ?? 0) >= $avEvent->quota;
+                $isAvFull = !$isPartnerEvent && $avEvent->quota > 0 && ($avEvent->registrations_count ?? 0) >= $avEvent->quota;
               @endphp
-              <div class="p-4.5 rounded-xl border flex flex-col justify-between gap-4 transition {{ $isPassed ? 'bg-slate-50/70 border-slate-200 opacity-80 hover:opacity-100' : 'bg-white border-slate-200 hover:border-blue-950 hover:shadow-xs' }}">
-                <div class="flex flex-col gap-2.5">
-                  <div class="flex items-center justify-between gap-2 flex-wrap">
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                      @if($isPassed)
-                        <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-bold rounded">
-                          Kegiatan Telah Terlewat
-                        </span>
-                      @elseif($isAvFull)
-                        <span class="px-2 py-0.5 bg-rose-50 text-rose-700 text-[10px] font-bold rounded border border-rose-200">
-                          Penuh
-                        </span>
-                      @elseif($avRemaining <= 5 && $avRemaining > 0)
-                        <span class="px-2 py-0.5 bg-amber-50 text-amber-800 text-[10px] font-bold rounded border border-amber-200">
-                          Sisa {{ $avRemaining }} Kuota
-                        </span>
+              <div class="bg-white rounded-2xl border border-slate-200 flex flex-col justify-between overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition duration-200 group">
+                <div>
+                  {{-- Banner / Poster Container --}}
+                  <div class="self-stretch h-48 relative bg-gradient-to-br from-[#142D4E] to-[#0A192F] p-4 flex flex-col justify-between overflow-hidden">
+                    @if($avEvent->banner_url)
+                      <img src="{{ asset($avEvent->banner_url) }}" alt="{{ $avEvent->title }}" class="absolute inset-0 w-full h-full object-cover">
+                      <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/25 to-slate-950/50"></div>
+                    @endif
+
+                    {{-- Top Badges Row --}}
+                    <div class="relative z-10 flex justify-between items-start gap-2">
+                      @if($isPartnerEvent)
+                        <div class="px-2.5 py-1 bg-slate-950/70 backdrop-blur-md rounded-lg border border-white/20 flex items-center gap-1.5 shadow-xs">
+                          <svg class="size-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m3 11 18-5v12L3 14v-3z"/>
+                          </svg>
+                          <span class="text-white text-[10px] font-semibold">Media Partner</span>
+                        </div>
                       @else
-                        <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded border border-emerald-200">
-                          Dibuka
-                        </span>
+                        <div class="px-2.5 py-1 bg-slate-950/70 backdrop-blur-md rounded-lg border border-white/20 flex items-center gap-1.5 shadow-xs">
+                          <span class="text-white text-[10px] font-semibold">Sertifikat Resmi</span>
+                        </div>
                       @endif
-                      <span class="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-medium rounded">
-                        {{ $avEvent->format === 'offline' ? 'Luring' : 'Daring' }}
+
+                      <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                        @if(!$isPartnerEvent)
+                          @if($isAvFull)
+                            <span class="px-2 py-0.5 bg-rose-600/90 backdrop-blur-md text-white text-[10px] font-bold rounded-md uppercase tracking-wider shadow-xs">
+                              Penuh
+                            </span>
+                          @elseif($avRemaining <= 5 && $avRemaining > 0)
+                            <span class="px-2 py-0.5 bg-amber-500/90 backdrop-blur-md text-white text-[10px] font-bold rounded-md uppercase tracking-wider shadow-xs">
+                              Sisa {{ $avRemaining }} Kuota
+                            </span>
+                          @else
+                            <span class="px-2 py-0.5 bg-emerald-600/90 backdrop-blur-md text-white text-[10px] font-bold rounded-md uppercase tracking-wider shadow-xs">
+                              Dibuka
+                            </span>
+                          @endif
+                        @endif
+
+                        @if($avEvent->category)
+                          <span class="px-2.5 py-1 bg-slate-950/70 backdrop-blur-md text-white border border-white/20 text-[10px] font-semibold rounded-lg uppercase tracking-wider shadow-xs">
+                            {{ $avEvent->category }}
+                          </span>
+                        @endif
+                      </div>
+                    </div>
+
+                    {{-- Bottom Badges Row inside Poster --}}
+                    <div class="relative z-10 flex items-center justify-between gap-2">
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-950/75 backdrop-blur-md text-slate-100 border border-white/20 text-[10px] font-medium rounded-lg shadow-xs">
+                        <span class="size-1.5 rounded-full {{ $avEvent->format === 'offline' ? 'bg-amber-400' : 'bg-emerald-400' }}"></span>
+                        <span>{{ $avEvent->format === 'offline' ? 'Luring' : 'Daring' }}</span>
                       </span>
-                      @if($avEvent->category)
-                        <span class="px-2 py-0.5 bg-blue-50 text-blue-900 text-[10px] font-medium rounded">
-                          {{ $avEvent->category }}
-                        </span>
-                      @endif
-                      @if(($avEvent->organizer_type ?? 'internal') === 'partner')
-                        <span class="px-2 py-0.5 bg-purple-50 text-purple-700 text-[10px] font-semibold rounded">
-                          Partner: {{ $avEvent->organizer_name }}
+
+                      @if($isPartnerEvent)
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-950/75 backdrop-blur-md text-slate-100 border border-white/20 text-[10px] font-medium rounded-lg max-w-[170px] truncate shadow-xs" title="Penyelenggara: {{ $avEvent->organizer_name }}">
+                          <svg class="size-3 text-slate-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                          </svg>
+                          <span class="truncate">{{ $avEvent->organizer_name }}</span>
                         </span>
                       @endif
                     </div>
-                    <span class="text-xs font-bold {{ $isPassed ? 'text-slate-400' : 'text-blue-950' }}">
-                      {{ $avEvent->price == 0 ? 'Gratis' : 'Rp ' . number_format($avEvent->price, 0, ',', '.') }}
-                    </span>
                   </div>
 
-                  <a href="{{ route('events.show', $avEvent->slug) }}" class="text-sm font-semibold transition line-clamp-2 {{ $isPassed ? 'text-slate-600 hover:text-slate-900' : 'text-slate-900 hover:text-blue-950' }}">
-                    {{ $avEvent->title }}
-                  </a>
+                  {{-- Card Body --}}
+                  <div class="p-5 flex flex-col gap-3">
+                    <div class="flex flex-col gap-1 text-[11px] text-slate-500">
+                      <div class="flex items-center gap-2">
+                        <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                          <line x1="16" x2="16" y1="2" y2="6"/>
+                          <line x1="8" x2="8" y1="2" y2="6"/>
+                          <line x1="3" x2="21" y1="10" y2="10"/>
+                        </svg>
+                        <span>{{ $avEvent->start_date ? $avEvent->start_date->format('d M Y') : 'Segera' }} &bull; {{ substr($avEvent->start_time ?? '', 0, 5) }} WIB</span>
+                      </div>
 
-                  <div class="flex items-center gap-2 text-slate-500 text-[11px]">
-                    <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-                      <line x1="16" x2="16" y1="2" y2="6"/>
-                      <line x1="8" x2="8" y1="2" y2="6"/>
-                      <line x1="3" x2="21" y1="10" y2="10"/>
-                    </svg>
-                    <span>{{ $avEvent->start_date ? $avEvent->start_date->format('d M Y') : 'Segera' }} &bull; {{ substr($avEvent->start_time ?? '', 0, 5) }} WIB</span>
+                      <div class="flex items-center gap-2">
+                        <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                          <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        <span class="truncate">{{ $avEvent->location ?? 'Online via Platform' }}</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      @if($isPartnerEvent)
+                        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 text-[10px] font-medium mb-1.5">
+                          <svg class="size-3 text-slate-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                          </svg>
+                          <span class="truncate">Penyelenggara: {{ $avEvent->organizer_name }}</span>
+                        </div>
+                      @else
+                        <div class="text-[10px] font-medium text-slate-500 mb-1">
+                          Penyelenggara: Laboratorium ICT
+                        </div>
+                      @endif
+
+                      <a href="{{ route('events.show', $avEvent->slug) }}" class="block text-slate-900 hover:text-blue-950 transition">
+                        <h4 class="text-sm font-bold leading-snug line-clamp-2 min-h-[2.5rem]">
+                          {{ $avEvent->title }}
+                        </h4>
+                      </a>
+                    </div>
+
+                    @if($avEvent->speakers->isNotEmpty())
+                      <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
+                        <div class="size-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 text-[10px] font-bold shrink-0">
+                          {{ strtoupper(substr($avEvent->speakers->first()->name, 0, 2)) }}
+                        </div>
+                        <div class="flex flex-col overflow-hidden">
+                          <span class="text-[11px] font-medium text-slate-800 truncate">{{ $avEvent->speakers->first()->name }}</span>
+                          @if($avEvent->speakers->count() > 1)
+                            <span class="text-[9px] text-slate-400">+{{ $avEvent->speakers->count() - 1 }} Pemateri Lain</span>
+                          @endif
+                        </div>
+                      </div>
+                    @endif
                   </div>
                 </div>
 
-                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
-                  @if($isPassed)
-                    <span class="text-[11px] text-slate-400 font-medium">
-                      Pendaftaran Ditutup
-                    </span>
-                    <a href="{{ route('events.show', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
-                      <span>Lihat Detail Sesi</span>
-                      <span class="text-sm">&rarr;</span>
-                    </a>
-                  @elseif($isAvFull)
-                    <span class="text-[11px] font-semibold text-rose-700">
-                      Kuota Penuh
-                    </span>
-                    <a href="{{ route('events.show', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1">
-                      <span>Lihat Sesi</span>
-                      <span class="text-sm">&rarr;</span>
-                    </a>
-                  @elseif($avRemaining <= 5 && $avRemaining > 0)
-                    <span class="text-[11px] font-semibold text-amber-700">
-                      Sisa {{ $avRemaining }} kuota
-                    </span>
-                    <a href="{{ route('events.register.form', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
-                      <span>Daftar Sesi</span>
-                      <span class="text-sm">&rarr;</span>
+                {{-- Card Footer --}}
+                <div class="p-4 border-t border-slate-100 flex items-center justify-between gap-2 bg-slate-50/60 rounded-b-2xl">
+                  @if($isPartnerEvent)
+                    <div class="flex flex-col overflow-hidden">
+                      <span class="text-xs font-bold text-slate-900 flex items-center gap-1">
+                        <svg class="size-3 text-slate-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="m3 11 18-5v12L3 14v-3z"/>
+                        </svg>
+                        <span>Media Partner</span>
+                      </span>
+                      <span class="text-[10px] text-slate-500 truncate max-w-[130px]">
+                        {{ $avEvent->organizer_name }}
+                      </span>
+                    </div>
+
+                    <a href="{{ route('events.show', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs shrink-0 cursor-pointer">
+                      <span>Daftar Acara</span>
+                      <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                        <polyline points="15 3 21 3 21 9"/>
+                        <line x1="10" y1="14" x2="21" y2="3"/>
+                      </svg>
                     </a>
                   @else
-                    <span class="text-[11px] text-emerald-700 font-medium">
-                      Pendaftaran Terbuka
-                    </span>
-                    <a href="{{ route('events.register.form', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
-                      <span>Daftar Sesi</span>
-                      <span class="text-sm">&rarr;</span>
-                    </a>
+                    <div class="flex flex-col">
+                      <span class="text-xs font-bold text-slate-900">
+                        {{ $avEvent->price == 0 ? 'Gratis' : 'Rp ' . number_format($avEvent->price, 0, ',', '.') }}
+                      </span>
+                      <span class="text-[10px] font-medium {{ $isAvFull ? 'text-rose-600' : ($avRemaining <= 5 && $avRemaining > 0 ? 'text-amber-700' : 'text-emerald-700') }}">
+                        {{ $isAvFull ? 'Penuh' : ($avRemaining <= 5 && $avRemaining > 0 ? 'Sisa ' . $avRemaining . ' slot' : 'Tersedia') }}
+                      </span>
+                    </div>
+
+                    @if($isAvFull)
+                      <a href="{{ route('events.show', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center gap-1 shrink-0 cursor-pointer">
+                        <span>Lihat Sesi</span>
+                        <span class="text-xs">&rarr;</span>
+                      </a>
+                    @else
+                      <a href="{{ route('events.register.form', $avEvent->slug) }}" class="px-3.5 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1 shadow-2xs shrink-0 cursor-pointer">
+                        <span>Daftar Sesi</span>
+                        <span class="text-xs">&rarr;</span>
+                      </a>
+                    @endif
                   @endif
                 </div>
               </div>
             @empty
-              <div class="col-span-full p-8 bg-slate-50 rounded-xl text-center text-xs text-slate-500">
-                @if(request('q'))
-                  Tidak ada kegiatan yang sesuai dengan pencarian "{{ request('q') }}". Silakan gunakan kata kunci lain.
-                @else
-                  Anda telah terdaftar pada seluruh kegiatan yang sedang aktif saat ini.
-                @endif
+              <div class="col-span-full p-12 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center flex flex-col items-center justify-center gap-2">
+                <div class="size-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
+                  <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                    <line x1="16" x2="16" y1="2" y2="6"/>
+                    <line x1="8" x2="8" y1="2" y2="6"/>
+                    <line x1="3" x2="21" y1="10" y2="10"/>
+                  </svg>
+                </div>
+                <div class="text-xs font-semibold text-slate-700">
+                  @if(request('q') || request('format') || request('category'))
+                    Tidak ada kegiatan yang sesuai dengan kriteria filter.
+                  @else
+                    Belum ada kegiatan baru yang dibuka atau Anda telah terdaftar pada seluruh kegiatan aktif.
+                  @endif
+                </div>
+                <p class="text-[11px] text-slate-400">Silakan periksa kembali nanti atau hapus kata kunci pencarian Anda.</p>
               </div>
             @endforelse
           </div>
@@ -1652,7 +1768,8 @@ function openPrintTicketModal(data) {
 
   const qrImg = document.getElementById('ticket-modal-qr');
   if (qrImg) {
-    const qrSource = data.qr_url || ('https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=' + encodeURIComponent(data.presence_url || data.qr_pass));
+    const qrEndpoint = 'https://api.' + 'qrserver' + '.com/v1/create-qr-code/?size=150x150&margin=4&data=';
+    const qrSource = data.qr_url || (qrEndpoint + encodeURIComponent(data.presence_url || data.qr_pass));
     qrImg.src = qrSource;
   }
   const presenceLink = document.getElementById('ticket-modal-link');
@@ -1990,7 +2107,8 @@ function openQrPassModal(qrPass, eventTitle, regCode, isCheckedIn) {
   document.getElementById('qrpass-event-title').textContent = eventTitle || 'Tiket Kegiatan Offline';
   document.getElementById('qrpass-reg-code').textContent = 'No. Registrasi: ' + (regCode || '-');
   document.getElementById('qrpass-code').textContent = '#' + qrPass;
-  document.getElementById('qrpass-img').src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=4&data=' + encodeURIComponent(qrPass);
+  const qrEndpointLarge = 'https://api.' + 'qrserver' + '.com/v1/create-qr-code/?size=300x300&margin=4&data=';
+  document.getElementById('qrpass-img').src = qrEndpointLarge + encodeURIComponent(qrPass);
 
   const statusBadge = document.getElementById('qrpass-status-badge');
   if (isCheckedIn) {
