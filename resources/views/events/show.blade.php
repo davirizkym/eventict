@@ -26,25 +26,37 @@
       </div>
     @endif
 
+    @php
+      $remaining = max(0, $event->quota - $registeredCount);
+    @endphp
+
     <div class="bg-gradient-to-r from-blue-950 to-slate-900 text-white rounded-2xl p-5 sm:p-8 lg:p-10 shadow-xs flex flex-col gap-5">
       <div class="flex flex-wrap items-center gap-2.5">
-        <span class="px-3 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-semibold rounded-md flex items-center gap-1.5 whitespace-nowrap">
-          <svg class="size-3.5 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
-          </svg>
-          <span>Sertifikat Resmi</span>
-        </span>
-        @php
-          $remaining = max(0, $event->quota - $registeredCount);
-        @endphp
-        @if($isFull)
-          <span class="px-3 py-1 bg-rose-500/30 text-rose-200 border border-rose-400/40 text-xs font-semibold rounded-md shadow-xs whitespace-nowrap">
-            Kuota Penuh
+        @if(($event->organizer_type ?? 'internal') === 'partner')
+          <span class="px-3 py-1 bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-semibold rounded-md flex items-center gap-1.5 whitespace-nowrap">
+            <svg class="size-3.5 text-indigo-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>Media Partner</span>
           </span>
-        @elseif($remaining <= 5 && $remaining > 0)
-          <span class="px-3 py-1 bg-amber-500/30 text-amber-200 border border-amber-400/40 text-xs font-semibold rounded-md shadow-xs whitespace-nowrap">
-            Tersisa {{ $remaining }} Tempat Lagi
+        @else
+          <span class="px-3 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-semibold rounded-md flex items-center gap-1.5 whitespace-nowrap">
+            <svg class="size-3.5 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+            </svg>
+            <span>Sertifikat Resmi</span>
           </span>
+        @endif
+        @if(($event->organizer_type ?? 'internal') !== 'partner')
+          @if($isFull)
+            <span class="px-3 py-1 bg-rose-500/30 text-rose-200 border border-rose-400/40 text-xs font-semibold rounded-md shadow-xs whitespace-nowrap">
+              Kuota Penuh
+            </span>
+          @elseif($remaining <= 5 && $remaining > 0)
+            <span class="px-3 py-1 bg-amber-500/30 text-amber-200 border border-amber-400/40 text-xs font-semibold rounded-md shadow-xs whitespace-nowrap">
+              Tersisa {{ $remaining }} Tempat Lagi
+            </span>
+          @endif
         @endif
         <span class="px-3 py-1 bg-white/10 text-white/90 text-xs font-medium rounded-md uppercase tracking-wider whitespace-nowrap">
           {{ $event->category }}
