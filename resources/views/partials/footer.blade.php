@@ -25,14 +25,17 @@
 
     <div class="flex flex-col gap-3">
       <span class="text-white text-sm font-semibold font-['Poppins']">Pusat Bantuan & Kontak</span>
-      <a href="mailto:help@eventict.id" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition flex items-center gap-2">
+      <a href="mailto:labkom@budiluhur.ac.id" class="text-slate-300 text-xs font-normal font-['Poppins'] hover:text-white transition flex items-center gap-2">
         <svg class="size-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect width="20" height="16" x="2" y="4" rx="2"/>
           <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
         </svg>
-        <span>help@eventict.id</span>
+        <span>labkom@budiluhur.ac.id</span>
       </a>
-      <span class="text-slate-400 text-xs font-normal font-['Poppins']">Senin–Jumat, 08:00–17:00 WIB</span>
+      <div class="flex flex-col gap-0.5 text-slate-400 text-xs font-normal font-['Poppins']">
+        <span>Senin–Jumat: 08:00–20:40 WIB</span>
+        <span>Sabtu: 08:00–17:00 WIB</span>
+      </div>
 
       <div class="pt-2 flex flex-col gap-2.5">
         <span class="text-slate-400 text-[11px] font-medium font-['Poppins'] uppercase tracking-wider">Media Sosial &amp; Web</span>
@@ -64,6 +67,6 @@
 
   <div class="self-stretch pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-normal font-['Poppins'] text-slate-400">
     <div>© 2026 Eventict — Laboratorium ICT. Seluruh hak dilindungi.</div>
-    <div>Sistem Informasi Manajemen Event Laboratorium Komputer & Teknologi Informasi.</div>
+    <div>Sistem Informasi Manajemen Event Laboratorium ICT.</div>
   </div>
 </footer>

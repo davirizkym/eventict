@@ -46,7 +46,7 @@
             {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
           </span>
           @if(($event->organizer_type ?? 'internal') === 'partner')
-            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
               Penyelenggara: {{ $event->organizer_name }}
             </span>
           @else
@@ -54,7 +54,7 @@
               Penyelenggara: Laboratorium ICT
             </span>
           @endif
-          @if($event->quota > 0 && $totalRegistrations >= $event->quota)
+          @if(($event->organizer_type ?? 'internal') !== 'partner' && $event->quota > 0 && $totalRegistrations >= $event->quota)
             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
               Kuota Penuh
             </span>
@@ -63,60 +63,70 @@
       </div>
 
       <nav class="bg-white rounded-2xl border border-slate-200 p-2 flex flex-row md:flex-col gap-1 shadow-2xs overflow-x-auto">
-        <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'dashboard']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between shrink-0 {{ $tab === 'dashboard' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
-          <div class="flex items-center gap-2.5">
+        @if(($event->organizer_type ?? 'internal') === 'partner')
+          <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'pengaturan']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2.5 shrink-0 bg-blue-950 text-white shadow-2xs">
             <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect width="18" height="18" x="3" y="3" rx="2"/>
-              <path d="M3 9h18"/>
-              <path d="M9 21V9"/>
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
             </svg>
-            <span>Dashboard</span>
-          </div>
-        </a>
+            <span>Pengaturan Acara</span>
+          </a>
+        @else
+          <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'dashboard']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between shrink-0 {{ $tab === 'dashboard' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
+            <div class="flex items-center gap-2.5">
+              <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="18" height="18" x="3" y="3" rx="2"/>
+                <path d="M3 9h18"/>
+                <path d="M9 21V9"/>
+              </svg>
+              <span>Dashboard</span>
+            </div>
+          </a>
 
-        <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between shrink-0 {{ $tab === 'peserta' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
-          <div class="flex items-center gap-2.5">
+          <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'peserta']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between shrink-0 {{ $tab === 'peserta' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
+            <div class="flex items-center gap-2.5">
+              <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <span>Data Peserta</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-md text-[10px] {{ $tab === 'peserta' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $totalRegistrations }}</span>
+          </a>
+
+          <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'sertifikat']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between shrink-0 {{ $tab === 'sertifikat' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
+            <div class="flex items-center gap-2.5">
+              <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="8" r="6"/>
+                <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+              </svg>
+              <span>E-Sertifikat</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-md text-[10px] {{ $tab === 'sertifikat' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $certificatesCount }}</span>
+          </a>
+
+          <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between shrink-0 {{ $tab === 'narasumber' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
+            <div class="flex items-center gap-2.5">
+              <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" x2="12" y1="19" y2="22"/>
+              </svg>
+              <span>Pengisi Acara</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-md text-[10px] {{ $tab === 'narasumber' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $event->speakers->count() }}</span>
+          </a>
+
+          <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'pengaturan']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2.5 shrink-0 {{ $tab === 'pengaturan' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
             <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
             </svg>
-            <span>Data Peserta</span>
-          </div>
-          <span class="px-2 py-0.5 rounded-md text-[10px] {{ $tab === 'peserta' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $totalRegistrations }}</span>
-        </a>
-
-        <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'sertifikat']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between shrink-0 {{ $tab === 'sertifikat' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
-          <div class="flex items-center gap-2.5">
-            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="8" r="6"/>
-              <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
-            </svg>
-            <span>E-Sertifikat</span>
-          </div>
-          <span class="px-2 py-0.5 rounded-md text-[10px] {{ $tab === 'sertifikat' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $certificatesCount }}</span>
-        </a>
-
-        <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'narasumber']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between shrink-0 {{ $tab === 'narasumber' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
-          <div class="flex items-center gap-2.5">
-            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-              <line x1="12" x2="12" y1="19" y2="22"/>
-            </svg>
-            <span>Pengisi Acara</span>
-          </div>
-          <span class="px-2 py-0.5 rounded-md text-[10px] {{ $tab === 'narasumber' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $event->speakers->count() }}</span>
-        </a>
-
-        <a href="{{ route('organizer.workspace', ['event' => $event->id, 'tab' => 'pengaturan']) }}" class="px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2.5 shrink-0 {{ $tab === 'pengaturan' ? 'bg-blue-950 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50' }}">
-          <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
-          </svg>
-          <span>Pengaturan Acara</span>
-        </a>
+            <span>Pengaturan Acara</span>
+          </a>
+        @endif
       </nav>
     </aside>
 
@@ -194,12 +204,12 @@
         </div>
       @endif
 
-      @if($tab === 'dashboard')
+      @if($tab === 'dashboard' && ($event->organizer_type ?? 'internal') !== 'partner')
         @if($event->isExternal())
           <div class="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex flex-col gap-0.5">
-              <span class="text-xs font-bold text-blue-950">Kegiatan Promosi Media Partner</span>
-              <span class="text-[11px] text-slate-600">Pendaftaran peserta diarahkan ke form eksternal mitra: <a href="{{ $event->registration_url }}" target="_blank" class="font-semibold underline text-blue-900">{{ $event->registration_url ?? 'Belum diisi' }}</a></span>
+              <span class="text-xs font-bold text-blue-950">Kegiatan Media Partner</span>
+              <span class="text-[11px] text-slate-600">Pendaftaran peserta diarahkan ke form eksternal media partner: <a href="{{ $event->registration_url }}" target="_blank" class="font-semibold underline text-blue-900">{{ $event->registration_url ?? 'Belum diisi' }}</a></span>
             </div>
             @if($event->registration_url)
               <a href="{{ $event->registration_url }}" target="_blank" class="px-3 py-1.5 bg-blue-950 hover:bg-blue-900 text-white rounded-lg text-xs font-semibold shrink-0 text-center">Buka Form Pendaftaran</a>
@@ -312,7 +322,7 @@
           @endif
         </div>
 
-      @elseif($tab === 'peserta')
+      @elseif($tab === 'peserta' && ($event->organizer_type ?? 'internal') !== 'partner')
         <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs flex flex-col gap-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-2.5">
@@ -606,7 +616,7 @@
           </div>
         </div>
 
-      @elseif($tab === 'sertifikat')
+      @elseif($tab === 'sertifikat' && ($event->organizer_type ?? 'internal') !== 'partner')
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between">
             <span class="text-slate-500 text-xs font-medium">Total Pendaftar</span>
@@ -824,7 +834,7 @@
           </div>
         </div>
 
-      @elseif($tab === 'narasumber')
+      @elseif($tab === 'narasumber' && ($event->organizer_type ?? 'internal') !== 'partner')
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-6 shadow-2xs">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex flex-col gap-1">
@@ -904,7 +914,7 @@
           @endif
         </div>
 
-      @elseif($tab === 'pengaturan')
+      @elseif($tab === 'pengaturan' || ($event->organizer_type ?? 'internal') === 'partner')
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-6 shadow-2xs">
           <div class="flex flex-col gap-1">
             <h3 class="text-sm font-bold text-slate-900">Pengaturan & Informasi Kegiatan</h3>
@@ -973,16 +983,16 @@
                 <label class="font-semibold text-slate-700">Penyelenggara Kegiatan</label>
                 <select name="organizer_type" onchange="toggleEditPartnerName(this.value)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
                   <option value="internal" {{ ($event->organizer_type ?? 'internal') === 'internal' ? 'selected' : '' }}>Internal (Laboratorium ICT)</option>
-                  <option value="partner" {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'selected' : '' }}>Mitra Penyelenggara (Himpunan / BEM / Eksternal)</option>
+                  <option value="partner" {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'selected' : '' }}>Media Partner (Himpunan / BEM / Eksternal)</option>
                 </select>
               </div>
               <div id="edit-partner-name-container" class="{{ ($event->organizer_type ?? 'internal') === 'partner' ? '' : 'hidden' }} flex flex-col gap-1.5">
                 <div class="flex items-center justify-between">
-                  <label class="font-semibold text-slate-700">Pilih Mitra Penyelenggara</label>
+                  <label class="font-semibold text-slate-700">Pilih Media Partner</label>
                   <a href="{{ route('organizer.media_partners.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola Data</a>
                 </div>
                 <select name="media_partner_id" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-                  <option value="" disabled {{ empty($event->media_partner_id) ? 'selected' : '' }}>-- Pilih Mitra Penyelenggara --</option>
+                  <option value="" disabled {{ empty($event->media_partner_id) ? 'selected' : '' }}>-- Pilih Media Partner --</option>
                   @foreach($allMediaPartners as $mp)
                     <option value="{{ $mp->id }}" {{ $event->media_partner_id == $mp->id || $event->organizer_name === $mp->name ? 'selected' : '' }}>
                       {{ $mp->name }}
@@ -994,11 +1004,11 @@
 
             <div id="edit-partner-promo-fields" class="{{ ($event->organizer_type ?? 'internal') === 'partner' ? '' : 'hidden' }} flex flex-col gap-3.5 p-4 bg-blue-50/60 border border-blue-200/80 rounded-2xl">
               <div class="flex flex-col gap-0.5">
-                <span class="text-xs font-bold text-blue-950">Informasi Promosi Media Partner</span>
-                <span class="text-[11px] text-slate-500">Kegiatan ini bersifat promosi eksternal. Cantumkan tautan form pendaftaran mitra dan poster kegiatan.</span>
+                <span class="text-xs font-bold text-blue-950">Informasi Media Partner</span>
+                <span class="text-[11px] text-slate-500">Kegiatan ini bersifat publikasi acara eksternal. Cantumkan tautan form pendaftaran dan poster kegiatan.</span>
               </div>
               <div class="flex flex-col gap-1.5">
-                <label class="font-semibold text-slate-700">Link Form Pendaftaran Mitra</label>
+                <label class="font-semibold text-slate-700">Link Form Pendaftaran</label>
                 <input type="url" name="registration_url" value="{{ $event->registration_url }}" placeholder="https://forms.gle/... atau https://..." class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-blue-950 text-xs">
               </div>
               <div class="flex flex-col gap-1.5">
@@ -1013,7 +1023,7 @@
               </div>
             </div>
 
-            <div class="flex flex-col gap-2">
+            <div id="edit-supporting-partners-container" class="flex flex-col gap-2 {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'hidden' : '' }}">
               <div class="flex items-center justify-between">
                 <label class="font-semibold text-slate-700">Media Partner Pendukung Acara</label>
                 <a href="{{ route('organizer.media_partners.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola Master Media Partner</a>
@@ -1037,7 +1047,6 @@
               @else
                 <p class="text-xs text-slate-400">Belum ada master media partner terdaftar.</p>
               @endif
-            </div>
             </div>
 
             <div class="flex flex-col gap-1.5">
@@ -1067,14 +1076,14 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div id="edit-capacity-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'hidden' : '' }}">
               <div class="flex flex-col gap-1.5">
                 <label class="font-semibold text-slate-700">Target Kuota Peserta</label>
-                <input type="number" name="quota" value="{{ $event->quota }}" min="1" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+                <input type="number" id="edit-quota-input" name="quota" value="{{ $event->quota }}" min="0" {{ ($event->organizer_type ?? 'internal') === 'partner' ? '' : 'required' }} class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
               </div>
-              <div class="flex flex-col gap-1.5">
-                <label class="font-semibold text-slate-700">Biaya Pendaftaran (Rp)</label>
-                <input type="number" name="price" value="{{ $event->price }}" min="0" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+              <div id="edit-price-container" class="flex flex-col gap-1.5 {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'hidden' : '' }}">
+                <label class="font-semibold text-slate-700">Biaya Pendaftaran (Rp, 0 jika gratis)</label>
+                <input type="number" id="edit-price-input" name="price" value="{{ $event->price }}" min="0" {{ ($event->organizer_type ?? 'internal') === 'partner' ? '' : 'required' }} class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
               </div>
             </div>
 
@@ -1088,9 +1097,17 @@
               <textarea name="description" rows="4" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 leading-relaxed">{{ $event->description }}</textarea>
             </div>
 
-            <div class="flex justify-end pt-3 border-t border-slate-100">
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <button type="button" onclick="openDeleteEventModal()" class="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-semibold transition shadow-2xs flex items-center gap-1.5 cursor-pointer">
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                </svg>
+                <span>Hapus Acara</span>
+              </button>
               <button type="submit" class="px-5 py-2.5 bg-blue-950 text-white rounded-xl text-xs font-semibold hover:bg-blue-900 transition shadow-xs cursor-pointer">
-                Simpan Perubahan Pengaturan
+                Simpan
               </button>
             </div>
           </form>
@@ -1099,6 +1116,7 @@
     </main>
   </div>
 
+  @if(($event->organizer_type ?? 'internal') !== 'partner')
   @if($event->format === 'offline')
   <div id="modal-organizer-scanner" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 flex flex-col gap-4 shadow-2xl">
@@ -1334,9 +1352,61 @@
       </form>
     </div>
   </div>
+  @endif
+
+  <!-- Modal Konfirmasi Hapus Acara -->
+  <div id="modal-delete-event" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 flex flex-col gap-5 shadow-2xl">
+      <div class="flex items-start gap-3.5">
+        <div class="size-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="flex flex-col gap-1">
+          <h3 class="text-sm font-bold text-slate-900">Konfirmasi Hapus Kegiatan</h3>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            Apakah Anda yakin ingin menghapus kegiatan <strong class="text-slate-800">"{{ $event->title }}"</strong>? Tindakan ini permanen dan tidak dapat dibatalkan.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+        <button type="button" onclick="closeDeleteEventModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer transition">
+          Batal
+        </button>
+        <form action="{{ route('organizer.event.destroy', $event->id) }}" method="POST" class="inline">
+          @csrf
+          @method('DELETE')
+          <button type="submit" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold transition shadow-xs cursor-pointer flex items-center gap-1.5">
+            <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            </svg>
+            <span>Ya, Hapus Kegiatan</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
+function openDeleteEventModal() {
+  const m = document.getElementById('modal-delete-event');
+  if (m) {
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+  }
+}
+
+function closeDeleteEventModal() {
+  const m = document.getElementById('modal-delete-event');
+  if (m) {
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+  }
+}
 function openSessionQrModal() {
   const m = document.getElementById('modal-session-qr');
   if (m) {
@@ -1385,6 +1455,12 @@ function onAssignSpeakerChange(selectEl) {
 function toggleEditPartnerName(val) {
   const container = document.getElementById('edit-partner-name-container');
   const promoFields = document.getElementById('edit-partner-promo-fields');
+  const priceContainer = document.getElementById('edit-price-container');
+  const priceInput = document.getElementById('edit-price-input');
+  const capacityGrid = document.getElementById('edit-capacity-grid');
+  const quotaInput = document.getElementById('edit-quota-input');
+  const supportingPartners = document.getElementById('edit-supporting-partners-container');
+
   if (container) {
     if (val === 'partner') {
       container.classList.remove('hidden');
@@ -1397,6 +1473,44 @@ function toggleEditPartnerName(val) {
       promoFields.classList.remove('hidden');
     } else {
       promoFields.classList.add('hidden');
+    }
+  }
+  if (supportingPartners) {
+    if (val === 'partner') {
+      supportingPartners.classList.add('hidden');
+    } else {
+      supportingPartners.classList.remove('hidden');
+    }
+  }
+  if (priceContainer) {
+    if (val === 'partner') {
+      priceContainer.classList.add('hidden');
+    } else {
+      priceContainer.classList.remove('hidden');
+    }
+  }
+  if (capacityGrid) {
+    if (val === 'partner') {
+      capacityGrid.classList.add('hidden');
+    } else {
+      capacityGrid.classList.remove('hidden');
+    }
+  }
+  if (quotaInput) {
+    if (val === 'partner') {
+      quotaInput.required = false;
+      quotaInput.value = '0';
+    } else {
+      quotaInput.required = true;
+      if (!quotaInput.value || quotaInput.value === '0') quotaInput.value = '100';
+    }
+  }
+  if (priceInput) {
+    if (val === 'partner') {
+      priceInput.required = false;
+      priceInput.value = '0';
+    } else {
+      priceInput.required = true;
     }
   }
 }

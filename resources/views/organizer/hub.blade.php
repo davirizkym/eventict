@@ -118,9 +118,10 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($events as $evt)
           @php
+            $isPartner = ($evt->organizer_type ?? 'internal') === 'partner';
             $isPast = \Carbon\Carbon::parse($evt->end_date)->isPast();
             $quotaPct = $evt->quota > 0 ? min(100, round(($evt->registrations_count / $evt->quota) * 100)) : 0;
-            $isFull = $evt->quota > 0 && $evt->registrations_count >= $evt->quota;
+            $isFull = !$isPartner && $evt->quota > 0 && $evt->registrations_count >= $evt->quota;
           @endphp
           <div class="bg-white rounded-2xl border border-slate-200 hover:border-blue-900 hover:shadow-md transition duration-200 flex flex-col justify-between overflow-hidden group">
             <div class="p-6 flex flex-col gap-4">
@@ -132,8 +133,8 @@
                   <span class="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-700">
                     {{ $evt->format === 'offline' ? 'Luring' : 'Daring' }}
                   </span>
-                  @if(($evt->organizer_type ?? 'internal') === 'partner')
-                    <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                  @if($isPartner)
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
                       Penyelenggara: {{ $evt->organizer_name }}
                     </span>
                   @endif
@@ -143,7 +144,7 @@
                   <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
                     Selesai
                   </span>
-                @elseif($isFull)
+                @elseif(!$isPartner && $isFull)
                   <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
                     Penuh
                   </span>
@@ -155,7 +156,7 @@
               </div>
 
               <div class="flex flex-col gap-1">
-                <a href="{{ route('organizer.workspace', ['event' => $evt->id]) }}" class="text-sm sm:text-base font-semibold text-slate-900 group-hover:text-blue-950 transition leading-snug line-clamp-2">
+                <a href="{{ route('organizer.workspace', ['event' => $evt->id, 'tab' => $isPartner ? 'pengaturan' : 'dashboard']) }}" class="text-sm sm:text-base font-semibold text-slate-900 group-hover:text-blue-950 transition leading-snug line-clamp-2">
                   {{ $evt->title }}
                 </a>
                 <span class="text-slate-500 text-xs flex items-center gap-1.5 mt-1">
@@ -176,34 +177,43 @@
                 </span>
               </div>
 
-              <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
-                <div class="flex items-center justify-between text-xs">
-                  <span class="text-slate-500">Kuota Terisi</span>
-                  <div class="flex items-center gap-1.5">
-                    @if($isFull)
-                      <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-rose-100 text-rose-700">Penuh</span>
-                    @endif
-                    <span class="font-semibold text-slate-900">{{ $evt->registrations_count }} / {{ $evt->quota }} Peserta ({{ $quotaPct }}%)</span>
+              @if($isPartner)
+                <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
+                  <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-1 text-[11px]">
+                    <span class="font-bold text-slate-900">Media Partner</span>
+                    <span class="text-slate-600 truncate">Pendaftaran: {{ $evt->registration_url ?: 'Tautan form belum diatur' }}</span>
                   </div>
                 </div>
-                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div class="h-full {{ $isFull ? 'bg-rose-600' : 'bg-blue-950' }} rounded-full transition-all" style="width: {{ $quotaPct }}%"></div>
+              @else
+                <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="text-slate-500">Kuota Terisi</span>
+                    <div class="flex items-center gap-1.5">
+                      @if($isFull)
+                        <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-rose-100 text-rose-700">Penuh</span>
+                      @endif
+                      <span class="font-semibold text-slate-900">{{ $evt->registrations_count }} / {{ $evt->quota }} Peserta ({{ $quotaPct }}%)</span>
+                    </div>
+                  </div>
+                  <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full {{ $isFull ? 'bg-rose-600' : 'bg-blue-950' }} rounded-full transition-all" style="width: {{ $quotaPct }}%"></div>
+                  </div>
                 </div>
-              </div>
 
-              <div class="flex items-center justify-between text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                <span>Kehadiran: <strong class="text-slate-900">{{ $evt->attended_count }}</strong></span>
-                <span>Sertifikat: <strong class="text-slate-900">{{ $evt->certificates_count }}</strong></span>
-                <span>Pengisi Acara: <strong class="text-slate-900">{{ $evt->speakers->count() }}</strong></span>
-              </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                  <span>Kehadiran: <strong class="text-slate-900">{{ $evt->attended_count }}</strong></span>
+                  <span>Sertifikat: <strong class="text-slate-900">{{ $evt->certificates_count }}</strong></span>
+                  <span>Pengisi Acara: <strong class="text-slate-900">{{ $evt->speakers->count() }}</strong></span>
+                </div>
+              @endif
             </div>
 
             <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
               <span class="text-xs font-semibold text-slate-700">
-                {{ $evt->price == 0 ? 'Gratis' : 'Rp ' . number_format($evt->price, 0, ',', '.') }}
+                {{ $isPartner ? 'Media Partner' : ($evt->price == 0 ? 'Gratis' : 'Rp ' . number_format($evt->price, 0, ',', '.')) }}
               </span>
-              <a href="{{ route('organizer.workspace', ['event' => $evt->id]) }}" class="px-3.5 py-1.5 bg-blue-950 text-white rounded-lg text-xs font-semibold hover:bg-blue-900 transition flex items-center gap-1.5 shadow-2xs">
-                <span>Buka Workspace</span>
+              <a href="{{ route('organizer.workspace', ['event' => $evt->id, 'tab' => $isPartner ? 'pengaturan' : 'dashboard']) }}" class="px-3.5 py-1.5 bg-blue-950 text-white rounded-lg text-xs font-semibold hover:bg-blue-900 transition flex items-center gap-1.5 shadow-2xs">
+                <span>{{ $isPartner ? 'Kelola Acara' : 'Buka Workspace' }}</span>
                 <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="9 18 15 12 9 6"/>
                 </svg>
@@ -219,8 +229,8 @@
     <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 flex flex-col gap-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-start justify-between gap-4 pb-4 border-b border-slate-100">
         <div class="flex flex-col">
-          <h2 class="text-base sm:text-lg font-bold text-slate-900">Buat Kegiatan Baru Lab ICT</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Isi rincian kegiatan seminar atau workshop. Ruang kerja operasional akan langsung dibuat otomatis.</p>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">Buat Kegiatan Baru</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Isi rincian kegiatan internal Laboratorium ICT atau kegiatan dari media partner.</p>
         </div>
         <button type="button" onclick="closeCreateEventModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -233,7 +243,7 @@
       <form action="{{ route('organizer.event.store') }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4 text-xs">
         @csrf
         <div class="flex flex-col gap-1.5">
-          <label class="font-semibold text-slate-700">Judul Kegiatan</label>
+          <label class="font-semibold text-slate-700">Judul Kegiatan <span class="text-rose-500">*</span></label>
           <input type="text" name="title" required placeholder="Contoh: Workshop Cloud Computing & DevSecOps 2026" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
         </div>
 
@@ -275,16 +285,16 @@
             <label class="font-semibold text-slate-700">Penyelenggara Kegiatan <span class="text-rose-500">*</span></label>
             <select name="organizer_type" onchange="toggleCreatePartnerName(this.value)" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
               <option value="internal" selected>Internal (Laboratorium ICT)</option>
-              <option value="partner">Mitra Penyelenggara (Himpunan / BEM / Eksternal)</option>
+              <option value="partner">Media Partner (Himpunan / BEM / Eksternal)</option>
             </select>
           </div>
           <div id="create-partner-name-container" class="hidden flex flex-col gap-1.5">
             <div class="flex items-center justify-between">
-              <label class="font-semibold text-slate-700">Pilih Mitra Penyelenggara <span class="text-rose-500">*</span></label>
+              <label class="font-semibold text-slate-700">Pilih Media Partner <span class="text-rose-500">*</span></label>
               <a href="{{ route('organizer.media_partners.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola Data</a>
             </div>
             <select name="media_partner_id" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 cursor-pointer">
-              <option value="" disabled selected>-- Pilih Mitra Penyelenggara --</option>
+              <option value="" disabled selected>-- Pilih Media Partner --</option>
               @foreach($masterMediaPartners as $mp)
                 <option value="{{ $mp->id }}">{{ $mp->name }}</option>
               @endforeach
@@ -294,12 +304,12 @@
 
         <div id="create-partner-promo-fields" class="hidden flex flex-col gap-3.5 p-4 bg-blue-50/60 border border-blue-200/80 rounded-2xl">
           <div class="flex flex-col gap-0.5">
-            <span class="text-xs font-bold text-blue-950">Informasi Promosi Media Partner</span>
-            <span class="text-[11px] text-slate-500">Media partner disini hanya untuk promosi. Masukkan tautan form pendaftaran mitra dan poster kegiatan.</span>
+            <span class="text-xs font-bold text-blue-950">Informasi Media Partner</span>
+            <span class="text-[11px] text-slate-500">Kegiatan media partner dikelola untuk publikasi acara eksternal. Peserta akan diarahkan langsung ke formulir pendaftaran.</span>
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="font-semibold text-slate-700">Link Form Pendaftaran Mitra <span class="text-rose-500">*</span></label>
+            <label class="font-semibold text-slate-700">Link Form Pendaftaran <span class="text-rose-500">*</span></label>
             <input type="url" name="registration_url" id="create-registration-url" placeholder="https://forms.gle/... atau https://..." class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-blue-950 text-xs">
           </div>
 
@@ -310,7 +320,7 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-2">
+        <div id="create-supporting-partners-container" class="flex flex-col gap-2">
           <div class="flex items-center justify-between">
             <label class="font-semibold text-slate-700">Media Partner Pendukung Acara</label>
             <a href="{{ route('organizer.media_partners.index') }}" target="_blank" class="text-[10px] text-blue-900 font-semibold hover:underline">Kelola Master Media Partner</a>
@@ -337,40 +347,43 @@
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <label class="font-semibold text-slate-700">Lokasi / Ruang Lab</label>
+          <label class="font-semibold text-slate-700">Lokasi / Ruang Lab <span class="text-rose-500">*</span></label>
           <input type="text" name="location" required value="Laboratorium ICT, Unit 7 Lantai 4, Universitas Budi Luhur" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="flex flex-col gap-1.5">
-            <label class="font-semibold text-slate-700">Tanggal Mulai</label>
-            <input type="date" name="start_date" min="{{ date('Y-m-d') }}" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+            <label class="font-semibold text-slate-700">Tanggal Mulai <span class="text-rose-500">*</span></label>
+            <input type="date" id="create-start-date-input" name="start_date" min="{{ \Carbon\Carbon::tomorrow()->format('Y-m-d') }}" onchange="onStartDateChanged(this.value)" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+            <span class="text-[10px] text-slate-400">Minimal 1 hari setelah hari ini (tidak dapat diselenggarakan di hari yang sama).</span>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="font-semibold text-slate-700">Tanggal Selesai</label>
-            <input type="date" name="end_date" min="{{ date('Y-m-d') }}" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="flex flex-col gap-1.5">
-            <label class="font-semibold text-slate-700">Jam Mulai</label>
-            <input type="time" name="start_time" value="09:00" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="font-semibold text-slate-700">Jam Selesai</label>
-            <input type="time" name="end_time" value="12:00" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+            <label class="font-semibold text-slate-700">Tanggal Selesai <span class="text-rose-500">*</span></label>
+            <input type="date" id="create-end-date-input" name="end_date" min="{{ \Carbon\Carbon::tomorrow()->format('Y-m-d') }}" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="flex flex-col gap-1.5">
-            <label class="font-semibold text-slate-700">Target Kuota Peserta</label>
+            <label class="font-semibold text-slate-700">Jam Mulai <span class="text-rose-500">*</span></label>
+            <input type="time" id="create-start-time-input" name="start_time" onchange="onStartTimeChanged(this.value)" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+            <span class="text-[10px] text-slate-400">Otomatis mengikuti jam perangkat saat ini.</span>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="font-semibold text-slate-700">Jam Selesai <span class="text-rose-500">*</span></label>
+            <input type="time" id="create-end-time-input" name="end_time" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+            <span class="text-[10px] text-slate-400">Default 3 jam setelah jam mulai (dapat diubah).</span>
+          </div>
+        </div>
+
+        <div id="create-capacity-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-semibold text-slate-700">Target Kuota Peserta <span class="text-rose-500">*</span></label>
             <input type="number" name="quota" value="100" min="1" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
           </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="font-semibold text-slate-700">Biaya Pendaftaran (Rp, 0 jika gratis)</label>
-            <input type="number" name="price" value="0" min="0" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
+          <div id="create-price-container" class="flex flex-col gap-1.5">
+            <label class="font-semibold text-slate-700">Biaya Pendaftaran (Rp, 0 jika gratis) <span class="text-rose-500">*</span></label>
+            <input type="number" id="create-price-input" name="price" value="0" min="0" required class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950">
           </div>
         </div>
 
@@ -425,7 +438,7 @@
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <label class="font-semibold text-slate-700">Deskripsi Ringkas Kegiatan</label>
+          <label class="font-semibold text-slate-700">Deskripsi Ringkas Kegiatan <span class="text-rose-500">*</span></label>
           <textarea name="description" rows="3" required placeholder="Tuliskan tujuan dan pokok materi kegiatan..." class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-950 leading-relaxed"></textarea>
         </div>
 
@@ -649,6 +662,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const createForm = document.querySelector('#modal-create-event form');
   if (createForm) {
     createForm.addEventListener('submit', function(e) {
+      const orgType = createForm.querySelector('select[name="organizer_type"]')?.value;
+      if (orgType === 'partner') {
+        return true;
+      }
       const container = document.getElementById('speaker-rows-container');
       if (!container) return;
       const selects = container.querySelectorAll('select[name="speaker_ids[]"]');
@@ -670,36 +687,139 @@ document.addEventListener('DOMContentLoaded', function() {
 function toggleCreatePartnerName(val) {
   const container = document.getElementById('create-partner-name-container');
   const promoFields = document.getElementById('create-partner-promo-fields');
+  const supportingPartners = document.getElementById('create-supporting-partners-container');
   const speakerSection = document.getElementById('create-speakers-section');
+  const priceContainer = document.getElementById('create-price-container');
+  const priceInput = document.getElementById('create-price-input');
+  const capacityGrid = document.getElementById('create-capacity-grid');
+  const quotaInput = document.querySelector('#modal-create-event input[name="quota"]');
   const regUrlInput = document.getElementById('create-registration-url');
   const speakerSelects = document.querySelectorAll('#speaker-rows-container select[name="speaker_ids[]"]');
 
   if (val === 'partner') {
     if (container) container.classList.remove('hidden');
     if (promoFields) promoFields.classList.remove('hidden');
+    if (supportingPartners) supportingPartners.classList.add('hidden');
     if (speakerSection) speakerSection.classList.add('hidden');
+    if (priceContainer) priceContainer.classList.add('hidden');
+    if (capacityGrid) capacityGrid.classList.add('hidden');
+    if (quotaInput) {
+      quotaInput.required = false;
+      quotaInput.value = '0';
+    }
+    if (priceInput) {
+      priceInput.required = false;
+      priceInput.value = '0';
+    }
     if (regUrlInput) regUrlInput.required = true;
     speakerSelects.forEach(sel => sel.required = false);
   } else {
     if (container) container.classList.add('hidden');
     if (promoFields) promoFields.classList.add('hidden');
+    if (supportingPartners) supportingPartners.classList.remove('hidden');
     if (speakerSection) speakerSection.classList.remove('hidden');
+    if (priceContainer) priceContainer.classList.remove('hidden');
+    if (capacityGrid) {
+      capacityGrid.classList.remove('hidden');
+      capacityGrid.classList.remove('sm:grid-cols-1');
+      capacityGrid.classList.add('sm:grid-cols-2');
+    }
+    if (quotaInput) {
+      quotaInput.required = true;
+      if (!quotaInput.value || quotaInput.value === '0') quotaInput.value = '100';
+    }
+    if (priceInput) {
+      priceInput.required = true;
+    }
     if (regUrlInput) regUrlInput.required = false;
     speakerSelects.forEach(sel => sel.required = true);
   }
 }
 
+function onStartDateChanged(val) {
+  const endInput = document.getElementById('create-end-date-input');
+  if (endInput && val) {
+    endInput.min = val;
+    if (!endInput.value || endInput.value < val) {
+      endInput.value = val;
+    }
+  }
+}
+
+function onStartTimeChanged(val) {
+  const endInput = document.getElementById('create-end-time-input');
+  if (!endInput || !val) return;
+  const parts = val.split(':');
+  if (parts.length >= 2) {
+    const h = parseInt(parts[0], 10);
+    const m = parts[1];
+    const endH = ((h + 3) % 24).toString().padStart(2, '0');
+    endInput.value = `${endH}:${m}`;
+  }
+}
+
+function initCreateEventDateTime() {
+  const startInput = document.getElementById('create-start-time-input');
+  const endInput = document.getElementById('create-end-time-input');
+  const startDateInput = document.getElementById('create-start-date-input');
+  const endDateInput = document.getElementById('create-end-date-input');
+
+  const now = new Date();
+  const pad = (n) => n.toString().padStart(2, '0');
+  const currentHours = pad(now.getHours());
+  const currentMinutes = pad(now.getMinutes());
+  const currentTime = `${currentHours}:${currentMinutes}`;
+
+  if (startInput) {
+    startInput.value = currentTime;
+  }
+  if (endInput) {
+    const endHour = ((now.getHours() + 3) % 24).toString().padStart(2, '0');
+    endInput.value = `${endHour}:${currentMinutes}`;
+  }
+
+  // Atur tanggal mulai minimal besok
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomY = tomorrow.getFullYear();
+  const tomM = pad(tomorrow.getMonth() + 1);
+  const tomD = pad(tomorrow.getDate());
+  const tomorrowStr = `${tomY}-${tomM}-${tomD}`;
+
+  if (startDateInput) {
+    startDateInput.min = tomorrowStr;
+    if (!startDateInput.value || startDateInput.value < tomorrowStr) {
+      startDateInput.value = tomorrowStr;
+    }
+  }
+  if (endDateInput) {
+    endDateInput.min = tomorrowStr;
+    if (!endDateInput.value || endDateInput.value < tomorrowStr) {
+      endDateInput.value = tomorrowStr;
+    }
+  }
+}
+
 function openCreateEventModal() {
   const m = document.getElementById('modal-create-event');
-  m.classList.remove('hidden');
-  m.classList.add('flex');
+  if (m) {
+    initCreateEventDateTime();
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+  }
 }
 
 function closeCreateEventModal() {
   const m = document.getElementById('modal-create-event');
-  m.classList.add('hidden');
-  m.classList.remove('flex');
+  if (m) {
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+  }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  initCreateEventDateTime();
+});
 </script>
 
 @include('partials.organizer-bottom-nav')

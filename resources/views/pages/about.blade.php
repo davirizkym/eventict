@@ -3,24 +3,15 @@
 @section('title', 'Tentang Kami — Laboratorium ICT')
 
 @section('content')
-<div class="w-full min-h-screen bg-slate-50 flex justify-center items-start">
-  <div class="w-full max-w-[1440px] bg-slate-50 flex flex-col justify-start items-start">
-    @include('partials.navbar')
+  <div class="w-full min-h-screen bg-slate-50 flex justify-center items-start">
+    <div class="w-full max-w-[1440px] bg-slate-50 flex flex-col justify-start items-start">
+      @include('partials.navbar')
 
     <main class="self-stretch px-4 sm:px-6 lg:px-20 py-8 sm:py-10 pb-24 md:pb-12 flex flex-col gap-8 sm:gap-10">
       <div class="flex items-center gap-2 text-xs text-slate-500 font-['Poppins']">
         <a href="{{ route('home') }}" class="hover:text-blue-950 transition">Beranda</a>
         <span>/</span>
         <span class="text-slate-900 font-medium">Tentang Kami</span>
-      </div>
-
-      <div class="flex flex-col gap-2 pb-6 border-b border-slate-200">
-        <h1 class="text-slate-900 text-2xl sm:text-3xl font-semibold font-['Poppins']">
-          Tentang Eventict
-        </h1>
-        <p class="text-slate-600 text-xs sm:text-sm font-normal font-['Poppins'] max-w-3xl leading-relaxed">
-          Tempat mencari dan mendaftar berbagai acara, pelatihan komputer, dan seminar seru yang diselenggarakan oleh Laboratorium ICT.
-        </p>
       </div>
 
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -76,19 +67,20 @@
               </div>
               <div>
                 <span class="text-slate-400 block text-[11px]">Email Bantuan:</span>
-                <span class="text-slate-800 font-medium">help@eventict.id</span>
+                <span class="text-slate-800 font-medium">labkom@budiluhur.ac.id</span>
               </div>
               <div>
                 <span class="text-slate-400 block text-[11px]">Jam Layanan:</span>
-                <span class="text-slate-800 font-medium">Senin – Jumat, 08:00 – 17:00 WIB</span>
+                <span class="text-slate-800 font-medium block">Senin – Jumat: 08:00 – 20:40 WIB</span>
+                <span class="text-slate-800 font-medium block">Sabtu: 08:00 – 17:00 WIB</span>
               </div>
             </div>
           </div>
         </div>
       </section>
-    </main>
+      </main>
 
-    @include('partials.footer')
+      @include('partials.footer')
+    </div>
   </div>
-</div>
 @endsection

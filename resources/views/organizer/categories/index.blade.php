@@ -127,8 +127,10 @@ $presetIcons = [
                     </div>
                   </div>
                 </td>
-                <td class="py-3.5 px-4 text-slate-500 font-mono text-[11px]">
-                  {{ $cat->slug }}
+                <td class="py-3.5 px-4">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 font-mono text-[11px] font-medium shadow-2xs">
+                    {{ $cat->slug }}
+                  </span>
                 </td>
                 <td class="py-3.5 px-4 text-slate-600 leading-relaxed">
                   {{ $cat->description ?: '-' }}

@@ -87,6 +87,8 @@ class OrganizerController extends Controller
     {
         $organizerTypeInput = $request->input('organizer_type', 'internal');
         $speakerRequiredRule = ($organizerTypeInput === 'partner') ? 'nullable|array' : 'required_without:speaker_id|array|min:1';
+        $priceRule = ($organizerTypeInput === 'partner') ? 'nullable|integer|min:0' : 'required|integer|min:0';
+        $quotaRule = ($organizerTypeInput === 'partner') ? 'nullable|integer|min:0' : 'required|integer|min:1';
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -95,12 +97,12 @@ class OrganizerController extends Controller
             'category' => 'nullable|string|max:100',
             'format' => 'required|in:online,offline',
             'location' => 'required|string|max:255',
-            'start_date' => 'required|date',
+            'start_date' => 'required|date|after:today',
             'end_date' => 'required|date|after_or_equal:start_date',
             'start_time' => 'required',
             'end_time' => 'required',
-            'quota' => 'required|integer|min:1',
-            'price' => 'required|integer|min:0',
+            'quota' => $quotaRule,
+            'price' => $priceRule,
             'organizer_type' => 'nullable|in:internal,partner',
             'media_partner_id' => 'nullable|exists:media_partners,id',
             'organizer_name' => 'nullable|string|max:255',
@@ -124,6 +126,7 @@ class OrganizerController extends Controller
             'location.required' => 'Lokasi atau link platform kegiatan wajib diisi.',
             'start_date.required' => 'Tanggal mulai kegiatan wajib diisi.',
             'start_date.date' => 'Format tanggal mulai kegiatan tidak valid.',
+            'start_date.after' => 'Tanggal mulai kegiatan tidak boleh pada hari yang sama atau hari sebelumnya. Kegiatan minimal diselenggarakan mulai besok.',
             'end_date.required' => 'Tanggal selesai kegiatan wajib diisi.',
             'end_date.date' => 'Format tanggal selesai kegiatan tidak valid.',
             'end_date.after_or_equal' => 'Tanggal selesai kegiatan harus sama dengan atau setelah tanggal mulai.',
@@ -143,11 +146,11 @@ class OrganizerController extends Controller
             'speaker_ids.*.exists' => 'Pengisi acara yang dipilih tidak valid.',
         ]);
 
-        $startDateTime = Carbon::parse($validated['start_date'] . ' ' . $validated['start_time']);
-        if ($startDateTime->isPast()) {
+        $startDate = Carbon::parse($validated['start_date'])->startOfDay();
+        if ($startDate->lte(Carbon::today())) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['start_date' => 'Jadwal pelaksanaan kegiatan tidak boleh sebelum waktu saat ini.']);
+                ->withErrors(['start_date' => 'Tanggal mulai kegiatan tidak boleh pada hari yang sama atau hari sebelumnya. Kegiatan minimal diselenggarakan mulai besok.']);
         }
 
         $speakerIds = $request->input('speaker_ids', []);
@@ -216,8 +219,8 @@ class OrganizerController extends Controller
             'end_date' => $validated['end_date'],
             'start_time' => $validated['start_time'],
             'end_time' => $validated['end_time'],
-            'quota' => $validated['quota'],
-            'price' => $validated['price'],
+            'quota' => ($organizerType === 'partner') ? 0 : (int) ($validated['quota'] ?? 0),
+            'price' => ($organizerType === 'partner') ? 0 : (int) ($validated['price'] ?? 0),
             'organizer_type' => $organizerType,
             'media_partner_id' => $mediaPartnerId,
             'organizer_name' => $organizerName,
@@ -281,56 +284,74 @@ class OrganizerController extends Controller
             $event->speakers()->sync($attachData);
         }
 
-        return redirect()->route('organizer.workspace', ['event' => $event->id])
+        $targetTab = ($organizerType === 'partner') ? 'pengaturan' : 'dashboard';
+        return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => $targetTab])
             ->with('success', "Kegiatan '{$event->title}' berhasil dibuat. Selamat datang di ruang kerja acara!");
     }
 
     public function workspace(Request $request, Event $event)
     {
-        $tab = $request->query('tab', 'dashboard');
+        $isPartner = (($event->organizer_type ?? 'internal') === 'partner');
+        $defaultTab = $isPartner ? 'pengaturan' : 'dashboard';
+        $tab = $request->query('tab', $defaultTab);
+
+        if ($isPartner && $tab !== 'pengaturan') {
+            return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'pengaturan']);
+        }
+
         $event->load(['speakers']);
 
-        $totalRegistrations = $event->registrations()->count();
-        $checkedInRegistrations = $event->registrations()->where('is_checked_in', true)->count();
-        $attendedRegistrations = $event->registrations()->where('attendance_status', 'attended')->count();
-        $attendancePercentage = $totalRegistrations > 0 ? round(($attendedRegistrations / $totalRegistrations) * 100, 1) : 0;
-        $certificatesCount = $event->registrations()->whereHas('certificate')->count();
-        $totalRevenue = $event->registrations()->where('payment_status', 'paid')->count() * (float) $event->price;
+        if ($isPartner) {
+            $totalRegistrations = 0;
+            $checkedInRegistrations = 0;
+            $attendedRegistrations = 0;
+            $attendancePercentage = 0;
+            $certificatesCount = 0;
+            $totalRevenue = 0;
+            $registrations = collect();
+        } else {
+            $totalRegistrations = $event->registrations()->count();
+            $checkedInRegistrations = $event->registrations()->where('is_checked_in', true)->count();
+            $attendedRegistrations = $event->registrations()->where('attendance_status', 'attended')->count();
+            $attendancePercentage = $totalRegistrations > 0 ? round(($attendedRegistrations / $totalRegistrations) * 100, 1) : 0;
+            $certificatesCount = $event->registrations()->whereHas('certificate')->count();
+            $totalRevenue = $event->registrations()->where('payment_status', 'paid')->count() * (float) $event->price;
 
-        $query = $event->registrations()->with(['user', 'certificate'])->latest();
+            $query = $event->registrations()->with(['user', 'certificate'])->latest();
 
-        if ($request->filled('q')) {
-            $keyword = $request->query('q');
-            $query->where(function ($q) use ($keyword) {
-                $q->where('registration_code', 'like', "%{$keyword}%")
-                    ->orWhere('qr_pass', 'like', "%{$keyword}%")
-                    ->orWhereHas('user', function ($uq) use ($keyword) {
-                        $uq->where('name', 'like', "%{$keyword}%")
-                            ->orWhere('identity_no', 'like', "%{$keyword}%")
-                            ->orWhere('institution', 'like', "%{$keyword}%")
-                            ->orWhere('email', 'like', "%{$keyword}%")
-                            ->orWhere('phone', 'like', "%{$keyword}%");
-                    });
-            });
-        }
-
-        if ($request->filled('checkin') && $event->format === 'offline') {
-            $query->where('is_checked_in', $request->query('checkin') === 'checked_in');
-        }
-
-        if ($request->filled('attendance')) {
-            $query->where('attendance_status', $request->query('attendance'));
-        }
-
-        if ($request->filled('certificate')) {
-            if ($request->query('certificate') === 'has_cert') {
-                $query->has('certificate');
-            } elseif ($request->query('certificate') === 'no_cert') {
-                $query->doesntHave('certificate');
+            if ($request->filled('q')) {
+                $keyword = $request->query('q');
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('registration_code', 'like', "%{$keyword}%")
+                        ->orWhere('qr_pass', 'like', "%{$keyword}%")
+                        ->orWhereHas('user', function ($uq) use ($keyword) {
+                            $uq->where('name', 'like', "%{$keyword}%")
+                                ->orWhere('identity_no', 'like', "%{$keyword}%")
+                                ->orWhere('institution', 'like', "%{$keyword}%")
+                                ->orWhere('email', 'like', "%{$keyword}%")
+                                ->orWhere('phone', 'like', "%{$keyword}%");
+                        });
+                });
             }
-        }
 
-        $registrations = $query->get();
+            if ($request->filled('checkin') && $event->format === 'offline') {
+                $query->where('is_checked_in', $request->query('checkin') === 'checked_in');
+            }
+
+            if ($request->filled('attendance')) {
+                $query->where('attendance_status', $request->query('attendance'));
+            }
+
+            if ($request->filled('certificate')) {
+                if ($request->query('certificate') === 'has_cert') {
+                    $query->has('certificate');
+                } elseif ($request->query('certificate') === 'no_cert') {
+                    $query->doesntHave('certificate');
+                }
+            }
+
+            $registrations = $query->get();
+        }
 
         $allMasterSpeakers = Speaker::orderBy('name', 'asc')->get();
         if (Category::count() === 0) {
@@ -365,6 +386,10 @@ class OrganizerController extends Controller
 
     public function updateEvent(Request $request, Event $event)
     {
+        $organizerTypeInput = $request->input('organizer_type', $event->organizer_type ?? 'internal');
+        $priceRule = ($organizerTypeInput === 'partner') ? 'nullable|integer|min:0' : 'required|integer|min:0';
+        $quotaRule = ($organizerTypeInput === 'partner') ? 'nullable|integer|min:0' : 'required|integer|min:1';
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'type' => 'nullable|string|in:Workshop,Seminar,Webinar,Sertifikasi',
@@ -376,8 +401,8 @@ class OrganizerController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'start_time' => 'required',
             'end_time' => 'required',
-            'quota' => 'required|integer|min:1',
-            'price' => 'required|integer|min:0',
+            'quota' => $quotaRule,
+            'price' => $priceRule,
             'organizer_type' => 'nullable|in:internal,partner',
             'media_partner_id' => 'nullable|exists:media_partners,id',
             'organizer_name' => 'nullable|string|max:255',
@@ -447,6 +472,14 @@ class OrganizerController extends Controller
             $validated['banner_url'] = '/storage/' . $posterPath;
         }
 
+        $targetOrgType = $validated['organizer_type'] ?? $event->organizer_type;
+        if ($targetOrgType === 'partner') {
+            $validated['price'] = 0;
+            $validated['quota'] = 0;
+        } else {
+            $validated['price'] = (int) ($validated['price'] ?? $event->price ?? 0);
+        }
+
         $event->update($validated);
 
         if ($request->has('media_partner_ids')) {
@@ -455,6 +488,23 @@ class OrganizerController extends Controller
 
         return redirect()->route('organizer.workspace', ['event' => $event->id, 'tab' => 'pengaturan'])
             ->with('success', 'Pengaturan kegiatan berhasil diperbarui.');
+    }
+
+    public function destroyEvent(Event $event)
+    {
+        $title = $event->title;
+
+        if ($event->banner_url && str_starts_with($event->banner_url, '/storage/')) {
+            $storagePath = str_replace('/storage/', '', $event->banner_url);
+            Storage::disk('public')->delete($storagePath);
+        }
+
+        $event->speakers()->detach();
+        $event->mediaPartners()->detach();
+        $event->delete();
+
+        return redirect()->route('organizer.dashboard')
+            ->with('success', "Kegiatan '{$title}' berhasil dihapus.");
     }
 
     public function assignSpeaker(Request $request, Event $event)

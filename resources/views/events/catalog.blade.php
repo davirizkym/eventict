@@ -40,10 +40,10 @@
               </select>
             </div>
             <div class="h-8 w-px bg-slate-200 hidden md:block"></div>
-            <div class="w-full md:w-52 flex flex-col justify-start items-start px-3 py-1">
-              <label class="text-slate-500 text-[10px] uppercase tracking-wider font-semibold font-['Poppins']">Rumpun Ilmu</label>
+            <div class="w-full md:w-56 flex flex-col justify-start items-start px-3 py-1">
+              <label class="text-slate-500 text-[10px] uppercase tracking-wider font-semibold font-['Poppins']">Kategori Acara</label>
               <select name="category" class="w-full bg-transparent border-none outline-none text-slate-900 text-xs font-medium font-['Poppins'] cursor-pointer">
-                <option value="">Semua Rumpun</option>
+                <option value="">Semua Kategori</option>
                 @foreach($allCategories ?? [] as $catOption)
                 <option value="{{ $catOption }}" {{ request('category') === $catOption ? 'selected' : '' }}>{{ $catOption }}</option>
                 @endforeach
@@ -91,10 +91,10 @@
             @endphp
             <div class="bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-slate-200 flex flex-col justify-between overflow-hidden hover:shadow-lg hover:-translate-y-1 transition duration-200 group">
               <div>
-                <div class="self-stretch h-48 sm:h-52 relative bg-gradient-to-br from-[#142D4E] to-[#0A192F] p-4 flex flex-col justify-between overflow-hidden">
+<div class="self-stretch h-48 sm:h-52 relative bg-gradient-to-br from-[#142D4E] to-[#0A192F] p-4 flex flex-col justify-between overflow-hidden">
                   @if($event->banner_url)
                     <img src="{{ asset($event->banner_url) }}" alt="{{ $event->title }}" class="absolute inset-0 w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/25 to-slate-950/50"></div>
                   @endif
                   <div class="relative z-10 flex items-start justify-between gap-2">
                     <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md rounded-lg text-white text-[11px] font-medium border border-white/15 tracking-wide max-w-[65%] truncate" title="{{ $event->category }}">
@@ -114,6 +114,23 @@
                       </span>
                     @endif
                   </div>
+                  <div class="relative z-10 flex items-center justify-between gap-2 text-white/90">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                      <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md rounded-lg border border-white/15 text-[11px] font-medium shrink-0">
+                        {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
+                      </span>
+                      @if(($event->organizer_type ?? 'internal') === 'partner')
+                        <span class="px-2 py-0.5 bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold rounded-lg border border-white/15 truncate max-w-[130px]" title="Penyelenggara: {{ $event->organizer_name }}">
+                          {{ $event->organizer_name }}
+                        </span>
+                      @endif
+                    </div>
+                    <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md text-blue-200 text-[11px] font-medium rounded-lg border border-blue-400/20 flex items-center gap-1.5 shrink-0">
+                      <svg class="size-3 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>Sertifikat</span>
+                    </span>
+                  </div>
+                </div>
                   <div class="relative z-10 flex items-center justify-between gap-2 text-white/90">
                     <span class="px-2.5 py-1 bg-black/50 backdrop-blur-md rounded-lg border border-white/15 text-[11px] font-medium">
                       {{ $event->format === 'offline' ? 'Luring' : 'Daring' }}
@@ -146,9 +163,18 @@
                   </div>
 
                   <div>
-                    <span class="text-[11px] font-medium text-slate-500 font-['Poppins']">
-                      {{ ($event->organizer_type ?? 'internal') === 'partner' ? 'Penyelenggara: ' . $event->organizer_name : 'Penyelenggara: Laboratorium ICT' }}
-                    </span>
+                    @if(($event->organizer_type ?? 'internal') === 'partner')
+                      <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 text-[10px] font-medium mb-1">
+                        <svg class="size-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                        </svg>
+                        <span>Penyelenggara: {{ $event->organizer_name }}</span>
+                      </span>
+                    @else
+                      <span class="text-[11px] font-medium text-slate-500 font-['Poppins']">
+                        Penyelenggara: Laboratorium ICT
+                      </span>
+                    @endif
                     <h3 class="text-slate-900 text-base font-semibold font-['Poppins'] leading-snug line-clamp-2 group-hover:text-blue-900 transition mt-0.5">
                       {{ $event->title }}
                     </h3>
@@ -172,23 +198,35 @@
 
               <div class="p-6 border-t border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <div class="flex flex-col">
-                  <span class="text-slate-900 font-semibold text-sm font-['Poppins']">
-                    {{ $event->price == 0 ? 'Gratis' : 'Rp ' . number_format($event->price, 0, ',', '.') }}
-                  </span>
-                  @if($isPassed)
-                    <span class="text-slate-500 font-semibold text-[11px] font-['Poppins']">
-                      Kegiatan Selesai
+                  @if($event->isExternal())
+                    <span class="text-slate-900 font-bold text-xs font-['Poppins'] flex items-center gap-1">
+                      <svg class="size-3 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m3 11 18-5v12L3 14v-3z"/>
+                      </svg>
+                      <span>Media Partner</span>
                     </span>
-                  @elseif($isFull)
-                    <span class="text-rose-600 font-semibold text-[11px] font-['Poppins']">
-                      Kuota Penuh
-                    </span>
-                  @elseif($remaining <= 5 && $remaining > 0)
-                    <span class="text-amber-700 font-semibold text-[11px] font-['Poppins']">
-                      Tersisa {{ $remaining }} slot lagi
+                    <span class="text-slate-600 text-[10px] font-medium font-['Poppins'] truncate max-w-[150px]">
+                      {{ $event->organizer_name }}
                     </span>
                   @else
-                    <span class="text-slate-500 text-[10px] font-normal font-['Poppins']">Pendaftaran Terbuka</span>
+                    <span class="text-slate-900 font-semibold text-sm font-['Poppins']">
+                      {{ $event->price == 0 ? 'Gratis' : 'Rp ' . number_format($event->price, 0, ',', '.') }}
+                    </span>
+                    @if($isPassed)
+                      <span class="text-slate-500 font-semibold text-[11px] font-['Poppins']">
+                        Kegiatan Selesai
+                      </span>
+                    @elseif($isFull)
+                      <span class="text-rose-600 font-semibold text-[11px] font-['Poppins']">
+                        Kuota Penuh
+                      </span>
+                    @elseif($remaining <= 5 && $remaining > 0)
+                      <span class="text-amber-700 font-semibold text-[11px] font-['Poppins']">
+                        Tersisa {{ $remaining }} slot lagi
+                      </span>
+                    @else
+                      <span class="text-slate-500 text-[10px] font-normal font-['Poppins']">Pendaftaran Terbuka</span>
+                    @endif
                   @endif
                 </div>
                 <div class="flex items-center gap-2">
@@ -206,7 +244,7 @@
                 <path d="m21 21-4.35-4.35"/>
               </svg>
               <div class="text-slate-800 font-semibold text-base font-['Poppins']">Tidak ada kegiatan yang cocok</div>
-              <p class="text-slate-500 text-xs font-normal font-['Poppins'] max-w-md">Coba ubah kata kunci pencarian atau bersihkan filter format dan rumpun ilmu.</p>
+              <p class="text-slate-500 text-xs font-normal font-['Poppins'] max-w-md">Coba ubah kata kunci pencarian atau bersihkan filter format dan kategori acara.</p>
               <a href="{{ route('events.index_public') }}" class="mt-2 px-4 py-2 bg-blue-950 text-white rounded-lg text-xs font-semibold font-['Poppins']">Tampilkan Semua Kegiatan</a>
             </div>
           @endforelse
