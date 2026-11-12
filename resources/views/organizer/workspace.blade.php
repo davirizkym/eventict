@@ -926,7 +926,7 @@
             </table>
           </div>
 
-          <div class="md:hidden flex flex-col gap-3">
+          <div class="md:hidden p-4 flex flex-col gap-3.5 bg-slate-50/50">
             @forelse($registrations as $reg)
               <div class="p-4 bg-white rounded-xl border border-slate-200 flex flex-col gap-3 shadow-2xs" id="cert-card-{{ $reg->id }}">
                 <div class="flex items-start justify-between gap-2 pb-2.5 border-b border-slate-100">
