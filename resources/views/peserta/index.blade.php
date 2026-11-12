@@ -1140,13 +1140,10 @@
 
       @if($tab === 'sertifikat')
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col gap-5 shadow-2xs">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div class="flex items-center justify-between gap-2">
             <div>
               <h3 class="text-sm sm:text-base font-bold text-slate-900">E-Sertifikat</h3>
             </div>
-            <span class="px-2.5 py-1 bg-blue-50 text-blue-900 border border-blue-200 text-xs font-semibold rounded-md self-start sm:self-auto">
-              Terverifikasi Digital
-            </span>
           </div>
 
           <div class="flex flex-col gap-4">
@@ -1160,16 +1157,13 @@
                     </svg>
                   </div>
                   <div class="min-w-0 flex flex-col gap-1">
-                    <div class="flex items-center gap-2 flex-wrap">
-                      <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold rounded-md">
-                        Terverifikasi Sah
-                      </span>
-                      @if($cert->event && $cert->event->start_date)
+                    @if($cert->event && $cert->event->start_date)
+                      <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-[11px] text-slate-400">
                           {{ $cert->event->start_date->format('d M Y') }}
                         </span>
-                      @endif
-                    </div>
+                      </div>
+                    @endif
                     <h4 class="text-slate-900 text-sm font-semibold truncate">
                       {{ $cert->event->title ?? 'Kegiatan Laboratorium ICT' }}
                     </h4>
